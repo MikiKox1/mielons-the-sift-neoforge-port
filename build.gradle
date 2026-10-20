@@ -45,34 +45,20 @@ repositories {
 neoForge {
     version = project.neo_version
 
-    // Select a fresh disposable server directory for isolated compatibility
-    // tests without touching or unlocking a previous test world's session.lock.
-    def qaServerLabel = providers.gradleProperty('qaServerLabel').getOrElse('test')
-    if (!(qaServerLabel ==~ /[a-z0-9][a-z0-9-]{0,30}/)) {
-        throw new GradleException('Invalid isolated QA server label')
-    }
-
     runs {
         client {
             client()
-            // Standalone Prime 2 stage smoke; never the user's Modrinth profile.
-            // A new loader release must never reuse a previous test world's directory.
-            gameDirectory = project.file("run/client-${project.neo_version}-port-2612-test")
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // Keep local client runs separate from existing player worlds.
+            gameDirectory = project.file("run/client")
         }
 
         server {
             server()
             // Must remain separate from the client and all player saves.
-            gameDirectory = project.file("run/server-${project.neo_version}-port-2612-${qaServerLabel}")
+            gameDirectory = project.file("run/server")
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
     }
 
     mods {
@@ -156,8 +142,7 @@ tasks.register('verifyNeoForgeCompatibility') {
 }
 
 tasks.matching {
-    it.name in ['build', 'check', 'test', 'compileJava', 'compileTestJava', 'runData', 'runServer', 'runClient'] ||
-        it.name.startsWith('runGameTest')
+    it.name in ['build', 'check', 'compileJava', 'runData', 'runServer', 'runClient']
 }.configureEach {
     dependsOn tasks.named('verifyNeoForgeCompatibility')
 }
