@@ -8,3 +8,11 @@ run-data/
 tools/tests/__pycache__/
 tools/tests/_qa_vendor/
 tools/__pycache__/
+
+# Development and test utilities remain outside the public source tree
+/tools/
+/evidence/
+/src/test/
+/src/client/test/
+**/__pycache__/
+.pytest_cache/

@@ -91,12 +91,8 @@ public final class SiftShaderCompat {
    }
 
    /**
-    * Photon v1.3b routes gbuffers_textured through its lit translucent
-    * geometry pipeline, not a sky renderer, causing our six textured layers
-    * to appear as giant semitransparent surfaces over the landscape.
-    * The no-shader path and Complementary path retain the stable ALPHA2
-    * renderer. This experimental detection gracefully returns false if
-    * a future Iris build changes its internal class.
+    * Selects the Photon-specific sky rendering route when a Photon shaderpack
+    * is active. Other shaderpacks and the native sky retain their own routes.
     */
    public static boolean isPhotonShaderPackSelected() {
       initialize();
