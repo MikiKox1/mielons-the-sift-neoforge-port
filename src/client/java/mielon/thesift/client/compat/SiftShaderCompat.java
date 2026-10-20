@@ -88,7 +88,10 @@ public final class SiftShaderCompat {
       }
    }
 
-   /** Isolates only Photon from the ALPHA2-tested Complementary/vanilla sky. */
+   /**
+    * Selects the Photon-specific sky rendering route when a Photon shaderpack
+    * is active. Other shaderpacks and the native sky retain their own routes.
+    */
    public static boolean isPhotonShaderPackSelected() {
       initialize();
       if (currentPackName == null) {
