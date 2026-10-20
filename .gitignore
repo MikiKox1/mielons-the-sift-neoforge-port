@@ -5,3 +5,11 @@ run-data/
 /logs/
 .idea/
 *.iml
+
+# Development and test utilities remain outside the public source tree
+/tools/
+/evidence/
+/src/test/
+/src/client/test/
+**/__pycache__/
+.pytest_cache/
