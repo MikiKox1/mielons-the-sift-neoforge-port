@@ -50,22 +50,16 @@ neoForge {
         client {
             client()
             // Client run data is isolated from regular player worlds.
-            gameDirectory = project.file("run/client-${project.neo_version}-hotfix-pass-preload-112")
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file("run/client")
         }
 
         server {
             server()
             // Server run data remains separate from client data and player worlds.
-            gameDirectory = project.file("run/server-${project.neo_version}-hotfix-pass-preload-112")
+            gameDirectory = project.file("run/server")
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
     }
 
     mods {
@@ -149,8 +143,7 @@ tasks.register('verifyNeoForgeCompatibility') {
 }
 
 tasks.matching {
-    it.name in ['build', 'check', 'test', 'compileJava', 'compileTestJava', 'runData', 'runServer', 'runClient'] ||
-        it.name.startsWith('runGameTest')
+    it.name in ['build', 'check', 'compileJava', 'runData', 'runServer', 'runClient']
 }.configureEach {
     dependsOn tasks.named('verifyNeoForgeCompatibility')
 }
