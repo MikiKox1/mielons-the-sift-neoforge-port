@@ -2,6 +2,10 @@
 
 Released versions are listed **newest first**.
 
+## Port 1.1.2.1 — Minecraft 26.2
+
+- Fixed the Sift portal rendering.
+
 ## Port 1.1.2 — Minecraft 26.2
 
 A distinct NeoForge implementation of Mielon's The Sift 1.1.2 for Minecraft 26.2.

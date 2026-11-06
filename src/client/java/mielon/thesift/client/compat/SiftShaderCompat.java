@@ -88,10 +88,7 @@ public final class SiftShaderCompat {
       }
    }
 
-   /**
-    * Selects the Photon-specific sky rendering route when a Photon shaderpack
-    * is active. Other shaderpacks and the native sky retain their own routes.
-    */
+   /** Selects the Photon-specific sky rendering route. */
    public static boolean isPhotonShaderPackSelected() {
       initialize();
       if (currentPackName == null) {
