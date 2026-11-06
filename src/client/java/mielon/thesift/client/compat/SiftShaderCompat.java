@@ -91,8 +91,12 @@ public final class SiftShaderCompat {
    }
 
    /**
-    * Selects the Photon-specific sky rendering route when a Photon shaderpack
-    * is active. Other shaderpacks and the native sky retain their own routes.
+    * Detects whether the currently selected Iris shaderpack uses Photon.
+    * Photon has a dedicated sky and portal rendering path.
+    * Native rendering and other shaderpacks retain their own routes.
+    * Reflection keeps Iris as an optional runtime integration.
+    * Missing Iris APIs are handled safely without changing gameplay.
+    * Models and sky content remain shared with the standard renderer.
     */
    public static boolean isPhotonShaderPackSelected() {
       initialize();
