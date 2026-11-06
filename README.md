@@ -8,9 +8,9 @@ An unofficial NeoForge port of **Mielon's The Sift** for **Minecraft 26.1.2, 26.
 
 | Minecraft | Current port | NeoForge minimum | Required GeckoLib | Optional Easy Magic | Download |
 | --- | --- | --- | --- | --- | --- |
-| **26.1.2** | **1.1.2** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 1.1.2 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2-neoforge.1-mc26.1.2) |
-| **26.2** | **1.1.2** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 1.1.2 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2-mc26.2-neoforge) |
-| **26.3** | **1.1.2** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 1.1.2 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2-mc26.3-neoforge) |
+| **26.1.2** | **1.1.2.1** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 1.1.2.1 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2.1-mc26.1.2-neoforge) |
+| **26.2** | **1.1.2.1** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 1.1.2.1 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2.1-mc26.2-neoforge) |
+| **26.3** | **1.1.2.1** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 1.1.2.1 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2.1-mc26.3-neoforge) |
 
 **Java:** 25. **Loader:** NeoForge. **Required:** GeckoLib for the matching Minecraft version. Each Minecraft version has its own source branch ([26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.1.2) · [26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.2) · [26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.3)) and a separate JAR. Do not install both builds or combine this port with the original Fabric mod.
 
