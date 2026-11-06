@@ -1,7 +1,6 @@
 package mielon.thesift.client.entity;
 
 import com.geckolib.renderer.GeoEntityRenderer;
-import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
 import mielon.thesift.client.light.SingerHeadLightBridge;
 import mielon.thesift.entity.SingerEntity;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -16,7 +15,7 @@ public class SingerRenderer extends GeoEntityRenderer<SingerEntity, EntityRender
    public SingerRenderer(Context context) {
       super(context, new SingerModel());
       this.withRenderLayer(new SingerSoulBlockLayer(context, this));
-      this.withRenderLayer(new AutoGlowingGeoLayer(this));
+      this.withRenderLayer(new SingerGlowingGeoLayer(this));
       this.withRenderLayer(new SiftGlowingOutlineLayer(this));
       this.shadowRadius = 0.0F;
    }
