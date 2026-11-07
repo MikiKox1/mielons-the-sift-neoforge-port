@@ -7,6 +7,8 @@ Released versions are listed **newest first**.
 - Fixed Singer rendering artifacts with Sodium 0.9.3-beta.1 and Iris 1.11.7; the issue was not present with Sodium 0.9.3-alpha.1.
 - Fixed the Sift portal rendering.
 
+[Port 1.1.2.1 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v1.1.2.1-mc26.3-neoforge)
+
 ## Port 1.1.2 — Minecraft 26.3
 
 The NeoForge 26.3 edition now includes Mielon's upstream 1.1.2 gameplay changes and 26.3-specific sky compatibility updates.
