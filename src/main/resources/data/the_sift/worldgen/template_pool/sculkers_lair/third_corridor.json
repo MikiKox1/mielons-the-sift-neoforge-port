@@ -1,0 +1,60 @@
+{
+  "name": "the_sift:sculkers_lair/third_corridor",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_1",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_2",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_3",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_4",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_5",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/third_corridor_6",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

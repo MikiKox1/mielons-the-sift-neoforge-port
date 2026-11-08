@@ -1,0 +1,73 @@
+{
+  "type": "minecraft:min",
+  "left": {
+    "type": "minecraft:add",
+    "left": "the_sift:strata_nodes",
+    "right": {
+      "type": "minecraft:gradient",
+      "from_value": 0.055,
+      "to_value": 0,
+      "from_coordinate": 24,
+      "to_coordinate": 92,
+      "axis": "y",
+      "tiling": "clamp_to_edge"
+    }
+  },
+  "right": {
+    "type": "minecraft:max",
+    "left": "the_sift:strata_surface",
+    "right": {
+      "type": "minecraft:max",
+      "left": {
+        "type": "minecraft:min",
+        "left": {
+          "type": "minecraft:min",
+          "left": "the_sift:strata_upper_region",
+          "right": {
+            "type": "minecraft:max",
+            "left": {
+              "type": "minecraft:add",
+              "left": "the_sift:strata_nodes",
+              "right": 0.1
+            },
+            "right": {
+              "type": "minecraft:add",
+              "left": 0.16,
+              "right": {
+                "type": "minecraft:mul",
+                "left": -1,
+                "right": "the_sift:strata_bridge_a"
+              }
+            }
+          }
+        },
+        "right": "the_sift:strata_upper_surface"
+      },
+      "right": {
+        "type": "minecraft:min",
+        "left": {
+          "type": "minecraft:min",
+          "left": "the_sift:strata_crown_region",
+          "right": {
+            "type": "minecraft:max",
+            "left": {
+              "type": "minecraft:add",
+              "left": "the_sift:strata_nodes",
+              "right": 0.085
+            },
+            "right": {
+              "type": "minecraft:add",
+              "left": 0.145,
+              "right": {
+                "type": "minecraft:mul",
+                "left": -1,
+                "right": "the_sift:strata_bridge_b"
+              }
+            }
+          }
+        },
+        "right": "the_sift:strata_crown_surface"
+      }
+    }
+  }
+}

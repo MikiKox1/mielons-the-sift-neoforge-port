@@ -45,6 +45,8 @@ public abstract class SnifferInfectionMixin implements SnifferInfectionAccess {
    @Unique
    private int theSift$infectionTicks;
    @Unique
+   private int theSift$fleeCooldown;
+   @Unique
    private static final double THE_SIFT$DARK_SNIFFER_FLEE_RANGE = 20.0;
 
    @Redirect(
@@ -86,7 +88,7 @@ public abstract class SnifferInfectionMixin implements SnifferInfectionAccess {
    @Inject(method = "tick", at = @At("TAIL"))
    private void theSift$tickSculkInfection(CallbackInfo ci) {
       Sniffer sniffer = (Sniffer)(Object)this;
-      theSift$fleeFromDarkSniffer(sniffer);
+      this.theSift$fleeFromDarkSniffer(sniffer);
       if (!((Object)this instanceof DarkSnifferEntity) && !sniffer.level().isClientSide() && this.theSift$infectionTicks > 0) {
          this.theSift$infectionTicks++;
          if (this.theSift$infectionTicks >= 600) {
@@ -102,16 +104,19 @@ public abstract class SnifferInfectionMixin implements SnifferInfectionAccess {
    }
 
    @Unique
-   private static void theSift$fleeFromDarkSniffer(Sniffer sniffer) {
-      if (!(sniffer instanceof DarkSnifferEntity) && sniffer.level() instanceof ServerLevel level) {
-         DarkSnifferEntity threat = level.getEntitiesOfClass(DarkSnifferEntity.class, sniffer.getBoundingBox().inflate(20.0), entity -> entity.isAlive())
-            .stream()
-            .min(Comparator.comparingDouble(sniffer::distanceToSqr))
-            .orElse(null);
-         if (threat != null) {
-            Vec3 away = DefaultRandomPos.getPosAway(sniffer, 16, 8, threat.position());
-            if (away != null) {
-               sniffer.getNavigation().moveTo(away.x(), away.y(), away.z(), 1.25);
+   private void theSift$fleeFromDarkSniffer(Sniffer sniffer) {
+      if (!(sniffer instanceof DarkSnifferEntity) && !sniffer.isNoAi() && sniffer.level() instanceof ServerLevel level) {
+         if (this.theSift$fleeCooldown-- <= 0) {
+            this.theSift$fleeCooldown = 10 + sniffer.getRandom().nextInt(5);
+            DarkSnifferEntity threat = level.getEntitiesOfClass(DarkSnifferEntity.class, sniffer.getBoundingBox().inflate(20.0), entity -> entity.isAlive())
+               .stream()
+               .min(Comparator.comparingDouble(sniffer::distanceToSqr))
+               .orElse(null);
+            if (threat != null) {
+               Vec3 away = DefaultRandomPos.getPosAway(sniffer, 16, 8, threat.position());
+               if (away != null) {
+                  sniffer.getNavigation().moveTo(away.x(), away.y(), away.z(), 1.25);
+               }
             }
          }
       }

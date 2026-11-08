@@ -5,6 +5,10 @@
     "the_sift:siftslate_growth",
     "the_sift:healthy_sculk",
     "the_sift:dry_healthy_sculk",
-    "the_sift:dry_healthy_sculk_growth"
+    "the_sift:dry_healthy_sculk_growth",
+    "the_sift:soulshale_growth",
+    "the_sift:healthy_sculk_cartilage",
+    "the_sift:healthy_sculk_pores",
+    "the_sift:soulshale"
   ]
 }

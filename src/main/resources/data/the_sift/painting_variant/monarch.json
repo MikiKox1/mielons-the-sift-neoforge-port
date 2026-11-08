@@ -1,0 +1,13 @@
+{
+  "asset_id": "the_sift:monarch",
+  "width": 3,
+  "height": 3,
+  "title": {
+    "translate": "painting.the_sift.monarch.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.the_sift.monarch.author",
+    "color": "gray"
+  }
+}

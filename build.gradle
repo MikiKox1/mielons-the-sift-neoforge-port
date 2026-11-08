@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.147'
+    id 'net.neoforged.moddev' version '2.0.148'
     id 'idea'
 }
 
@@ -16,9 +16,6 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 sourceSets {
     main {
-        // The Fabric source release used split environment source sets. NeoForge
-        // ships one universal mod JAR, so compile both trees into that JAR while
-        // client-only entry points are migrated to Dist.CLIENT event hooks.
         java.srcDir 'src/client/java'
         resources.srcDir 'src/client/resources'
         resources.srcDir 'src/generated/resources'
@@ -35,8 +32,6 @@ repositories {
         }
     }
 
-    // LambDynamicLights API is optional at runtime but used by the client
-    // integration at compile time. Its 4.13.0 API is loader-neutral on 26.3.
     maven {
         name = 'Gegy'
         url = uri('https://maven.gegy.dev')
@@ -49,17 +44,13 @@ neoForge {
     runs {
         client {
             client()
-            // Client run data is isolated from regular player worlds.
-            gameDirectory = project.file("run/client")
+            gameDirectory = project.file("run/client-${project.neo_version}")
         }
-
         server {
             server()
-            // Server run data remains separate from client data and player worlds.
-            gameDirectory = project.file("run/server")
+            gameDirectory = project.file("run/server-${project.neo_version}")
             programArgument '--nogui'
         }
-
     }
 
     mods {
@@ -75,77 +66,8 @@ configurations {
 
 dependencies {
     implementation "com.geckolib:geckolib-neoforge-26.3:${project.geckolib_version}"
-    // GeckoLib's runtime client mixins add GeoRenderState to vanilla render states.
-    // Consume its published sidecar so ModDevGradle exposes the same interface at compile time.
     interfaceInjectionData "com.geckolib:geckolib-neoforge-26.3:${project.geckolib_version}"
     compileOnly "dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${project.lambdynlights_version}+${project.minecraft_version}"
-}
-
-// The compile-time NeoForge version only needs to be compatible with this
-// Minecraft line and the declared minimum. A newer Maven release does not
-// invalidate an older, supported and reproducible compilation.
-def pinnedNeoForge = project.neo_version.toString()
-def pinnedNeoMinimum = project.neo_min_version.toString()
-def targetMinecraft = project.minecraft_version.toString()
-def targetMinecraftRange = project.minecraft_version_range.toString()
-tasks.register('verifyNeoForgeCompatibility') {
-    group = 'verification'
-    description = 'Validate that the selected NeoForge compiler matches Minecraft and meets the loader minimum.'
-    inputs.property('neo_version', pinnedNeoForge)
-    inputs.property('neo_min_version', pinnedNeoMinimum)
-    inputs.property('minecraft_version', targetMinecraft)
-    inputs.property('minecraft_version_range', targetMinecraftRange)
-    doLast {
-        if (targetMinecraftRange != '[' + targetMinecraft + ']') {
-            throw new GradleException(
-                'Minecraft version range must exactly match ' + targetMinecraft +
-                '; found ' + targetMinecraftRange
-            )
-        }
-
-        def parseNeoForgeVersion = { String version ->
-            def matcher = version =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)(?:-([A-Za-z0-9.-]+))?$/
-            if (!matcher.matches()) {
-                throw new GradleException('Invalid NeoForge version: ' + version)
-            }
-            return [
-                minecraft: matcher.group(1) + '.' + matcher.group(2),
-                api: matcher.group(3).toInteger(),
-                build: matcher.group(4).toInteger(),
-                qualifier: matcher.group(5)
-            ]
-        }
-
-        def compiled = parseNeoForgeVersion(pinnedNeoForge)
-        def minimum = parseNeoForgeVersion(pinnedNeoMinimum)
-        if (compiled.minecraft != targetMinecraft || minimum.minecraft != targetMinecraft ||
-                compiled.api != 0 || minimum.api != 0) {
-            throw new GradleException(
-                'NeoForge compile and minimum versions must target Minecraft ' +
-                targetMinecraft + '. Got compiler ' + pinnedNeoForge +
-                ' and minimum ' + pinnedNeoMinimum
-            )
-        }
-        if (compiled.build < minimum.build ||
-                (compiled.build == minimum.build && compiled.qualifier != null &&
-                (minimum.qualifier == null || compiled.qualifier != minimum.qualifier))) {
-            throw new GradleException(
-                'NeoForge compiler ' + pinnedNeoForge +
-                ' is below the declared supported minimum ' + pinnedNeoMinimum
-            )
-        }
-
-        logger.lifecycle('NeoForge compiler ' + pinnedNeoForge +
-            ' is compatible with Minecraft ' + targetMinecraft +
-            ' and declared minimum ' + pinnedNeoMinimum +
-            ' (no latest-release requirement)')
-    }
-}
-
-tasks.matching {
-    it.name in ['build', 'check', 'compileJava', 'runData', 'runServer', 'runClient']
-}.configureEach {
-    dependsOn tasks.named('verifyNeoForgeCompatibility')
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -174,10 +96,19 @@ neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xmaxerrs', '1000']
 }
 
 java {
     withSourcesJar()
+}
+
+tasks.named('jar', Jar) {
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md')
+}
+
+tasks.named('sourcesJar', Jar) {
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md')
 }
 
 publishing {

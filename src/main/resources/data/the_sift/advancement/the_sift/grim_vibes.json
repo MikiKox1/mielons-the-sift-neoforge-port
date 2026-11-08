@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:soulshale"
+    },
+    "title": {
+      "translate": "advancement.the_sift.grim_vibes.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.grim_vibes.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

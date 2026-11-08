@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.RandomSource;
@@ -36,6 +37,10 @@ public final class SiftArchFeature implements Feature {
          return false;
       }
 
+      if (SiftCampProtection.near(level, centerX, centerZ, 24)) {
+         return false;
+      }
+
       int halfSpan = 13 + random.nextInt(3);
       SiftArchFeature.Candidate best = findBestSpan(level, bounds, centerX, centerZ, centerY, halfSpan, random);
       if (best == null) {
@@ -58,8 +63,9 @@ public final class SiftArchFeature implements Feature {
       boolean healthyGround = isHealthy(leftFloor) || isHealthy(rightFloor);
       boolean growthGround = leftFloor.is(ModBlocks.SIFTSLATE_GROWTH) || rightFloor.is(ModBlocks.SIFTSLATE_GROWTH);
       float healthyChance = healthyGround ? 0.78F : (growthGround ? 0.22F : 0.43F);
-      boolean healthy = random.nextFloat() < healthyChance;
-      BlockState body = (healthy ? ModBlocks.HEALTHY_SCULK : ModBlocks.SIFTSLATE).defaultBlockState();
+      boolean coral = TheSiftDimension.isCoralBiome(level.getBiome(new BlockPos(centerX, centerY, centerZ)));
+      boolean healthy = random.nextFloat() < healthyChance && !coral;
+      BlockState body = (coral ? ModBlocks.SOULSHALE : (healthy ? ModBlocks.HEALTHY_SCULK : ModBlocks.SIFTSLATE)).defaultBlockState();
       boolean growthVariant = !healthy && growthGround;
       double baseThickness = 2.45 + random.nextDouble() * 0.9;
       int span = best.halfSpan * 2;
@@ -155,6 +161,7 @@ public final class SiftArchFeature implements Feature {
                && level.ensureCanWrite(pos)
                && !archBlocks.contains(abovePos.asLong())
                && isOpenCrownSpace(level.getBlockState(abovePos))
+               && SiftLandmarkTerrain.allowsGrowth(level, pos)
                && level.getBlockState(pos).is(ModBlocks.SIFTSLATE)) {
                level.setBlock(pos, ModBlocks.SIFTSLATE_GROWTH.defaultBlockState(), 2);
             }
@@ -264,7 +271,13 @@ public final class SiftArchFeature implements Feature {
                         && dy < 0
                         && stripeSeed / 8 % 7 == 3
                         && hash01(cursor.getX(), cursor.getY(), cursor.getZ(), salt ^ -7046029254386353131L) < 0.58;
-                     level.setBlock(cursor, dryVein ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState() : mainState, 2);
+                     level.setBlock(
+                        cursor,
+                        TheSiftDimension.isCoralBiome(level.getBiome(cursor))
+                           ? ModBlocks.SOULSHALE.defaultBlockState()
+                           : (dryVein ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState() : mainState),
+                        2
+                     );
                      placedBlocks.add(cursor.asLong());
                      placed++;
                   }
@@ -338,7 +351,7 @@ public final class SiftArchFeature implements Feature {
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 
    private static double smootherstep(double value) {

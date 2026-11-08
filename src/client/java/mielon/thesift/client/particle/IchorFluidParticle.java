@@ -59,6 +59,7 @@ public final class IchorFluidParticle {
          IchorFluidParticle.tintIchor(this, level, x, y, z, false);
       }
 
+      @Override
       public void tick() {
          this.xo = this.x;
          this.yo = this.y;
@@ -78,6 +79,7 @@ public final class IchorFluidParticle {
          }
       }
 
+      @Override
       protected Layer getLayer() {
          return Layer.OPAQUE;
       }

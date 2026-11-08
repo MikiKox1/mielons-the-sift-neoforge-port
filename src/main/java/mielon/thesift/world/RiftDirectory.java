@@ -88,10 +88,15 @@ public final class RiftDirectory {
    }
 
    public static Optional<RiftDirectory.Exit> near(BlockPos anchor, long now) {
+      return nearby(anchor, now).stream().findFirst();
+   }
+
+   public static List<RiftDirectory.Exit> nearby(BlockPos anchor, long now) {
       return exits.values()
          .stream()
          .filter(e -> e.expires - now > 20L && (horizontal(e.anchor, anchor) <= 4096.0 || horizontal(e.pos, anchor) <= 4096.0))
-         .min(Comparator.comparingDouble(e -> horizontal(e.pos, anchor)));
+         .sorted(Comparator.comparingDouble(e -> horizontal(e.pos, anchor)))
+         .toList();
    }
 
    private static double horizontal(BlockPos a, BlockPos b) {

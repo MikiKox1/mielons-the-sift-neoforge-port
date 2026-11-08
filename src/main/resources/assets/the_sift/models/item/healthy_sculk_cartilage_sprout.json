@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_sift:block/healthy_sculk_cartilage_sprout"
+  },
+  "display": {
+    "gui": {
+      "translation": [
+        0,
+        6,
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:min",
+  "left": {
+    "type": "minecraft:add",
+    "left": 0.075,
+    "right": {
+      "type": "minecraft:mul",
+      "left": -1,
+      "right": "the_sift:strata_bridge_a"
+    }
+  },
+  "right": {
+    "type": "minecraft:add",
+    "left": 0.075,
+    "right": {
+      "type": "minecraft:mul",
+      "left": -1,
+      "right": "the_sift:strata_bridge_b"
+    }
+  }
+}

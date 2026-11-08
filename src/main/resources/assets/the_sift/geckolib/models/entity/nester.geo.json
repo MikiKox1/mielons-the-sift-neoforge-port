@@ -1,0 +1,337 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.nester",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 2.5,
+        "visible_bounds_height": 3.0,
+        "visible_bounds_offset": [
+          0,
+          1.0,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Body",
+          "parent": "root",
+          "pivot": [
+            0,
+            8.25,
+            1.5
+          ]
+        },
+        {
+          "name": "RamBody",
+          "parent": "Body",
+          "pivot": [
+            0,
+            8.25,
+            1.5
+          ]
+        },
+        {
+          "name": "RamHead",
+          "parent": "RamBody",
+          "pivot": [
+            0,
+            13.25,
+            -0.25
+          ]
+        },
+        {
+          "name": "LowerHead",
+          "parent": "RamHead",
+          "pivot": [
+            0,
+            13.25,
+            -0.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4,
+                13,
+                -4.75
+              ],
+              "size": [
+                8,
+                2.5,
+                9
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "UpperHead",
+          "parent": "LowerHead",
+          "pivot": [
+            0,
+            15.5,
+            -0.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4,
+                15.5,
+                -4.75
+              ],
+              "size": [
+                8,
+                2.5,
+                9
+              ],
+              "uv": [
+                0,
+                11
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RamAntennae",
+          "parent": "UpperHead",
+          "pivot": [
+            0,
+            18,
+            4.25
+          ]
+        },
+        {
+          "name": "Antennaes",
+          "parent": "RamAntennae",
+          "pivot": [
+            0,
+            18,
+            4.25
+          ]
+        },
+        {
+          "name": "LeftAntenna",
+          "parent": "Antennaes",
+          "pivot": [
+            2.0,
+            18,
+            4.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1,
+                18,
+                4.25
+              ],
+              "size": [
+                2,
+                6,
+                0
+              ],
+              "uv": [
+                22,
+                31
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RightAntenna",
+          "parent": "Antennaes",
+          "pivot": [
+            -2.0,
+            18,
+            4.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -3,
+                18,
+                4.25
+              ],
+              "size": [
+                2,
+                6,
+                0
+              ],
+              "uv": [
+                26,
+                31
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Torso",
+          "parent": "RamBody",
+          "pivot": [
+            0,
+            7,
+            -0.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.25,
+                6.5,
+                -2.5
+              ],
+              "size": [
+                4.5,
+                7,
+                4.5
+              ],
+              "uv": [
+                0,
+                22
+              ]
+            }
+          ]
+        },
+        {
+          "name": "LeftFrontLeg",
+          "parent": "Body",
+          "pivot": [
+            1.75,
+            8.5,
+            -2.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                0.75,
+                0,
+                -3
+              ],
+              "size": [
+                2,
+                8.5,
+                1.5
+              ],
+              "uv": [
+                22,
+                22
+              ]
+            }
+          ]
+        },
+        {
+          "name": "LeftBackLeg",
+          "parent": "root",
+          "pivot": [
+            1.75,
+            8.25,
+            1.5
+          ],
+          "cubes": [
+            {
+              "origin": [
+                0.75,
+                -0.23732,
+                0.66697
+              ],
+              "size": [
+                2,
+                8.5,
+                1.5
+              ],
+              "pivot": [
+                1.75,
+                8.25,
+                1.5
+              ],
+              "rotation": [
+                12.5,
+                0,
+                0
+              ],
+              "uv": [
+                28,
+                22
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RightBackLeg",
+          "parent": "root",
+          "pivot": [
+            -1.75,
+            8.25,
+            1.5
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.75,
+                -0.23732,
+                0.66697
+              ],
+              "size": [
+                2,
+                8.5,
+                1.5
+              ],
+              "pivot": [
+                -1.75,
+                8.25,
+                1.5
+              ],
+              "rotation": [
+                12.5,
+                0,
+                0
+              ],
+              "uv": [
+                16,
+                31
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RightFrontLeg",
+          "parent": "Body",
+          "pivot": [
+            -1.75,
+            8.5,
+            -2.25
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.75,
+                0,
+                -3
+              ],
+              "size": [
+                2,
+                8.5,
+                1.5
+              ],
+              "uv": [
+                16,
+                22
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

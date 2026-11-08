@@ -27,9 +27,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-/** Narrow adapter for the Fabric callback shapes consumed by the 26.3 source. */
+/** Native NeoForge listeners preserving the callback timing used by upstream. */
 public final class NeoEvents {
    private static final List<PlayerBlockBreakEvents.After> BLOCK_BREAK_AFTER = new ArrayList<>();
    private static final List<ServerLivingEntityEvents.AfterDeath> LIVING_DEATH_AFTER = new ArrayList<>();
@@ -39,6 +40,7 @@ public final class NeoEvents {
    private static final List<ServerTickEvents.EndTick> SERVER_TICK_END = new ArrayList<>();
    private static final List<ServerLifecycleEvents.ServerStopping> SERVER_STOPPING = new ArrayList<>();
    private static final List<ServerLifecycleEvents.ServerStopped> SERVER_STOPPED = new ArrayList<>();
+   private static final List<ServerLifecycleEvents.ServerStarted> SERVER_STARTED = new ArrayList<>();
    private static final List<ServerPlayerEvents.AfterRespawn> AFTER_RESPAWN = new ArrayList<>();
    private static final List<ServerPlayerEvents.Join> PLAYER_JOIN = new ArrayList<>();
    private static final List<CommandRegistrationCallback> COMMAND_REGISTRATION = new ArrayList<>();
@@ -77,6 +79,7 @@ public final class NeoEvents {
       });
       NeoForge.EVENT_BUS.addListener((ServerTickEvent.Pre event) -> SERVER_TICK_START.forEach(callback -> callback.onStartTick(event.getServer())));
       NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> SERVER_TICK_END.forEach(callback -> callback.onEndTick(event.getServer())));
+      NeoForge.EVENT_BUS.addListener((ServerStartedEvent event) -> SERVER_STARTED.forEach(callback -> callback.onServerStarted(event.getServer())));
       NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> SERVER_STOPPING.forEach(callback -> callback.onServerStopping(event.getServer())));
       NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> {
          SERVER_STOPPED.forEach(callback -> callback.onServerStopped(event.getServer()));
@@ -176,10 +179,16 @@ public final class NeoEvents {
    }
 
    public static final class ServerLifecycleEvents {
+      public static final Event<ServerStarted> SERVER_STARTED = new Event<>(NeoEvents.SERVER_STARTED::add);
       public static final Event<ServerStopping> SERVER_STOPPING = new Event<>(NeoEvents.SERVER_STOPPING::add);
       public static final Event<ServerStopped> SERVER_STOPPED = new Event<>(NeoEvents.SERVER_STOPPED::add);
 
       private ServerLifecycleEvents() {
+      }
+
+      @FunctionalInterface
+      public interface ServerStarted {
+         void onServerStarted(MinecraftServer server);
       }
 
       @FunctionalInterface

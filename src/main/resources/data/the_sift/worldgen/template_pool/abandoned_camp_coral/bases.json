@@ -1,0 +1,59 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_1"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_2"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_3"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_4"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_5"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/base_6"
+      }
+    }
+  ]
+}

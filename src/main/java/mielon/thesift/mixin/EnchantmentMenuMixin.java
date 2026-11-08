@@ -53,13 +53,13 @@ public abstract class EnchantmentMenuMixin implements CharoiteEnchantmentMenuBri
 
    @Inject(method = "clickMenuButton", at = @At("HEAD"))
    private void theSift$rememberCharoiteUse(Player player, int button, CallbackInfoReturnable<Boolean> cir) {
-      this.theSift$usingCharoiteForClick = this.theSift$hasCharoiteCatalyst();
+      this.theSift$usingCharoiteForClick = ((EnchantmentMenu)(Object)this).getSlot(1).getItem().is(ModItems.CHAROITE);
    }
 
    @Inject(method = "clickMenuButton", at = @At("RETURN"))
    private void theSift$markCharoiteEnchantment(Player player, int button, CallbackInfoReturnable<Boolean> cir) {
       if (this.theSift$usingCharoiteForClick && Boolean.TRUE.equals(cir.getReturnValue())) {
-         CharoiteEnchanting.markUsed(this.theSift$getEnchantItem());
+         CharoiteEnchanting.markUsed(((EnchantmentMenu)(Object)this).getSlot(0).getItem());
          if (player instanceof ServerPlayer serverPlayer) {
             ModAdvancements.award(serverPlayer, "the_sift/better_enchanter");
          }
@@ -80,8 +80,7 @@ public abstract class EnchantmentMenuMixin implements CharoiteEnchantmentMenuBri
    @Inject(method = "slotsChanged", at = @At("RETURN"))
    private void theSift$applyCharoitePreview(Container container, CallbackInfo ci) {
       if (container == this.enchantSlots && this.enchantSlots.getItem(1).is(ModItems.CHAROITE)) {
-         RegistryAccess registryAccess = (RegistryAccess)(Object)this.access
-            .evaluate((level, pos) -> level.isClientSide() ? null : level.registryAccess(), (RegistryAccess)null);
+         RegistryAccess registryAccess = this.access.evaluate((level, pos) -> level.isClientSide() ? null : level.registryAccess(), (RegistryAccess)null);
          if (registryAccess != null) {
             Registry<Enchantment> enchantments = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
 
@@ -92,7 +91,7 @@ public abstract class EnchantmentMenuMixin implements CharoiteEnchantmentMenuBri
 
                if (this.levelClue[slot] >= 0
                   && this.enchantClue[slot] >= 0
-                  && enchantments.get(this.enchantClue[slot]).map(enchantment -> ((Enchantment)enchantment.value()).getMaxLevel() > 1).orElse(false)) {
+                  && enchantments.get(this.enchantClue[slot]).map(enchantment -> enchantment.value().getMaxLevel() > 1).orElse(false)) {
                   this.levelClue[slot]++;
                }
             }
@@ -112,11 +111,11 @@ public abstract class EnchantmentMenuMixin implements CharoiteEnchantmentMenuBri
    private void theSift$boostCharoiteEnchantments(
       RegistryAccess registryAccess, ItemStack stack, int button, int cost, CallbackInfoReturnable<List<EnchantmentInstance>> cir
    ) {
-      if (this.theSift$charoiteCosts && !((List)cir.getReturnValue()).isEmpty()) {
-         List<EnchantmentInstance> boosted = new ArrayList<>(((List)cir.getReturnValue()).size());
+      if (this.theSift$charoiteCosts && !cir.getReturnValue().isEmpty()) {
+         List<EnchantmentInstance> boosted = new ArrayList<>(cir.getReturnValue().size());
 
-         for (EnchantmentInstance enchantment : (List<EnchantmentInstance>) cir.getReturnValue()) {
-            int boostedLevel = ((Enchantment)enchantment.enchantment().value()).getMaxLevel() > 1 ? enchantment.level() + 1 : enchantment.level();
+         for (EnchantmentInstance enchantment : cir.getReturnValue()) {
+            int boostedLevel = enchantment.enchantment().value().getMaxLevel() > 1 ? enchantment.level() + 1 : enchantment.level();
             boosted.add(new EnchantmentInstance(enchantment.enchantment(), boostedLevel));
          }
 
@@ -132,15 +131,5 @@ public abstract class EnchantmentMenuMixin implements CharoiteEnchantmentMenuBri
    @Override
    public void theSift$setCharoiteCostsActive(boolean active) {
       this.theSift$charoiteCosts = active;
-   }
-
-   @Unique
-   private ItemStack theSift$getEnchantItem() {
-      return ((EnchantmentMenu)(Object)this).getSlot(0).getItem();
-   }
-
-   @Unique
-   private boolean theSift$hasCharoiteCatalyst() {
-      return ((EnchantmentMenu)(Object)this).getSlot(1).getItem().is(ModItems.CHAROITE);
    }
 }

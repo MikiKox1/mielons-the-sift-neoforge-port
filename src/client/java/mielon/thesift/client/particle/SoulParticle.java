@@ -1,6 +1,6 @@
 package mielon.thesift.client.particle;
 
-import java.util.Arrays;
+import mielon.thesift.fluid.IchorSoulMotion;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SingleQuadParticle;
@@ -9,22 +9,20 @@ import net.minecraft.client.particle.SingleQuadParticle.FacingCameraMode;
 import net.minecraft.client.particle.SingleQuadParticle.Layer;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.Heightmap.Types;
 
 public final class SoulParticle extends SingleQuadParticle {
    private final boolean canyonSoul;
    private final float startSize;
    private final double swayPhase;
-   private final int rimSurfaceY;
+   private final double startY;
    private final FacingCameraMode facingMode;
-   private int ticksAboveSurface;
 
    private SoulParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites, boolean canyonSoul) {
       super(level, x, y, z, xd, yd, zd, sprites.get(level.getRandom()));
       this.canyonSoul = canyonSoul;
       this.swayPhase = this.random.nextDouble() * Math.PI * 2.0;
       this.facingMode = canyonSoul ? FacingCameraMode.LOOKAT_Y : FacingCameraMode.LOOKAT_XYZ;
-      this.rimSurfaceY = canyonSoul ? findRimSurface(level, (int)Math.floor(x), (int)Math.floor(z)) : Integer.MAX_VALUE;
+      this.startY = y;
       this.hasPhysics = false;
       this.gravity = 0.0F;
       this.friction = canyonSoul ? 0.995F : 0.94F;
@@ -34,7 +32,7 @@ public final class SoulParticle extends SingleQuadParticle {
          this.yd = 0.18 + this.random.nextDouble() * 0.08;
          this.zd = (this.random.nextDouble() - 0.5) * 0.018;
          this.startSize = 0.92F + this.random.nextFloat() * 0.62F;
-         this.lifetime = 140 + this.random.nextInt(41);
+         this.lifetime = 90;
       } else {
          this.xd = xd + (this.random.nextDouble() - 0.5) * 0.055;
          this.yd = Math.abs(yd) + 0.035 + this.random.nextDouble() * 0.065;
@@ -47,6 +45,7 @@ public final class SoulParticle extends SingleQuadParticle {
       this.setSize(this.startSize, this.startSize);
    }
 
+   @Override
    public void tick() {
       this.xo = this.x;
       this.yo = this.y;
@@ -55,13 +54,13 @@ public final class SoulParticle extends SingleQuadParticle {
          double sway = Math.sin(this.swayPhase + this.age * 0.22) * 0.007;
          this.move(this.xd + sway, this.yd, this.zd - sway * 0.65);
          this.yd = Math.min(0.31, this.yd + 0.0016);
-         if (this.y > this.rimSurfaceY + 12.0) {
-            this.ticksAboveSurface++;
+         double rise = this.y - this.startY;
+         this.alpha = IchorSoulMotion.canyonAlpha(rise);
+         if (rise >= 16.0) {
+            this.remove();
+            return;
          }
 
-         float exitFade = 1.0F - this.ticksAboveSurface / 26.0F;
-         float lifeFade = (this.lifetime - this.age) / 20.0F;
-         this.alpha = 0.86F * Math.max(0.0F, Math.min(1.0F, Math.min(exitFade, lifeFade)));
          this.quadSize = this.startSize * (1.0F + Math.min(0.28F, this.age / 180.0F));
       } else {
          this.move(this.xd, this.yd, this.zd);
@@ -77,33 +76,19 @@ public final class SoulParticle extends SingleQuadParticle {
       }
    }
 
+   @Override
    public int getLightCoords(float partialTickTime) {
       return 15728880;
    }
 
+   @Override
    public FacingCameraMode getFacingCameraMode() {
       return this.facingMode;
    }
 
+   @Override
    protected Layer getLayer() {
       return Layer.bySprite(this.sprite);
-   }
-
-   private static int findRimSurface(ClientLevel level, int x, int z) {
-      int[] heights = new int[8];
-      int radius = 6;
-      int index = 0;
-
-      for (int dx = -1; dx <= 1; dx++) {
-         for (int dz = -1; dz <= 1; dz++) {
-            if (dx != 0 || dz != 0) {
-               heights[index++] = level.getHeight(Types.MOTION_BLOCKING_NO_LEAVES, x + dx * radius, z + dz * radius);
-            }
-         }
-      }
-
-      Arrays.sort(heights);
-      return (heights[3] + heights[4]) / 2;
    }
 
    public static final class FragmentProvider implements ParticleProvider<SimpleParticleType> {

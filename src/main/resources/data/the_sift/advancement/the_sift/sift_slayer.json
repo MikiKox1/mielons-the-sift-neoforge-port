@@ -1,0 +1,232 @@
+{
+  "parent": "the_sift:the_sift/certified_sifter",
+  "display": {
+    "icon": {
+      "id": "the_sift:siftite_sword"
+    },
+    "title": {
+      "translate": "advancement.the_sift.sift_slayer.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.sift_slayer.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "minecraft:sniffer": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "minecraft:sniffer"
+          }
+        }
+      }
+    },
+    "the_sift:singer": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:singer"
+          }
+        }
+      }
+    },
+    "the_sift:echo_golem": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:echo_golem"
+          }
+        }
+      }
+    },
+    "the_sift:dark_sniffer": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:dark_sniffer"
+          }
+        }
+      }
+    },
+    "the_sift:blub": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:blub"
+          }
+        }
+      }
+    },
+    "the_sift:seedling": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:seedling"
+          }
+        }
+      }
+    },
+    "the_sift:nester": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:nester"
+          }
+        }
+      }
+    },
+    "the_sift:pollinator": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:pollinator"
+          }
+        }
+      }
+    },
+    "the_sift:slabber": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:slabber"
+          }
+        }
+      }
+    },
+    "the_sift:nuzzle": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:nuzzle"
+          }
+        }
+      }
+    },
+    "the_sift:stalker": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:stalker"
+          }
+        }
+      }
+    },
+    "the_sift:scavenger": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:scavenger"
+          }
+        }
+      }
+    },
+    "the_sift:monarch": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:monarch"
+          }
+        }
+      }
+    },
+    "minecraft:allay": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "minecraft:allay"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "minecraft:sniffer"
+    ],
+    [
+      "the_sift:singer"
+    ],
+    [
+      "the_sift:echo_golem"
+    ],
+    [
+      "the_sift:dark_sniffer"
+    ],
+    [
+      "the_sift:blub"
+    ],
+    [
+      "the_sift:seedling"
+    ],
+    [
+      "the_sift:nester"
+    ],
+    [
+      "the_sift:pollinator"
+    ],
+    [
+      "the_sift:slabber"
+    ],
+    [
+      "the_sift:nuzzle"
+    ],
+    [
+      "the_sift:stalker"
+    ],
+    [
+      "the_sift:scavenger"
+    ],
+    [
+      "the_sift:monarch"
+    ],
+    [
+      "minecraft:allay"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  }
+}

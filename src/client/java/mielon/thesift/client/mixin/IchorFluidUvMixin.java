@@ -1,9 +1,12 @@
 package mielon.thesift.client.mixin;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import mielon.thesift.client.render.IchorQuadUv;
 import mielon.thesift.fluid.ModFluids;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidRenderer;
 import net.minecraft.client.renderer.block.FluidRenderer.Output;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -19,93 +22,112 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FluidRenderer.class)
 public abstract class IchorFluidUvMixin {
    @Unique
-   private static final int THE_SIFT$WORLD_TILE_BLOCKS = 16;
-   @Unique
-   private static final float THE_SIFT$WORLD_TILE_SPAN = 0.0625F;
-   @Unique
-   private static final Identifier THE_SIFT$ICHOR_STILL = Identifier.fromNamespaceAndPath("the_sift", "block/ichor_still");
-   @Unique
-   private static final Identifier THE_SIFT$ICHOR_FLOW = Identifier.fromNamespaceAndPath("the_sift", "block/ichor_flow");
-   @Unique
-   private static final ThreadLocal<IchorFluidUvMixin.UvContext> THE_SIFT$ICHOR_CONTEXT = new ThreadLocal<>();
+   private static final ThreadLocal<IchorFluidUvMixin.QuadContext> THE_SIFT$QUAD = new ThreadLocal<>();
 
    @Inject(method = "tesselate", at = @At("HEAD"))
-   private void theSift$beginIchorUv(BlockAndTintGetter level, BlockPos pos, Output output, BlockState blockState, FluidState fluidState, CallbackInfo ci) {
-      if (fluidState.getType() != ModFluids.ICHOR && fluidState.getType() != ModFluids.FLOWING_ICHOR) {
-         THE_SIFT$ICHOR_CONTEXT.remove();
+   private void theSift$begin(BlockAndTintGetter level, BlockPos pos, Output output, BlockState block, FluidState state, CallbackInfo ci) {
+      if (state.getType() != ModFluids.ICHOR && state.getType() != ModFluids.FLOWING_ICHOR) {
+         THE_SIFT$QUAD.remove();
       } else {
-         THE_SIFT$ICHOR_CONTEXT.set(new IchorFluidUvMixin.UvContext(pos.getX(), pos.getZ()));
+         THE_SIFT$QUAD.set(new IchorFluidUvMixin.QuadContext(pos));
       }
    }
 
    @Inject(method = "tesselate", at = @At("RETURN"))
-   private void theSift$finishIchorUv(BlockAndTintGetter level, BlockPos pos, Output output, BlockState blockState, FluidState fluidState, CallbackInfo ci) {
-      THE_SIFT$ICHOR_CONTEXT.remove();
+   private void theSift$end(BlockAndTintGetter level, BlockPos pos, Output output, BlockState block, FluidState state, CallbackInfo ci) {
+      THE_SIFT$QUAD.remove();
+   }
+
+   @Unique
+   private static void theSift$capture(TextureAtlasSprite sprite) {
+      IchorFluidUvMixin.QuadContext context = THE_SIFT$QUAD.get();
+      if (context != null) {
+         context.sprite = sprite;
+      }
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getU0()F"))
-   private float theSift$worldU0(TextureAtlasSprite sprite) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getU(context.baseU()) : sprite.getU0();
+   private float theSift$getU0(TextureAtlasSprite sprite) {
+      theSift$capture(sprite);
+      return sprite.getU0();
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getU1()F"))
-   private float theSift$worldU1(TextureAtlasSprite sprite) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getU(context.baseU() + 0.0625F) : sprite.getU1();
+   private float theSift$getU1(TextureAtlasSprite sprite) {
+      theSift$capture(sprite);
+      return sprite.getU1();
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getV0()F"))
-   private float theSift$worldV0(TextureAtlasSprite sprite) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getV(context.baseV()) : sprite.getV0();
+   private float theSift$getV0(TextureAtlasSprite sprite) {
+      theSift$capture(sprite);
+      return sprite.getV0();
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getV1()F"))
-   private float theSift$worldV1(TextureAtlasSprite sprite) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getV(context.baseV() + 0.0625F) : sprite.getV1();
+   private float theSift$getV1(TextureAtlasSprite sprite) {
+      theSift$capture(sprite);
+      return sprite.getV1();
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getU(F)F"))
-   private float theSift$worldFlowU(TextureAtlasSprite sprite, float localU) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getU(context.baseU() + theSift$clampUnit(localU) * 0.0625F) : sprite.getU(localU);
+   private float theSift$getU(TextureAtlasSprite sprite, float value) {
+      theSift$capture(sprite);
+      return sprite.getU(value);
    }
 
    @Redirect(method = "tesselate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;getV(F)F"))
-   private float theSift$worldFlowV(TextureAtlasSprite sprite, float localV) {
-      IchorFluidUvMixin.UvContext context = THE_SIFT$ICHOR_CONTEXT.get();
-      return context != null && theSift$isIchorSprite(sprite) ? sprite.getV(context.baseV() + theSift$clampUnit(localV) * 0.0625F) : sprite.getV(localV);
+   private float theSift$getV(TextureAtlasSprite sprite, float value) {
+      theSift$capture(sprite);
+      return sprite.getV(value);
+   }
+
+   @Inject(method = "vertex", at = @At("HEAD"), cancellable = true)
+   private void theSift$vertex(VertexConsumer output, float x, float y, float z, int color, float u, float v, int light, CallbackInfo ci) {
+      IchorFluidUvMixin.QuadContext context = THE_SIFT$QUAD.get();
+      if (context != null && context.sprite != null) {
+         Identifier name = context.sprite.contents().name();
+         if (name.getNamespace().equals("the_sift") && (name.getPath().equals("block/ichor_still") || name.getPath().equals("block/ichor_flow"))) {
+            int i = context.count++;
+            context.x[i] = x;
+            context.y[i] = y;
+            context.z[i] = z;
+            context.lights[i] = light;
+            context.uv.sectionVertex(i, x, y, z);
+            context.colors[i] = color;
+            if (context.count == 4) {
+               context.emit(output);
+               context.count = 0;
+            }
+
+            ci.cancel();
+         }
+      }
    }
 
    @Unique
-   private static boolean theSift$isIchorSprite(TextureAtlasSprite sprite) {
-      Identifier name = sprite.contents().name();
-      return THE_SIFT$ICHOR_STILL.equals(name) || THE_SIFT$ICHOR_FLOW.equals(name);
-   }
+   private static final class QuadContext {
+      private final IchorQuadUv uv;
+      private final float[] x = new float[4];
+      private final float[] y = new float[4];
+      private final float[] z = new float[4];
+      private final int[] lights = new int[4];
+      private final int[] colors = new int[4];
+      private TextureAtlasSprite sprite;
+      private int count;
 
-   @Unique
-   private static float theSift$clampUnit(float coordinate) {
-      return Math.max(0.0F, Math.min(1.0F, coordinate));
-   }
-
-   @Unique
-   private static final class UvContext {
-      private final float baseU;
-      private final float baseV;
-
-      private UvContext(int worldX, int worldZ) {
-         this.baseU = Math.floorMod(worldX, 16) * 0.0625F;
-         this.baseV = Math.floorMod(worldZ, 16) * 0.0625F;
+      private QuadContext(BlockPos pos) {
+         this.uv = new IchorQuadUv(pos.getX(), pos.getY(), pos.getZ());
       }
 
-      private float baseU() {
-         return this.baseU;
-      }
-
-      private float baseV() {
-         return this.baseV;
+      private void emit(VertexConsumer output) {
+         for (int j = 0; j < 4; j++) {
+            float coordinate = this.uv.u(j);
+            float u = this.sprite.getU(coordinate);
+            coordinate = this.uv.v(j);
+            float v = this.sprite.getV(coordinate);
+            output.addVertex(this.x[j], this.y[j], this.z[j], this.colors[j], u, v, OverlayTexture.NO_OVERLAY, this.lights[j], 0.0F, 1.0F, 0.0F);
+         }
       }
    }
 }

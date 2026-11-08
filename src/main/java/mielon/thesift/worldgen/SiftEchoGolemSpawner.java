@@ -5,18 +5,18 @@ import mielon.thesift.entity.ModEntities;
 import mielon.thesift.sound.ModSounds;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.level.levelgen.Heightmap.Types;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.phys.AABB;
 
 public final class SiftEchoGolemSpawner {
    private static final int CHECK_INTERVAL = 80;
    private static final double MINIMUM_SPACING = 165.0;
    private static int checkCooldown;
+   private static long nextNaturalSpawnTick;
 
    private SiftEchoGolemSpawner() {
    }
@@ -25,13 +25,17 @@ public final class SiftEchoGolemSpawner {
       if (--checkCooldown <= 0) {
          checkCooldown = 80;
          ServerLevel level = server.getLevel(TheSiftDimension.LEVEL_KEY);
-         if (level != null) {
+         if (level != null && SiftSpawnBudget.enabled(level)) {
             if (!spawnCanyonGolem(level)) {
-               for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                  if (player.level() == level && !player.isSpectator() && player.isAlive()) {
-                     AABB nearby = new AABB(player.blockPosition()).inflate(165.0, 96.0, 165.0);
-                     if (level.getEntitiesOfClass(EchoGolemEntity.class, nearby).isEmpty() && trySpawn(level, player.blockPosition())) {
-                        return;
+               if (level.getGameTime() >= nextNaturalSpawnTick) {
+                  nextNaturalSpawnTick = level.getGameTime() + 1200L;
+
+                  for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                     if (player.level() == level && !player.isSpectator() && player.isAlive()) {
+                        AABB nearby = new AABB(player.blockPosition()).inflate(165.0, 96.0, 165.0);
+                        if (level.getEntitiesOfClass(EchoGolemEntity.class, nearby).isEmpty() && trySpawn(level, player.blockPosition())) {
+                           return;
+                        }
                      }
                   }
                }
@@ -50,7 +54,7 @@ public final class SiftEchoGolemSpawner {
                         int x = entrance.getX() + dx;
                         int z = entrance.getZ() + dz;
                         if (spawnAreaLoaded(level, x, z)) {
-                           BlockPos feet = findSpawnFeet(level, x, z);
+                           BlockPos feet = SiftLayeredWalkSurface.findFeet(level, x, z, entrance.getY(), 6, 3);
                            if (feet != null && Math.abs(feet.getY() - entrance.getY()) <= 6 && spawnAt(level, feet, EntitySpawnReason.STRUCTURE)) {
                               SiftLandmarkTracker.forget(SiftLandmarkTracker.Kind.SOUL_CANYON_GOLEM_PENDING, entrance);
                               return true;
@@ -83,11 +87,11 @@ public final class SiftEchoGolemSpawner {
 
       for (int attempt = 0; attempt < 28; attempt++) {
          double angle = phase + attempt * 2.399963229728653;
-         int radius = 82 + level.getRandom().nextInt(79);
+         int radius = 82 + level.getRandom().nextInt(39);
          int x = around.getX() + (int)Math.round(Math.cos(angle) * radius);
          int z = around.getZ() + (int)Math.round(Math.sin(angle) * radius);
          if (spawnAreaLoaded(level, x, z)) {
-            BlockPos feet = findSpawnFeet(level, x, z);
+            BlockPos feet = SiftLayeredWalkSurface.findFeet(level, x, z, around.getY(), 16, 3);
             if (feet != null) {
                AABB spacing = new AABB(feet).inflate(165.0, 96.0, 165.0);
                if (level.getEntitiesOfClass(EchoGolemEntity.class, spacing).isEmpty() && spawnAt(level, feet, EntitySpawnReason.NATURAL)) {
@@ -101,44 +105,31 @@ public final class SiftEchoGolemSpawner {
    }
 
    private static boolean spawnAt(ServerLevel level, BlockPos feet, EntitySpawnReason reason) {
-      EchoGolemEntity golem = (EchoGolemEntity)ModEntities.ECHO_GOLEM.create(level, reason);
+      if (reason == EntitySpawnReason.NATURAL && SiftSpawnBudget.available(level, feet, MobCategory.CREATURE) <= 0) {
+         return false;
+      }
+
+      EchoGolemEntity golem = ModEntities.ECHO_GOLEM.create(level, reason);
       if (golem == null) {
          return false;
-      } else {
-         golem.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+      }
+
+      golem.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+      if (reason == EntitySpawnReason.STRUCTURE) {
          golem.setPersistenceRequired();
-         if (level.noCollision(golem) && level.addFreshEntity(golem)) {
-            level.playSound(null, feet, ModSounds.ECHO_GOLEM_SPAWN, golem.getSoundSource(), 0.8F, 0.94F);
-            return true;
-         } else {
-            golem.discard();
-            return false;
-         }
-      }
-   }
-
-   private static BlockPos findSpawnFeet(ServerLevel level, int x, int z) {
-      int top = level.getHeight(Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-      MutableBlockPos floor = new MutableBlockPos(x, top - 1, z);
-
-      for (int drop = 0; drop <= 12; drop++) {
-         floor.setY(top - 1 - drop);
-         if (level.getBlockState(floor).isCollisionShapeFullBlock(level, floor)) {
-            BlockPos feet = floor.above().immutable();
-            if (hasEmptyCollision(level, feet) && hasEmptyCollision(level, feet.above()) && hasEmptyCollision(level, feet.above(2))) {
-               return feet;
-            }
-         }
       }
 
-      return null;
-   }
-
-   private static boolean hasEmptyCollision(ServerLevel level, BlockPos pos) {
-      return level.getFluidState(pos).isEmpty() && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
+      if (level.noCollision(golem) && !level.getBiome(golem.blockPosition()).is(TheSiftDimension.CORRUPTED_SIFT) && level.addFreshEntity(golem)) {
+         level.playSound(null, feet, ModSounds.ECHO_GOLEM_SPAWN, golem.getSoundSource(), 0.8F, 0.94F);
+         return true;
+      } else {
+         golem.discard();
+         return false;
+      }
    }
 
    public static void clear() {
       checkCooldown = 0;
+      nextNaturalSpawnTick = 0L;
    }
 }

@@ -12,12 +12,11 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.AABB;
 
 public final class RiftRenderer extends EntityRenderer<RiftEntity, RiftRenderState> {
    private static final RiftMesh OPEN = new RiftMesh(RiftAssetModel.INSTANCE.boxes(1.0F));
    private static final Identifier ENERGY_TEXTURE = id("textures/misc/rift_energy_shaderpack.png");
-   private static final Identifier SIFT_TEXTURE = id("textures/entity/rift/sift.png");
-   private static final Identifier OVERWORLD_TEXTURE = id("textures/entity/rift/overworld.png");
 
    public RiftRenderer(Context context) {
       super(context);
@@ -33,10 +32,16 @@ public final class RiftRenderer extends EntityRenderer<RiftEntity, RiftRenderSta
       state.openScale = entity.getOpenScale(partial);
       state.longAlongX = entity.isLongAlongX();
       state.targetSift = entity.targetsSift();
+      state.backgroundVariant = entity.getBackgroundVariant();
    }
 
    protected int getBlockLightLevel(RiftEntity entity, BlockPos pos) {
       return 15;
+   }
+
+   @Override
+   protected AABB getBoundingBoxForCulling(RiftEntity entity, float partialTicks) {
+      return entity.getPortalBounds().inflate(4.0);
    }
 
    public void submit(RiftRenderState state, PoseStack poses, SubmitNodeCollector collector, CameraRenderState camera) {
@@ -45,7 +50,7 @@ public final class RiftRenderer extends EntityRenderer<RiftEntity, RiftRenderSta
          boolean axis = state.longAlongX;
          if (!SiftShaderCompat.isShaderPackInUse()) {
             collector.submitCustomGeometry(
-               poses, state.targetSift ? RiftRenderTypes.SIFT : RiftRenderTypes.OVERWORLD, (pose, buffer) -> mesh.draw(buffer, pose, axis, false)
+               poses, RiftRenderTypes.surface(state.targetSift, state.backgroundVariant), (pose, buffer) -> mesh.draw(buffer, pose, axis, false)
             );
             collector.submitCustomGeometry(poses, RiftRenderTypes.GLOW, (pose, buffer) -> mesh.draw(buffer, pose, axis, true));
          } else {
@@ -56,7 +61,7 @@ public final class RiftRenderer extends EntityRenderer<RiftEntity, RiftRenderSta
                mesh.drawShaderpack(buffer, pose, axis, RiftMesh.ShaderpackPass.FRAME, 1.0F, seconds);
             });
             if (destinationAlpha > 0.001F) {
-               Identifier destination = state.targetSift ? SIFT_TEXTURE : OVERWORLD_TEXTURE;
+               Identifier destination = RiftRenderTypes.texture(state.targetSift, state.backgroundVariant);
                collector.submitCustomGeometry(
                   poses,
                   RenderTypes.beaconBeam(destination, true),

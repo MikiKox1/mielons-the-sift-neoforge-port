@@ -18,6 +18,7 @@ public final class SonorousAutoplay {
          BlockPos anchor = SonorousConsoles.findAnchor(level, matched.notes().get(0).notePos());
          if (anchor != null) {
             if (level.getBlockEntity(anchor) instanceof SonorousDeepslateBlockEntity blockEntity) {
+               SonorousBeams.clearGroup(level, anchor);
                blockEntity.startAutoplay(matched);
             }
          }

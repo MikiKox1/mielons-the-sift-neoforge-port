@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:clamp",
+  "input": {
+    "type": "minecraft:mul",
+    "left": 5,
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:range_choice",
+        "input": "the_sift:mountain_region",
+        "min_inclusive": 0,
+        "max_exclusive": 1000000,
+        "when_in_range": "the_sift:mountain_surface",
+        "when_out_of_range": "the_sift:strata_surface"
+      },
+      "right": -0.06562499999999999
+    }
+  },
+  "min": -1,
+  "max": 1
+}

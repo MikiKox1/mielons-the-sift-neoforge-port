@@ -21,41 +21,45 @@ public final class SiftIchorCaveSpringFeature implements Feature {
    }
 
    public boolean place(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos origin) {
-      for (Direction direction : POSSIBLE_OPENINGS) {
-         BlockPos opening = origin.relative(direction);
-         if (level.isEmptyBlock(opening)) {
-            int surfaceY = level.getHeight(Types.WORLD_SURFACE_WG, opening.getX(), opening.getZ());
-            if (opening.getY() >= surfaceY - 1) {
+      if (origin.getY() >= 14 && origin.getY() <= 30) {
+         for (Direction direction : POSSIBLE_OPENINGS) {
+            BlockPos opening = origin.relative(direction);
+            if (level.isEmptyBlock(opening)) {
+               int surfaceY = level.getHeight(Types.WORLD_SURFACE_WG, opening.getX(), opening.getZ());
+               if (opening.getY() >= surfaceY - 1) {
+                  return false;
+               }
+            }
+         }
+
+         if (isValidSpringBlock(level.getBlockState(origin.above())) && isValidSpringBlock(level.getBlockState(origin.below()))) {
+            BlockState current = level.getBlockState(origin);
+            if (!current.isAir() && !isValidSpringBlock(current)) {
                return false;
             }
-         }
-      }
 
-      if (isValidSpringBlock(level.getBlockState(origin.above())) && isValidSpringBlock(level.getBlockState(origin.below()))) {
-         BlockState current = level.getBlockState(origin);
-         if (!current.isAir() && !isValidSpringBlock(current)) {
-            return false;
-         }
+            int rockCount = 0;
+            int holeCount = 0;
 
-         int rockCount = 0;
-         int holeCount = 0;
+            for (Direction direction : POSSIBLE_OPENINGS) {
+               BlockPos adjacent = origin.relative(direction);
+               BlockState adjacentState = level.getBlockState(adjacent);
+               if (isValidSpringBlock(adjacentState)) {
+                  rockCount++;
+               }
 
-         for (Direction direction : POSSIBLE_OPENINGS) {
-            BlockPos adjacent = origin.relative(direction);
-            BlockState adjacentState = level.getBlockState(adjacent);
-            if (isValidSpringBlock(adjacentState)) {
-               rockCount++;
+               if (level.isEmptyBlock(adjacent)) {
+                  holeCount++;
+               }
             }
 
-            if (level.isEmptyBlock(adjacent)) {
-               holeCount++;
+            if (rockCount == 4 && holeCount == 1) {
+               level.setBlock(origin, ModFluids.ICHOR.getSource(true).createLegacyBlock(), 2);
+               level.scheduleTick(origin, ModFluids.ICHOR, 0);
+               return true;
+            } else {
+               return false;
             }
-         }
-
-         if (rockCount == 4 && holeCount == 1) {
-            level.setBlock(origin, ModFluids.ICHOR.getSource(true).createLegacyBlock(), 2);
-            level.scheduleTick(origin, ModFluids.ICHOR, 0);
-            return true;
          } else {
             return false;
          }

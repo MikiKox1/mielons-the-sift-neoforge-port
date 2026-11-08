@@ -1,0 +1,13 @@
+{
+  "layers": {
+    "wings": [
+      {
+        "texture": "minecraft:elytra",
+        "use_player_texture": true
+      },
+      {
+        "texture": "the_sift:monarch_elytra_overlay"
+      }
+    ]
+  }
+}

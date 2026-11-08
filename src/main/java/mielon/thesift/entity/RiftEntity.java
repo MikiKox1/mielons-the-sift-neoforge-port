@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import mielon.thesift.sound.ModSounds;
 import mielon.thesift.world.RiftAnimationClock;
+import mielon.thesift.world.RiftBackgrounds;
 import mielon.thesift.world.RiftDirectory;
 import mielon.thesift.world.RiftLightCleanup;
 import net.minecraft.core.BlockPos;
@@ -20,7 +21,6 @@ import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueOutput.TypedOutputList;
@@ -51,6 +51,7 @@ public final class RiftEntity extends Entity {
       this.setPermanentlyInvulnerable(true);
    }
 
+   @Override
    protected void defineSynchedData(Builder builder) {
       builder.define(DATA_TARGET_SIFT, false);
       builder.define(DATA_LONG_ALONG_X, true);
@@ -70,16 +71,20 @@ public final class RiftEntity extends Entity {
       this.entityData.set(DATA_END, expiresAt);
    }
 
+   public int getBackgroundVariant() {
+      return RiftBackgrounds.variant(this.getUUID());
+   }
+
    public boolean targetsSift() {
-      return (Boolean)this.entityData.get(DATA_TARGET_SIFT);
+      return this.entityData.get(DATA_TARGET_SIFT);
    }
 
    public boolean isLongAlongX() {
-      return (Boolean)this.entityData.get(DATA_LONG_ALONG_X);
+      return this.entityData.get(DATA_LONG_ALONG_X);
    }
 
    public boolean isClosing() {
-      return (Boolean)this.entityData.get(DATA_CLOSING);
+      return this.entityData.get(DATA_CLOSING);
    }
 
    public long getExpiresAt() {
@@ -90,6 +95,10 @@ public final class RiftEntity extends Entity {
       if (expiry > this.expiresAt) {
          this.expiresAt = expiry;
          this.entityData.set(DATA_END, expiry);
+         if (this.level() instanceof ServerLevel serverLevel) {
+            RiftLightCleanup.track(serverLevel, this.placedLights, expiry);
+         }
+
          if (expiry - this.level().getGameTime() > 16L) {
             this.entityData.set(DATA_CLOSING, false);
             this.closingTicks = 0;
@@ -129,6 +138,7 @@ public final class RiftEntity extends Entity {
       return new AABB(position.x - halfX, position.y - 0.375, position.z - halfZ, position.x + halfX, position.y + 3.875, position.z + halfZ);
    }
 
+   @Override
    protected AABB makeBoundingBox(Vec3 position) {
       return portalBoundsAt(position, this.isLongAlongX());
    }
@@ -141,6 +151,7 @@ public final class RiftEntity extends Entity {
       }
    }
 
+   @Override
    public void tick() {
       this.setBoundingBox(this.getPortalBounds());
       super.tick();
@@ -167,14 +178,15 @@ public final class RiftEntity extends Entity {
             this.playSound(ModSounds.RIFT_APPEAR, 2.0F, 1.0F);
          }
 
-         if ((Boolean)this.entityData.get(DATA_APPEARING) && this.tickCount >= 16) {
+         if (this.entityData.get(DATA_APPEARING) && this.tickCount >= 16) {
             this.entityData.set(DATA_APPEARING, false);
          }
 
-         if (this.placedLights.isEmpty()) {
+         if (this.placedLights.isEmpty() || this.tickCount == 1 || this.tickCount % 20 == 0) {
             this.placeVanillaLights(level);
          }
 
+         RiftLightCleanup.track(level, this.placedLights, this.expiresAt);
          long remaining = this.expiresAt - level.getGameTime();
          if (remaining <= 16L && !this.isClosing()) {
             this.entityData.set(DATA_CLOSING, true);
@@ -196,9 +208,15 @@ public final class RiftEntity extends Entity {
 
       for (int offset : new int[]{-3, 0, 3}) {
          BlockPos lightPos = this.isLongAlongX() ? anchor.offset(offset, 2, 0) : anchor.offset(0, 2, offset);
-         if (level.getBlockState(lightPos).isAir()) {
-            level.setBlock(lightPos, (BlockState)Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15), 3);
-            this.placedLights.add(lightPos.immutable());
+         if (level.getChunkSource().getChunkNow(lightPos.getX() >> 4, lightPos.getZ() >> 4) != null) {
+            if (level.getBlockState(lightPos).isAir()) {
+               level.setBlock(lightPos, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15), 3);
+               if (!this.placedLights.contains(lightPos)) {
+                  this.placedLights.add(lightPos.immutable());
+               }
+            } else if (level.getBlockState(lightPos).is(Blocks.LIGHT) && RiftLightCleanup.isManaged(level, lightPos) && !this.placedLights.contains(lightPos)) {
+               this.placedLights.add(lightPos.immutable());
+            }
          }
       }
    }
@@ -210,11 +228,9 @@ public final class RiftEntity extends Entity {
       }
    }
 
+   @Override
    public void onRemoval(RemovalReason reason) {
-      if (reason.shouldDestroy()) {
-         this.removeVanillaLights();
-      }
-
+      this.removeVanillaLights();
       if (!this.level().isClientSide()) {
          RiftDirectory.removed(this, reason.shouldDestroy());
       }
@@ -222,6 +238,7 @@ public final class RiftEntity extends Entity {
       super.onRemoval(reason);
    }
 
+   @Override
    protected void readAdditionalSaveData(ValueInput input) {
       this.entityData.set(DATA_TARGET_SIFT, input.getBooleanOr("TargetSift", false));
       this.entityData.set(DATA_LONG_ALONG_X, input.getBooleanOr("LongAlongX", true));
@@ -238,12 +255,13 @@ public final class RiftEntity extends Entity {
       input.listOrEmpty("PlacedLights", BlockPos.CODEC).forEach(p -> this.placedLights.add(p.immutable()));
    }
 
+   @Override
    protected void addAdditionalSaveData(ValueOutput output) {
       output.putBoolean("TargetSift", this.targetsSift());
       output.putBoolean("LongAlongX", this.isLongAlongX());
       output.putBoolean("Closing", this.isClosing());
       output.putLong("ExpiresAt", this.expiresAt);
-      output.putLong("BornAt", (Long)this.entityData.get(DATA_BORN));
+      output.putLong("BornAt", this.entityData.get(DATA_BORN));
       output.putString("PairId", this.pairId.toString());
       if (this.linkedPos != null) {
          output.store("LinkedPos", BlockPos.CODEC, this.linkedPos);
@@ -264,49 +282,61 @@ public final class RiftEntity extends Entity {
       }
    }
 
+   @Override
    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
       return false;
    }
 
+   @Override
    public boolean hurtClient(DamageSource source) {
       return false;
    }
 
+   @Override
    public boolean isAttackable() {
       return false;
    }
 
+   @Override
    public boolean isPickable() {
       return false;
    }
 
+   @Override
    public boolean canBeHitByProjectile() {
       return false;
    }
 
+   @Override
    public boolean isPushable() {
       return false;
    }
 
+   @Override
    public boolean canCollideWith(Entity other) {
       return false;
    }
 
+   @Override
    public boolean canBeCollidedWith(Entity other) {
       return false;
    }
 
+   @Override
    public boolean skipAttackInteraction(Entity attacker) {
       return true;
    }
 
+   @Override
    protected void doWaterSplashEffect() {
    }
 
+   @Override
    public boolean isPushedByFluid() {
       return false;
    }
 
+   @Override
    public AABB getFluidInteractionBox() {
       return new AABB(this.getX(), this.getY(), this.getZ(), this.getX(), this.getY(), this.getZ());
    }

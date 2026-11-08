@@ -20,7 +20,8 @@ public abstract class VegetationBlockMixin {
       if (theSift$isFlower(this) && theSift$isSiftSoil(floor)) {
          cir.setReturnValue(true);
       } else {
-         if ((Object)this instanceof SaplingBlock && (floor.is(ModBlocks.SIFTSLATE_GROWTH) || floor.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH))) {
+         if ((Object)this instanceof SaplingBlock
+            && (floor.is(ModBlocks.SIFTSLATE_GROWTH) || floor.is(ModBlocks.SOULSHALE_GROWTH) || floor.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH))) {
             cir.setReturnValue(true);
          }
       }
@@ -33,9 +34,16 @@ public abstract class VegetationBlockMixin {
    private static boolean theSift$isSiftSoil(BlockState floor) {
       return floor.is(ModBlocks.SIFTSLATE)
          || floor.is(ModBlocks.SIFTSLATE_GROWTH)
+         || floor.is(ModBlocks.SOULSHALE_GROWTH)
          || floor.is(ModBlocks.HEALTHY_SCULK)
+         || floor.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || floor.is(ModBlocks.HEALTHY_SCULK_PORES)
          || floor.is(ModBlocks.DRY_HEALTHY_SCULK)
          || floor.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-         || floor.is(ModBlocks.OVERGROWN_WILLOW_FOLIAGE);
+         || floor.is(ModBlocks.OVERGROWN_WILLOW_FOLIAGE)
+         || floor.is(ModBlocks.ASH_WILLOW_FOLIAGE)
+         || floor.is(ModBlocks.CORAL_SOIL)
+         || floor.is(ModBlocks.CORAL_GROWTH)
+         || floor.is(ModBlocks.BRIGHT_CORAL_GROWTH);
    }
 }

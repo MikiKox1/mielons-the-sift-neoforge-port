@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public interface IchorScheduledTickMixin {
    @ModifyVariable(method = "createTick", at = @At("HEAD"), argsOnly = true)
    private Object theSift$scheduleActualFluid(Object type, @Local(argsOnly = true) BlockPos pos) {
-      return (type == Fluids.WATER || type == Fluids.FLOWING_WATER) && IchorWaterlogging.isIchorlogged(((LevelAccessor)(Object)this).getBlockState(pos))
+      return (type == Fluids.WATER || type == Fluids.FLOWING_WATER) && IchorWaterlogging.isIchorlogged(((LevelAccessor)this).getBlockState(pos))
          ? ModFluids.ICHOR
          : type;
    }

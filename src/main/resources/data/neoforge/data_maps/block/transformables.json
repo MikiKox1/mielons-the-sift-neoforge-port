@@ -1,27 +1,12 @@
 {
+  "replace": false,
   "values": {
     "the_sift:overgrown_willow_log": {
       "transformer": "minecraft:axe",
       "transform_data": {
         "block_state_provider": {
           "type": "minecraft:rule_based",
-          "rules": [
-            {
-              "if_true": {
-                "type": "minecraft:matching_blocks",
-                "blocks": "the_sift:overgrown_willow_log"
-              },
-              "then": {
-                "type": "minecraft:copy_properties",
-                "source": {
-                  "id": "the_sift:stripped_overgrown_willow_log",
-                  "properties": {
-                    "axis": "y"
-                  }
-                }
-              }
-            }
-          ]
+          "rules": [{"if_true": {"type": "minecraft:matching_blocks", "blocks": "the_sift:overgrown_willow_log"}, "then": {"type": "minecraft:copy_properties", "source": {"id": "the_sift:stripped_overgrown_willow_log", "properties": {"axis": "y"}}}}]
         },
         "item_damage_per_use": 1,
         "sound": "minecraft:item.axe.strip"
@@ -32,23 +17,29 @@
       "transform_data": {
         "block_state_provider": {
           "type": "minecraft:rule_based",
-          "rules": [
-            {
-              "if_true": {
-                "type": "minecraft:matching_blocks",
-                "blocks": "the_sift:overgrown_willow_wood"
-              },
-              "then": {
-                "type": "minecraft:copy_properties",
-                "source": {
-                  "id": "the_sift:stripped_overgrown_willow_wood",
-                  "properties": {
-                    "axis": "y"
-                  }
-                }
-              }
-            }
-          ]
+          "rules": [{"if_true": {"type": "minecraft:matching_blocks", "blocks": "the_sift:overgrown_willow_wood"}, "then": {"type": "minecraft:copy_properties", "source": {"id": "the_sift:stripped_overgrown_willow_wood", "properties": {"axis": "y"}}}}]
+        },
+        "item_damage_per_use": 1,
+        "sound": "minecraft:item.axe.strip"
+      }
+    },
+    "the_sift:ash_willow_log": {
+      "transformer": "minecraft:axe",
+      "transform_data": {
+        "block_state_provider": {
+          "type": "minecraft:rule_based",
+          "rules": [{"if_true": {"type": "minecraft:matching_blocks", "blocks": "the_sift:ash_willow_log"}, "then": {"type": "minecraft:copy_properties", "source": {"id": "the_sift:stripped_ash_willow_log", "properties": {"axis": "y"}}}}]
+        },
+        "item_damage_per_use": 1,
+        "sound": "minecraft:item.axe.strip"
+      }
+    },
+    "the_sift:ash_willow_wood": {
+      "transformer": "minecraft:axe",
+      "transform_data": {
+        "block_state_provider": {
+          "type": "minecraft:rule_based",
+          "rules": [{"if_true": {"type": "minecraft:matching_blocks", "blocks": "the_sift:ash_willow_wood"}, "then": {"type": "minecraft:copy_properties", "source": {"id": "the_sift:stripped_ash_willow_wood", "properties": {"axis": "y"}}}}]
         },
         "item_damage_per_use": 1,
         "sound": "minecraft:item.axe.strip"

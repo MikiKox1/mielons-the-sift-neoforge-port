@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "the_sift:block/royal_sculk"
+    },
+    "active=true": {
+      "model": "the_sift:block/royal_sculk_activated"
+    }
+  }
+}

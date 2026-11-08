@@ -1,0 +1,34 @@
+{
+  "parent": "the_sift:the_sift/like_father_and_son",
+  "display": {
+    "icon": {
+      "id": "the_sift:polished_soulshale"
+    },
+    "title": {
+      "translate": "advancement.the_sift.choir_conductor.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.choir_conductor.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "built_golem": {
+      "trigger": "minecraft:summoned_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "the_sift:echo_golem"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "built_golem"
+    ]
+  ]
+}

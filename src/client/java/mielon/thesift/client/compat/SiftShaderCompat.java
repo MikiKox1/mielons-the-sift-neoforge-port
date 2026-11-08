@@ -36,10 +36,6 @@ public final class SiftShaderCompat {
                   irisProgramClass = null;
                }
 
-               // Iris API v0 has no public pack-name getter. The optional
-               // Iris internal method is probed defensively to select only
-               // Photon's known special post-final sky compositor. It is
-               // present in the exact Iris1.11.7 build for Minecraft 26.3.
                try {
                   currentPackName = Class.forName("net.irisshaders.iris.Iris").getMethod("getCurrentPackName");
                } catch (ReflectiveOperationException | LinkageError ignored) {
@@ -47,17 +43,6 @@ public final class SiftShaderCompat {
                }
 
                TheSiftMod.LOGGER.info("Iris detected; The Sift shader compatibility is enabled.");
-               if (currentPackName != null) {
-                  try {
-                     Object packName = currentPackName.invoke(null);
-                     TheSiftMod.LOGGER.info(
-                        "The Sift MC26.3 Iris pack '{}'; Photon-specific sky compositing: {}",
-                        packName, isPhotonShaderPackSelected()
-                     );
-                  } catch (ReflectiveOperationException ignored) {
-                     TheSiftMod.LOGGER.debug("Iris pack name not ready during initial client registration.");
-                  }
-               }
             } catch (ReflectiveOperationException | LinkageError exception) {
                irisApi = null;
                isShaderPackInUse = null;
@@ -88,21 +73,6 @@ public final class SiftShaderCompat {
       }
    }
 
-   /** Selects the Photon-specific sky rendering route. */
-   public static boolean isPhotonShaderPackSelected() {
-      initialize();
-      if (currentPackName == null) {
-         return false;
-      }
-      try {
-         Object value = currentPackName.invoke(null);
-         return value instanceof String name
-            && name.toLowerCase(Locale.ROOT).startsWith("photon");
-      } catch (ReflectiveOperationException | RuntimeException exception) {
-         return false;
-      }
-   }
-
    public static void assignPipeline(RenderPipeline pipeline, String irisProgram) {
       initialize();
       if (irisApi != null && assignPipeline != null && irisProgramClass != null) {
@@ -113,6 +83,25 @@ public final class SiftShaderCompat {
             TheSiftMod.LOGGER.warn("Could not assign The Sift pipeline {} to Iris program {}.", new Object[]{pipeline.getLocation(), irisProgram, exception});
          }
       }
+   }
+
+   public static String currentPackName() {
+      initialize();
+      if (currentPackName == null) return "";
+      try {
+         Object name = currentPackName.invoke(null);
+         return name instanceof String text ? text : "";
+      } catch (ReflectiveOperationException | RuntimeException | LinkageError ignored) {
+         return "";
+      }
+   }
+
+   public static boolean isPhotonShaderPackSelected() {
+      return currentPackName().toLowerCase(Locale.ROOT).startsWith("photon");
+   }
+
+   public static boolean isComplementaryShaderPackSelected() {
+      return currentPackName().toLowerCase(Locale.ROOT).startsWith("complementary");
    }
 
    private static Object enumValue(Class<?> enumClass, String name) {

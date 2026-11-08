@@ -18,7 +18,7 @@ public final class EchoGolemRenderer extends GeoEntityRenderer<EchoGolemEntity, 
    public EchoGolemRenderer(Context context) {
       super(context, new EchoGolemModel());
       this.withRenderLayer(new EchoGolemSoulGlowLayer(this));
-      this.withRenderLayer(new SiftGlowingOutlineLayer(this));
+      this.withRenderLayer(new SiftGlowingOutlineLayer<>(this));
       this.shadowRadius = 0.72F;
    }
 
@@ -28,8 +28,9 @@ public final class EchoGolemRenderer extends GeoEntityRenderer<EchoGolemEntity, 
       EchoGolemLightBridge.update(animatable, animatable.getPosition(partialTick).add(0.0, 2.125, 0.0));
    }
 
+   @Override
    public void preRenderPass(RenderPassInfo<EntityRenderState> renderPassInfo, SubmitNodeCollector renderTasks) {
-      EchoGolemEntity golem = (EchoGolemEntity)renderPassInfo.getGeckolibData(ECHO_GOLEM_ENTITY);
+      EchoGolemEntity golem = renderPassInfo.getGeckolibData(ECHO_GOLEM_ENTITY);
       if (golem != null && golem.hasSoulBlock()) {
          renderPassInfo.addLocatorPositionListener("soul_light", (worldPos, modelPos, localPos) -> {
             if (worldPos != null) {
@@ -39,10 +40,11 @@ public final class EchoGolemRenderer extends GeoEntityRenderer<EchoGolemEntity, 
       }
    }
 
+   @Override
    public void adjustModelBonesForRender(RenderPassInfo<EntityRenderState> renderPassInfo, BoneSnapshots snapshots) {
-      EchoGolemEntity golem = (EchoGolemEntity)renderPassInfo.getGeckolibData(ECHO_GOLEM_ENTITY);
+      EchoGolemEntity golem = renderPassInfo.getGeckolibData(ECHO_GOLEM_ENTITY);
       if (golem != null) {
-         float partialTick = (Float)renderPassInfo.getOrDefaultGeckolibData(DataTickets.PARTIAL_TICK, 0.0F);
+         float partialTick = renderPassInfo.getOrDefaultGeckolibData(DataTickets.PARTIAL_TICK, 0.0F);
          float headYaw = Mth.rotLerp(partialTick, golem.yHeadRotO, golem.getYHeadRot());
          float bodyYaw = Mth.rotLerp(partialTick, golem.yBodyRotO, golem.yBodyRot);
          float relativeYaw = Mth.clamp(Mth.wrapDegrees(headYaw - bodyYaw), -55.0F, 55.0F);

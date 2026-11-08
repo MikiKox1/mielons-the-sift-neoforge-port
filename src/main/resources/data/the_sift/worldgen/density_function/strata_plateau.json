@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:noise",
+      "noise": "the_sift:strata_mainland",
+      "xz_scale": 1,
+      "y_scale": 0
+    },
+    "right": 0.07
+  },
+  "right": {
+    "type": "minecraft:mul",
+    "left": 0.055,
+    "right": "the_sift:strata_local_relief"
+  }
+}

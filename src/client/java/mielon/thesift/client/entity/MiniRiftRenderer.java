@@ -14,11 +14,11 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.AABB;
 
 public final class MiniRiftRenderer extends EntityRenderer<MiniRiftEntity, MiniRiftRenderer.State> {
    private static final RiftMesh CUBE = new RiftMesh(List.of(new RiftAssetModel.Box(-0.4F, -0.4F, -0.4F, 0.4F, 0.4F, 0.4F)));
    private static final Identifier ENERGY_TEXTURE = id("textures/misc/rift_energy_shaderpack.png");
-   private static final Identifier SIFT_TEXTURE = id("textures/entity/rift/sift.png");
 
    public MiniRiftRenderer(Context context) {
       super(context);
@@ -32,10 +32,16 @@ public final class MiniRiftRenderer extends EntityRenderer<MiniRiftEntity, MiniR
    public void extractRenderState(MiniRiftEntity entity, MiniRiftRenderer.State state, float partial) {
       super.extractRenderState(entity, state, partial);
       state.open = entity.getOpenScale(partial);
+      state.backgroundVariant = entity.getBackgroundVariant();
    }
 
    protected int getBlockLightLevel(MiniRiftEntity entity, BlockPos pos) {
       return 15;
+   }
+
+   @Override
+   protected AABB getBoundingBoxForCulling(MiniRiftEntity entity, float partialTicks) {
+      return entity.getInterpolatedBoundingBox(partialTicks).inflate(1.0);
    }
 
    public void submit(MiniRiftRenderer.State state, PoseStack poses, SubmitNodeCollector collector, CameraRenderState camera) {
@@ -44,7 +50,9 @@ public final class MiniRiftRenderer extends EntityRenderer<MiniRiftEntity, MiniR
          float size = state.open * state.open * (3.0F - 2.0F * state.open);
          poses.scale(size, size, size);
          if (!SiftShaderCompat.isShaderPackInUse()) {
-            collector.submitCustomGeometry(poses, RiftRenderTypes.SIFT, (pose, buffer) -> CUBE.draw(buffer, pose, true, false));
+            collector.submitCustomGeometry(
+               poses, RiftRenderTypes.surface(true, state.backgroundVariant), (pose, buffer) -> CUBE.draw(buffer, pose, true, false)
+            );
             collector.submitCustomGeometry(poses, RiftRenderTypes.GLOW, (pose, buffer) -> CUBE.draw(buffer, pose, true, true));
          } else {
             float seconds = shaderSeconds();
@@ -56,7 +64,7 @@ public final class MiniRiftRenderer extends EntityRenderer<MiniRiftEntity, MiniR
             if (destinationAlpha > 0.001F) {
                collector.submitCustomGeometry(
                   poses,
-                  RenderTypes.beaconBeam(SIFT_TEXTURE, true),
+                  RenderTypes.beaconBeam(RiftRenderTypes.texture(true, state.backgroundVariant), true),
                   (pose, buffer) -> CUBE.drawShaderpack(buffer, pose, true, RiftMesh.ShaderpackPass.DESTINATION, destinationAlpha, seconds)
                );
             }
@@ -95,5 +103,6 @@ public final class MiniRiftRenderer extends EntityRenderer<MiniRiftEntity, MiniR
 
    public static final class State extends EntityRenderState {
       float open;
+      int backgroundVariant;
    }
 }

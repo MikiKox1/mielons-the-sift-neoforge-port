@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:add",
+  "left": "the_sift:strata_surface",
+  "right": {
+    "type": "minecraft:add",
+    "left": 0.36,
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": 0.34,
+        "right": "the_sift:mountain_mask"
+      },
+      "right": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:mul",
+          "left": 0.58,
+          "right": {
+            "type": "minecraft:mul",
+            "left": "the_sift:mountain_mask",
+            "right": "the_sift:mountain_ridge_shape"
+          }
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": 0.055,
+          "right": {
+            "type": "minecraft:noise",
+            "noise": "the_sift:strata_crown_hills",
+            "xz_scale": 1.8,
+            "y_scale": 0
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@ package mielon.thesift.world;
 
 import java.util.Optional;
 import java.util.UUID;
-import mielon.thesift.block.ModBlocks;
+import mielon.thesift.block.SiftPortalBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -18,7 +18,7 @@ public final class SiftWorldStorage extends SavedData {
    private static final String PORTAL_GUARDS = "portal_guards";
    private static final String RIFT_ROUTES = "rift_routes";
    private static final String FIRST_SIFT_ENTRIES = "first_sift_entries";
-   private static final SavedDataType<SiftWorldStorage> TYPE = new SavedDataType(
+   private static final SavedDataType<SiftWorldStorage> TYPE = new SavedDataType<>(
       Identifier.fromNamespaceAndPath("the_sift", "world_state"),
       SiftWorldStorage::new,
       CompoundTag.CODEC.xmap(SiftWorldStorage::new, SiftWorldStorage::saveTag),
@@ -39,7 +39,7 @@ public final class SiftWorldStorage extends SavedData {
    }
 
    private static SiftWorldStorage data(MinecraftServer server) {
-      return (SiftWorldStorage)server.getDataStorage().computeIfAbsent(TYPE);
+      return server.getDataStorage().computeIfAbsent(TYPE);
    }
 
    public static Optional<BlockPos> getPortalAnchor(MinecraftServer server) {
@@ -78,38 +78,44 @@ public final class SiftWorldStorage extends SavedData {
    public static void saveReturnPoint(Entity entity) {
       MinecraftServer server = entity.level().getServer();
       if (server != null) {
-         CompoundTag tag = new CompoundTag();
-         tag.putBoolean("valid", true);
-         tag.putDouble("x", entity.getX());
-         tag.putDouble("y", entity.getY());
-         tag.putDouble("z", entity.getZ());
-         tag.putFloat("yaw", entity.getYRot());
-         tag.putFloat("pitch", entity.getXRot());
-         BlockPos portal = BlockPos.containing(entity.position());
-         BlockPos min = BlockPos.containing(entity.getBoundingBox().minX, entity.getBoundingBox().minY, entity.getBoundingBox().minZ);
-         BlockPos max = BlockPos.containing(entity.getBoundingBox().maxX, entity.getBoundingBox().maxY, entity.getBoundingBox().maxZ);
-
-         for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
-            if (entity.level().getBlockState(pos).is(ModBlocks.SIFT_PORTAL)) {
-               portal = pos.immutable();
-               break;
-            }
-         }
-
-         tag.putInt("portal_x", portal.getX());
-         tag.putInt("portal_y", portal.getY());
-         tag.putInt("portal_z", portal.getZ());
-         SiftWorldStorage data = data(server);
-         data.putEntry(RETURN_POINTS, entity.getUUID(), tag);
-         // A Rift journey invalidates the immediate return ticket, but it
-         // must not erase the last genuine Overworld main-portal entrance.
-         data.putEntry(MAIN_PORTAL_ENTRANCES, entity.getUUID(), tag);
+         saveReturnPoint(server, entity.getUUID(), captureReturnPoint(entity));
       }
    }
 
+   public static SiftWorldStorage.ReturnPoint captureReturnPoint(Entity entity) {
+      BlockPos portal = BlockPos.containing(entity.position());
+      BlockPos min = BlockPos.containing(entity.getBoundingBox().minX, entity.getBoundingBox().minY, entity.getBoundingBox().minZ);
+      BlockPos max = BlockPos.containing(entity.getBoundingBox().maxX, entity.getBoundingBox().maxY, entity.getBoundingBox().maxZ);
+      for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+         if (SiftPortalBlock.isActivePortal(entity.level().getBlockState(pos))) {
+            portal = pos.immutable();
+            break;
+         }
+      }
+      return new SiftWorldStorage.ReturnPoint(
+         entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), portal
+      );
+   }
+
+   public static void saveReturnPoint(MinecraftServer server, UUID entityId, SiftWorldStorage.ReturnPoint point) {
+      CompoundTag tag = new CompoundTag();
+      tag.putBoolean("valid", true);
+      tag.putDouble("x", point.x());
+      tag.putDouble("y", point.y());
+      tag.putDouble("z", point.z());
+      tag.putFloat("yaw", point.yaw());
+      tag.putFloat("pitch", point.pitch());
+      tag.putInt("portal_x", point.portalBlock().getX());
+      tag.putInt("portal_y", point.portalBlock().getY());
+      tag.putInt("portal_z", point.portalBlock().getZ());
+      SiftWorldStorage data = data(server);
+      data.putEntry(RETURN_POINTS, entityId, tag);
+      // Do not overwrite a valid historic entrance until the new transfer
+      // really succeeds, or a Rift could erase the last working main route.
+      data.putEntry(MAIN_PORTAL_ENTRANCES, entityId, tag);
+   }
    public static Optional<SiftWorldStorage.ReturnPoint> getReturnPoint(MinecraftServer server, UUID entityId) {
-      Optional<CompoundTag> optional = data(server).getOrMigrateEntry(server, RETURN_POINTS, entityId, "return/" + entityId);
-      return optional.flatMap(SiftWorldStorage::parseReturnPoint);
+      return data(server).getOrMigrateEntry(server, RETURN_POINTS, entityId, "return/" + entityId).flatMap(SiftWorldStorage::parseReturnPoint);
    }
 
    public static Optional<SiftWorldStorage.ReturnPoint> getMainPortalEntrance(MinecraftServer server, UUID entityId) {
@@ -147,14 +153,12 @@ public final class SiftWorldStorage extends SavedData {
    }
 
    private void preserveMainPortalEntrance(MinecraftServer server, UUID entityId) {
-      Optional<CompoundTag> existing = this.root
-         .getCompound(MAIN_PORTAL_ENTRANCES)
+      Optional<CompoundTag> existing = this.root.getCompound(MAIN_PORTAL_ENTRANCES)
          .flatMap(section -> section.getCompound(entityId.toString()))
-         .flatMap(tag -> parseReturnPoint(tag).map(point -> tag));
+         .filter(tag -> parseReturnPoint(tag).isPresent());
       if (existing.isPresent()) {
          return;
       }
-
       this.getOrMigrateEntry(server, RETURN_POINTS, entityId, "return/" + entityId)
          .filter(tag -> parseReturnPoint(tag).isPresent())
          .ifPresent(tag -> this.putEntry(MAIN_PORTAL_ENTRANCES, entityId, tag));

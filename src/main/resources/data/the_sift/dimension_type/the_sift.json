@@ -10,22 +10,30 @@
       }
     },
     "minecraft:audio/background_music": {
-      "creative": {
-        "max_delay": 24000,
-        "min_delay": 12000,
-        "sound": "minecraft:music.creative"
-      },
       "default": {
-        "max_delay": 24000,
+        "sound": "the_sift:music.biome.sift_wastes",
         "min_delay": 12000,
-        "sound": "minecraft:music.game"
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "creative": {
+        "sound": "the_sift:music.biome.sift_wastes",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "underwater": {
+        "sound": "the_sift:music.biome.sift_wastes",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
       }
     },
     "minecraft:gameplay/bed_rule": {
       "can_set_spawn": "always",
       "can_sleep": "when_dark",
       "error_message": {
-        "translate": "block.minecraft.bed.no_sleep"
+        "translate": "block.the_sift.bed.no_sleep"
       }
     },
     "minecraft:gameplay/nether_portal_spawns_piglin": false,

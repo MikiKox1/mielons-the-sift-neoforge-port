@@ -1,7 +1,6 @@
 package mielon.thesift.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import mielon.thesift.fluid.IchorWaterlogging;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -9,30 +8,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(BlockItem.class)
 public abstract class IchorBlockPlacementMixin {
-   @WrapOperation(
+   @ModifyArg(
       method = "place",
       at = @At(
          value = "INVOKE",
          target = "Lnet/minecraft/world/item/BlockItem;placeBlock(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"
-      )
+      ),
+      index = 1
    )
-   private boolean theSift$placeInIchor(
-      BlockItem instance,
-      BlockPlaceContext context,
-      BlockState state,
-      Operation<Boolean> original
-   ) {
-      FluidState existing = context.getLevel().getFluidState(context.getClickedPos());
-      // A flowing Ichor volume is not a bucketable source. Placing a
-      // waterloggable block into that flow must never mint a new source.
-      BlockState placementState = IchorWaterlogging.isIchor(existing.getType())
-            && existing.isSource()
-            && IchorWaterlogging.canContain(state)
-         ? IchorWaterlogging.fillState(state)
-         : state;
-      return original.call(instance, context, placementState);
+   private BlockState theSift$placeInIchor(BlockState state, @Local(argsOnly = true) BlockPlaceContext context) {
+      FluidState fluid = context.getLevel().getFluidState(context.getClickedPos());
+      if (IchorWaterlogging.isIchor(fluid.getType()) && IchorWaterlogging.canContain(state)) {
+         return fluid.isSource() ? IchorWaterlogging.fillState(state) : IchorWaterlogging.setFluidlogged(state, false);
+      } else {
+         return state;
+      }
    }
 }

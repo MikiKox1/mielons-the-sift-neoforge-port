@@ -37,6 +37,9 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.portal.TeleportTransition.PostTeleportTransition;
@@ -47,11 +50,18 @@ import net.minecraft.world.phys.Vec3;
 public final class RiftManager {
    private static final int REENTRY_COOLDOWN_TICKS = 100;
    private static final Map<UUID, Long> NEXT_SPAWN = new HashMap<>();
+   private static GameRule<Boolean> spawnRifts;
    private static final Map<UUID, RiftManager.Request> PENDING = new LinkedHashMap<>();
    private static final Map<UUID, RiftManager.RiftArrival> RIFT_EXIT_LATCHES = new HashMap<>();
+   private static final Map<UUID, RiftManager.ExitSearch> EXIT_SEARCHES = new HashMap<>();
+   private static final int EXIT_SEARCH_COLUMNS_PER_TICK = 16;
+
+   public static void registerGameRules() {
+      // Called only during NeoForge's GAME_RULE RegisterEvent, while writable.
+      spawnRifts = GameRules.registerBoolean("the_sift:spawn_rifts", GameRuleCategory.SPAWNING, true);
+   }
 
    public static void tick(MinecraftServer server) {
-      RiftDirectory.tick(server);
       RiftLightCleanup.tick(server);
       List<RiftManager.Request> requests = List.copyOf(PENDING.values());
       PENDING.clear();
@@ -66,24 +76,7 @@ public final class RiftManager {
       }
 
       releaseRiftExitLatches(server);
-
-      for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
-         if (player.level().dimension().equals(TheSiftDimension.LEVEL_KEY) && player.isAlive()) {
-            long due = NEXT_SPAWN.computeIfAbsent(player.getUUID(), idx -> now + 5400L + player.getRandom().nextInt(1201));
-            if (now >= due) {
-               Optional<RiftManager.Placement> found = findNatural(player.level(), player.blockPosition(), player.getRandom());
-               if (found.isPresent()) {
-                  RiftManager.Placement p = found.get();
-                  spawn(player.level(), p, false, now + 6000L, UUID.randomUUID());
-               }
-
-               NEXT_SPAWN.put(player.getUUID(), now + (found.isPresent() ? 5400 + player.getRandom().nextInt(1201) : 200));
-            }
-         } else {
-            NEXT_SPAWN.remove(player.getUUID());
-         }
-      }
-
+      tickNaturalSpawns(server, now);
       Set<UUID> visited = new HashSet<>();
 
       for (RiftEntity rift : RiftDirectory.loaded()) {
@@ -91,17 +84,36 @@ public final class RiftManager {
             for (Entity candidate : List.copyOf(rift.level().getEntities(rift, rift.getPortalBounds().inflate(8.0), RiftManager::traveler))) {
                Entity entity = candidate.getRootVehicle();
                UUID id = entity.getUUID();
-               if (visited.add(id)
-                  && !entity.isRemoved()
-                  && !isRiftExitBlocked(entity)
-                  && !PortalTransitGuard.isBlocked(entity)
-                  && !SiftTeleportManager.isPortalExitBlocked(server, entity)) {
+               if (visited.add(id) && !entity.isRemoved() && !isRiftExitBlocked(entity) && !PortalTransitGuard.isBlocked(entity)) {
                   if (!touches(entity, rift)) {
                      visited.remove(id);
                   } else {
                      queue(entity, rift, false, true);
                   }
                }
+            }
+         }
+      }
+   }
+
+   private static void tickNaturalSpawns(MinecraftServer server, long now) {
+      if (!server.getGameRules().get(spawnRifts)) {
+         NEXT_SPAWN.clear();
+      } else {
+         for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
+            if (player.level().dimension().equals(TheSiftDimension.LEVEL_KEY) && player.isAlive()) {
+               long due = NEXT_SPAWN.computeIfAbsent(player.getUUID(), id -> now + 5400L + player.getRandom().nextInt(1201));
+               if (now >= due) {
+                  Optional<RiftManager.Placement> found = findNatural(player.level(), player.blockPosition(), player.getRandom());
+                  if (found.isPresent()) {
+                     RiftManager.Placement p = found.get();
+                     spawn(player.level(), p, false, now + 6000L, UUID.randomUUID());
+                  }
+
+                  NEXT_SPAWN.put(player.getUUID(), now + (found.isPresent() ? 5400 + player.getRandom().nextInt(1201) : 200));
+               }
+            } else {
+               NEXT_SPAWN.remove(player.getUUID());
             }
          }
       }
@@ -199,45 +211,56 @@ public final class RiftManager {
    private static void finish(MinecraftServer server, RiftManager.Request request) {
       Entity entity = request.entity;
       List<ServerPlayer> players = entity.getSelfAndPassengers().filter(e -> e instanceof ServerPlayer).map(e -> (ServerPlayer)e).toList();
+      boolean keepLoading = false;
 
       try {
-         if (entity.isRemoved() || !entity.isAlive()) {
-            return;
-         }
+         try {
+            if (entity.isRemoved() || !entity.isAlive()) {
+               return;
+            }
 
-         RiftEntity origin = request.origin;
-         if (origin == null || entity.level() == origin.level()) {
+            RiftEntity origin = request.origin;
+            if (origin != null && (entity.level() != origin.level()
+               || origin.isRemoved() || origin.isClosing()
+               || origin.getExpiresAt() <= origin.level().getGameTime()
+               || !touches(entity, origin))) {
+               // Searching for a counterpart may take several ticks. A player
+               // who left an expired Rift must not teleport later by surprise.
+               return;
+            }
+
             boolean intoSift = origin != null && origin.targetsSift();
             RiftManager.Destination destination = intoSift ? intoSift(server, entity, origin) : outOfSift(server, entity, origin);
+            if (destination == null && EXIT_SEARCHES.containsKey(entity.getUUID())) {
+               PENDING.put(entity.getUUID(), request);
+               keepLoading = true;
+               return;
+            }
+
+            if (destination != null) {
+               Optional<Vec3> safe = SafePortalArrival.find(destination.level, entity, destination.pos);
+               if (safe.isEmpty()) {
+                  return;
+               }
+
+               destination = new RiftManager.Destination(destination.level, safe.get(), destination.fallback, destination.exit);
+            }
+
             if (destination == null || !entity.canTeleport(entity.level(), destination.level)) {
                return;
             }
 
-            ResourceKey<Level> sourceDimension = entity.level().dimension();
-            Vec3 sourcePos = entity.position();
-            String routeSource = origin == null ? "synthetic_portal_fallback" : intoSift ? "rift_to_sift" : "rift_to_overworld";
             Vec3 motion = entity instanceof ServerPlayer ? Vec3.ZERO : entity.getDeltaMovement();
             Entity moved = moveToDestination(entity, destination, motion, TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
-            if (!players.isEmpty()) {
-               TheSiftMod.LOGGER.info(
-                  "Sift Rift transfer entity={} route={} origin={} from={} pos={} to={} destination={} success={}",
-                  entity.getUUID(),
-                  routeSource,
-                  origin == null ? "none" : origin.getUUID(),
-                  sourceDimension,
-                  sourcePos,
-                  destination.level.dimension(),
-                  destination.pos,
-                  moved != null
-               );
-            }
-
             if (moved != null) {
-               moved.getSelfAndPassengers().forEach(SiftWorldStorage::markRiftEntry);
-               if (!moved.getUUID().equals(entity.getUUID())) {
-                  SiftWorldStorage.clearReturnPoint(server, entity.getUUID());
+               if (intoSift) {
+                  // The source-world ticket must survive a rejected/failed
+                  // teleport. Only a completed Rift entry consumes it.
+                  moved.getSelfAndPassengers().forEach(SiftWorldStorage::markRiftEntry);
+                  if (!moved.getUUID().equals(entity.getUUID())) {
+                     SiftWorldStorage.clearReturnPoint(server, entity.getUUID());
+                  }
                }
-
                if (request.riftScreen) {
                   for (ServerPlayer player : players) {
                      ModAdvancements.award(player, "the_sift/rifter");
@@ -247,6 +270,22 @@ public final class RiftManager {
                PortalTransitGuard.block(moved);
                SiftTeleportManager.suppressUntilExit(moved);
                latchRiftExit(server, moved);
+               if (!intoSift) {
+                  moved.getSelfAndPassengers().forEach(
+                     passenger -> SiftWorldStorage.clearReturnPoint(server, passenger.getUUID())
+                  );
+                  if (!moved.getUUID().equals(entity.getUUID())) {
+                     SiftWorldStorage.clearReturnPoint(server, entity.getUUID());
+                  }
+                  if (origin != null && destination.exit != null) {
+                     RiftDirectory.Exit exit = destination.exit;
+                     origin.setLinkedPos(exit.pos(), exit.expires());
+                     moved.getSelfAndPassengers().forEach(
+                        e -> SiftWorldStorage.saveRiftRoute(server, e.getUUID(), exit.id(), origin.getAnchorPos(), origin.getExpiresAt())
+                     );
+                  }
+               }
+
                for (ServerPlayer player : players) {
                   if (destination.fallback) {
                      player.sendSystemMessage(Component.translatable("message.the_sift.rift_no_exit").withStyle(ChatFormatting.RED));
@@ -257,33 +296,28 @@ public final class RiftManager {
                   }
                }
             }
-
-            return;
-         }
-      } catch (RuntimeException failure) {
-         TheSiftMod.LOGGER.error("Rift transfer failed", failure);
-         if (entity.level().dimension().equals(TheSiftDimension.LEVEL_KEY) && !entity.isRemoved()) {
-            RiftManager.Destination fallback = fallback(server, entity);
-            Entity moved = moveToDestination(entity, fallback, Vec3.ZERO, TeleportTransition.PLACE_PORTAL_TICKET);
-            if (moved != null) {
-               moved.getSelfAndPassengers().forEach(SiftWorldStorage::markRiftEntry);
-               if (!moved.getUUID().equals(entity.getUUID())) {
-                  SiftWorldStorage.clearReturnPoint(server, entity.getUUID());
+         } catch (RuntimeException failure) {
+            TheSiftMod.LOGGER.error("Rift transfer failed", failure);
+            if (entity.level().dimension().equals(TheSiftDimension.LEVEL_KEY) && !entity.isRemoved()) {
+               RiftManager.Destination fallback = fallback(server, entity);
+               Entity moved = moveToDestination(entity, fallback, Vec3.ZERO, TeleportTransition.PLACE_PORTAL_TICKET);
+               if (moved != null) {
+                  PortalTransitGuard.block(moved);
+                  latchRiftExit(server, moved);
                }
 
-               PortalTransitGuard.block(moved);
-               latchRiftExit(server, moved);
-            }
-
-            for (ServerPlayer player : players) {
-               player.sendSystemMessage(Component.translatable("message.the_sift.rift_no_exit").withStyle(ChatFormatting.RED));
+               for (ServerPlayer player : players) {
+                  player.sendSystemMessage(Component.translatable("message.the_sift.rift_no_exit").withStyle(ChatFormatting.RED));
+               }
             }
          }
-
-         return;
       } finally {
-         for (ServerPlayer player : players) {
-            RiftLoadingPayload.send(player, false, request.riftScreen);
+         if (!keepLoading) {
+            EXIT_SEARCHES.remove(entity.getUUID());
+
+            for (ServerPlayer player : players) {
+               RiftLoadingPayload.send(player, false, request.riftScreen);
+            }
          }
       }
    }
@@ -295,34 +329,126 @@ public final class RiftManager {
       }
 
       BlockPos pos = SiftWorldStorage.getRiftRoute(server, entity.getUUID(), origin.getUUID(), server.overworld().getGameTime()).orElse(origin.getLinkedPos());
-      if (pos == null) {
-         pos = SiftPortalStructure.ensurePortal(server, sift).orElse(null);
+      if (pos != null) {
+         Optional<Boolean> link = linkedRiftExists(sift, pos, origin);
+         if (link.isEmpty()) {
+            // Loading a chunk does not synchronously load its entity sections.
+            // Keep the transfer pending rather than spawning a duplicate pair.
+            EXIT_SEARCHES.computeIfAbsent(entity.getUUID(), id -> new RiftManager.ExitSearch(origin.getAnchorPos()));
+            return null;
+         }
+         if (!link.get()) {
+            // Coordinates alone do not prove the paired Rift still exists.
+            pos = null;
+         }
       }
-
       if (pos == null) {
-         return null;
+         // A Rift must lead to another Rift, never to the main Sift portal.
+         // Reuse the incremental loaded-chunk search already used for exits.
+         RiftManager.ExitSearch search = EXIT_SEARCHES.computeIfAbsent(entity.getUUID(), id -> new RiftManager.ExitSearch(origin.getAnchorPos()));
+         Optional<RiftManager.Placement> found = search.step(sift);
+         if (found.isEmpty()) {
+            if (search.complete()) {
+               EXIT_SEARCHES.remove(entity.getUUID());
+            }
+            return null;
+         }
+         EXIT_SEARCHES.remove(entity.getUUID());
+         long expiry = Math.max(sift.getGameTime() + 40L, origin.getExpiresAt());
+         RiftEntity paired = spawn(sift, found.get(), false, expiry, origin.getPairId());
+         if (paired == null) {
+            return null;
+         }
+         paired.setLinkedPos(origin.getAnchorPos(), origin.getExpiresAt());
+         origin.setLinkedPos(paired.getAnchorPos(), expiry);
+         pos = paired.getAnchorPos();
       }
 
       load(sift, pos);
       return new RiftManager.Destination(sift, new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5), false);
    }
 
+   private static Optional<Boolean> linkedRiftExists(ServerLevel level, BlockPos pos, RiftEntity origin) {
+      // Newly spawned Rifts are already tracked only AFTER addFreshEntity
+      // succeeds. They can be used immediately without waiting for the
+      // persistence manager to mark their chunk's disk entity sections ready.
+      if (RiftDirectory.loaded().stream().anyMatch(rift -> matchesLinkedRift(level, pos, origin, rift))) {
+         return Optional.of(true);
+      }
+      load(level, pos);
+      if (!level.areEntitiesLoaded(new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4).pack())) {
+         return Optional.empty();
+      }
+      // Use actual entities in the loaded section, not only RiftDirectory's
+      // tick-populated cache (which can lag behind a freshly loaded chunk).
+      return Optional.of(!level.getEntitiesOfClass(
+         RiftEntity.class, new AABB(pos).inflate(3.0),
+         rift -> matchesLinkedRift(level, pos, origin, rift)
+      ).isEmpty());
+   }
+
+   private static boolean matchesLinkedRift(ServerLevel level, BlockPos pos, RiftEntity origin, RiftEntity rift) {
+      return rift.level() == level && !rift.isRemoved() && !rift.isClosing()
+         && rift.getExpiresAt() > level.getGameTime() + 20L
+         && !rift.targetsSift() && rift.getPairId().equals(origin.getPairId())
+         && rift.getAnchorPos().distSqr(pos) <= 2.0
+         && origin.getAnchorPos().equals(rift.getLinkedPos());
+   }
+
    private static RiftManager.Destination outOfSift(MinecraftServer server, Entity entity, RiftEntity origin) {
       ServerLevel overworld = server.overworld();
-      BlockPos anchor = overworldAnchor(server, entity);
+      BlockPos linkedOverworld = origin == null ? null : origin.getLinkedPos();
+      BlockPos anchor = linkedOverworld == null ? overworldAnchor(server, entity) : linkedOverworld;
       long expiry = origin == null ? overworld.getGameTime() + 6000L : Math.max(overworld.getGameTime() + 20L, origin.getExpiresAt());
-      Optional<RiftDirectory.Exit> existing = RiftDirectory.near(anchor, overworld.getGameTime());
+      Optional<RiftDirectory.Exit> existing = Optional.empty();
+      boolean waitingForEntitySections = false;
+      if (origin == null) {
+         existing = RiftDirectory.near(anchor, overworld.getGameTime());
+      } else {
+         for (RiftDirectory.Exit candidate : RiftDirectory.nearby(anchor, overworld.getGameTime())) {
+            if (RiftDirectory.loaded().stream().anyMatch(rift -> matchesOverworldRift(overworld, candidate, origin, rift))) {
+               existing = Optional.of(candidate);
+               break;
+            }
+            load(overworld, candidate.pos());
+            BlockPos candidatePos = candidate.pos();
+            if (!overworld.areEntitiesLoaded(new ChunkPos(candidatePos.getX() >> 4, candidatePos.getZ() >> 4).pack())) {
+               waitingForEntitySections = true;
+               break;
+            }
+            if (!overworld.getEntitiesOfClass(RiftEntity.class, new AABB(candidatePos).inflate(3.0), rift ->
+               matchesOverworldRift(overworld, candidate, origin, rift)
+            ).isEmpty()) {
+               existing = Optional.of(candidate);
+               break;
+            }
+         }
+      }
+      if (waitingForEntitySections) {
+         EXIT_SEARCHES.computeIfAbsent(entity.getUUID(), id -> new RiftManager.ExitSearch(anchor));
+         return null;
+      }
       RiftDirectory.Exit exit;
       if (existing.isPresent()) {
          exit = RiftDirectory.extend(existing.get(), expiry);
          load(overworld, exit.pos());
       } else {
-         Optional<RiftManager.Placement> found = findNear(overworld, anchor);
+         RiftManager.ExitSearch search = EXIT_SEARCHES.computeIfAbsent(entity.getUUID(), id -> new RiftManager.ExitSearch(anchor));
+         Optional<RiftManager.Placement> found = search.step(overworld);
          if (found.isEmpty()) {
+            if (!search.complete()) {
+               return null;
+            }
+
+            EXIT_SEARCHES.remove(entity.getUUID());
             return fallback(server, entity);
          }
 
-         RiftEntity rift = spawn(overworld, found.get(), true, expiry, UUID.randomUUID());
+         EXIT_SEARCHES.remove(entity.getUUID());
+         RiftEntity rift = spawn(overworld, found.get(), true, expiry, origin == null ? UUID.randomUUID() : origin.getPairId());
+         if (rift == null) {
+            return null;
+         }
          if (origin != null) {
             rift.setLinkedPos(origin.getAnchorPos(), origin.getExpiresAt());
          }
@@ -331,13 +457,16 @@ public final class RiftManager {
          exit = new RiftDirectory.Exit(rift.getUUID(), rift.getAnchorPos(), anchor, expiry);
       }
 
-      if (origin != null) {
-         RiftDirectory.Exit selected = exit;
-         entity.getSelfAndPassengers()
-            .forEach(e -> SiftWorldStorage.saveRiftRoute(server, e.getUUID(), selected.id(), origin.getAnchorPos(), origin.getExpiresAt()));
-      }
+      return new RiftManager.Destination(overworld, new Vec3(exit.pos().getX() + 0.5, exit.pos().getY(), exit.pos().getZ() + 0.5), false, origin == null ? null : exit);
+   }
 
-      return new RiftManager.Destination(overworld, new Vec3(exit.pos().getX() + 0.5, exit.pos().getY(), exit.pos().getZ() + 0.5), false);
+   private static boolean matchesOverworldRift(ServerLevel overworld, RiftDirectory.Exit candidate, RiftEntity origin, RiftEntity rift) {
+      return rift.level() == overworld && rift.getUUID().equals(candidate.id())
+         && !rift.isRemoved() && !rift.isClosing()
+         && rift.getExpiresAt() > overworld.getGameTime() + 20L
+         && rift.targetsSift() && rift.getPairId().equals(origin.getPairId())
+         && candidate.pos().equals(rift.getAnchorPos())
+         && origin.getAnchorPos().equals(rift.getLinkedPos());
    }
 
    private static void load(ServerLevel level, BlockPos pos) {
@@ -366,6 +495,12 @@ public final class RiftManager {
    }
 
    private static Entity moveToDestination(Entity entity, RiftManager.Destination destination, Vec3 motion, PostTeleportTransition postTransition) {
+      Optional<Vec3> safe = SafePortalArrival.find(destination.level, entity, destination.pos);
+      if (safe.isEmpty()) {
+         return null;
+      }
+
+      destination = new RiftManager.Destination(destination.level, safe.get(), destination.fallback);
       if (destination.fallback && entity instanceof ItemEntity item) {
          if (item.getItem().isEmpty()) {
             return null;
@@ -392,6 +527,9 @@ public final class RiftManager {
       RiftEntity rift = spawn(
          level, new RiftManager.Placement(pos, alongX), !level.dimension().equals(TheSiftDimension.LEVEL_KEY), level.getGameTime() + 6000L, UUID.randomUUID()
       );
+      if (rift == null) {
+         return false;
+      }
       if (level.dimension().equals(Level.OVERWORLD)) {
          RiftDirectory.add(rift, pos);
       }
@@ -404,7 +542,9 @@ public final class RiftManager {
       rift.configure(target, p.alongX, expiry, pair);
       rift.setPos(p.base.getX() + 0.5, p.base.getY() + 1, p.base.getZ() + 0.5);
       rift.setBoundingBox(rift.getPortalBounds());
-      level.addFreshEntity(rift);
+      if (!level.addFreshEntity(rift)) {
+         return null;
+      }
       RiftDirectory.track(rift);
       return rift;
    }
@@ -416,6 +556,10 @@ public final class RiftManager {
    }
 
    private static boolean space(ServerLevel level, BlockPos base, boolean alongX) {
+      if (!level.hasChunkAt(base)) {
+         return false;
+      }
+
       if (base.getY() >= level.getMinY() && base.getY() + 5 < level.getMaxY()) {
          boolean supported = false;
 
@@ -434,7 +578,7 @@ public final class RiftManager {
          for (int a = -4; a <= 4; a++) {
             for (int y = 0; y < 5; y++) {
                BlockPos p = alongX ? base.offset(a, y, 0) : base.offset(0, y, a);
-               if (!level.getWorldBorder().isWithinBounds(p)) {
+               if (!level.hasChunkAt(p) || !level.getWorldBorder().isWithinBounds(p)) {
                   return false;
                }
 
@@ -454,7 +598,23 @@ public final class RiftManager {
       }
    }
 
+   private static boolean columnReady(ServerLevel level, int x, int z) {
+      for (int cx = x - 4 >> 4; cx <= x + 4 >> 4; cx++) {
+         for (int cz = z - 4 >> 4; cz <= z + 4 >> 4; cz++) {
+            if (level.getChunkSource().getChunkNow(cx, cz) == null) {
+               return false;
+            }
+         }
+      }
+
+      return true;
+   }
+
    private static Optional<RiftManager.Placement> column(ServerLevel level, int x, int z, boolean axis) {
+      if (!columnReady(level, x, z)) {
+         return Optional.empty();
+      }
+
       int surface = level.getHeight(Types.MOTION_BLOCKING, x, z);
 
       for (int rise = 0; rise <= 2; rise++) {
@@ -465,27 +625,6 @@ public final class RiftManager {
 
          if (space(level, base, !axis)) {
             return Optional.of(new RiftManager.Placement(base, !axis));
-         }
-      }
-
-      return Optional.empty();
-   }
-
-   private static Optional<RiftManager.Placement> findNear(ServerLevel level, BlockPos anchor) {
-      Optional<RiftManager.Placement> first = column(level, anchor.getX(), anchor.getZ(), true);
-      if (first.isPresent()) {
-         return first;
-      }
-
-      for (int radius = 16; radius <= 256; radius += 16) {
-         for (int i = 0; i < 16; i++) {
-            double angle = (i + radius * 0.017) * Math.PI / 8.0;
-            int x = anchor.getX() + (int)Math.round(Math.cos(angle) * radius);
-            int z = anchor.getZ() + (int)Math.round(Math.sin(angle) * radius);
-            Optional<RiftManager.Placement> found = column(level, x, z, (i & 1) == 0);
-            if (found.isPresent()) {
-               return found;
-            }
          }
       }
 
@@ -514,13 +653,65 @@ public final class RiftManager {
    public static void clearTransientState() {
       NEXT_SPAWN.clear();
       PENDING.clear();
+      EXIT_SEARCHES.clear();
       RIFT_EXIT_LATCHES.clear();
       RiftDirectory.clear();
       PortalTransitGuard.clear();
       RiftLightCleanup.clear();
    }
 
-   private record Destination(ServerLevel level, Vec3 pos, boolean fallback) {
+   private record Destination(ServerLevel level, Vec3 pos, boolean fallback, RiftDirectory.Exit exit) {
+      private Destination(ServerLevel level, Vec3 pos, boolean fallback) {
+         this(level, pos, fallback, null);
+      }
+   }
+
+   private static final class ExitSearch {
+      final BlockPos anchor;
+      int next;
+
+      ExitSearch(BlockPos anchor) {
+         this.anchor = anchor.immutable();
+      }
+
+      boolean complete() {
+         return this.next >= 257;
+      }
+
+      Optional<RiftManager.Placement> step(ServerLevel level) {
+         for (int budget = 16; budget > 0 && !this.complete(); budget--) {
+            int index = this.next;
+            int x = this.anchor.getX();
+            int z = this.anchor.getZ();
+            boolean axis = true;
+            if (index > 0) {
+               int ring = (index - 1) / 16 + 1;
+               int radius = ring <= 4 ? ring * 4 : (ring - 3) * 16;
+               int direction = (index - 1) % 16;
+               double angle = (direction + radius * 0.017) * Math.PI / 8.0;
+               x += (int)Math.round(Math.cos(angle) * radius);
+               z += (int)Math.round(Math.sin(angle) * radius);
+               axis = (direction & 1) == 0;
+            }
+
+            if (!level.getWorldBorder().isWithinBounds(new BlockPos(x, this.anchor.getY(), z))) {
+               this.next++;
+            } else {
+               if (!RiftManager.columnReady(level, x, z)) {
+                  level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, new ChunkPos(x >> 4, z >> 4), 1);
+                  return Optional.empty();
+               }
+
+               this.next++;
+               Optional<RiftManager.Placement> result = RiftManager.column(level, x, z, axis);
+               if (result.isPresent()) {
+                  return result;
+               }
+            }
+         }
+
+         return Optional.empty();
+      }
    }
 
    private record Placement(BlockPos base, boolean alongX) {

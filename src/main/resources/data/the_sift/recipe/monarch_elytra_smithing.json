@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "the_sift:monarch_membrane",
+  "base": "minecraft:elytra",
+  "result": {
+    "id": "the_sift:monarch_elytra"
+  },
+  "template": "the_sift:monarch_upgrade_smithing_template"
+}

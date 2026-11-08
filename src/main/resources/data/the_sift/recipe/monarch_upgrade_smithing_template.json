@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:diamond",
+    "S": "the_sift:monarch_upgrade_smithing_template",
+    "C": "the_sift:soulshale"
+  },
+  "pattern": [
+    "#S#",
+    "#C#",
+    "###"
+  ],
+  "result": {
+    "id": "the_sift:monarch_upgrade_smithing_template",
+    "count": 2
+  }
+}

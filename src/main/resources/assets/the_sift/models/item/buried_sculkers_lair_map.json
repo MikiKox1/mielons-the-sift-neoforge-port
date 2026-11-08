@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_sift:item/buried_sculkers_lair_map"
+  }
+}

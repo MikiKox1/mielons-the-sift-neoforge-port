@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:mul",
+    "left": 0.075,
+    "right": {
+      "type": "minecraft:noise",
+      "noise": "the_sift:strata_floor",
+      "xz_scale": 0.8,
+      "y_scale": 0
+    }
+  },
+  "right": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:mul",
+      "left": 0.075,
+      "right": {
+        "type": "minecraft:noise",
+        "noise": "the_sift:strata_lower_hills",
+        "xz_scale": 0.9,
+        "y_scale": 0
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": 0.025,
+      "right": "the_sift:strata_local_relief"
+    }
+  }
+}

@@ -10,9 +10,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntitySnifferShakeMixin {
-   @Inject(method = "isShaking", at = @At("HEAD"), cancellable = true)
+   @Inject(method = "isShaking", at = @At("RETURN"), cancellable = true)
    private void theSift$shakeInfectedSniffer(LivingEntityRenderState state, CallbackInfoReturnable<Boolean> cir) {
-      if (state instanceof SnifferInfectionRenderState infectionState && infectionState.theSift$isInfected()) {
+      if (!cir.getReturnValue() && state instanceof SnifferInfectionRenderState infectionState && infectionState.theSift$isInfected()) {
          cir.setReturnValue(true);
       }
    }

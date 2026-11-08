@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#the_sift:overgrown_willow_logs"
+    "#the_sift:overgrown_willow_logs",
+    "#the_sift:ash_willow_logs"
   ]
 }

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "###",
+    "# #"
+  ],
+  "key": {
+    "#": "the_sift:sifter_hide"
+  },
+  "result": {
+    "id": "the_sift:sifter_cap",
+    "count": 1
+  }
+}

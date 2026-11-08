@@ -8,13 +8,25 @@ import mielon.thesift.entity.DarkSnifferEntity;
 import mielon.thesift.entity.EchoGolemEntity;
 import mielon.thesift.entity.ModAttachments;
 import mielon.thesift.entity.ModEntities;
-import mielon.thesift.entity.SifterEntity;
+import mielon.thesift.entity.MonarchEntity;
+import mielon.thesift.entity.NesterEntity;
+import mielon.thesift.entity.NuzzleEntity;
+import mielon.thesift.entity.PollinatorEntity;
+import mielon.thesift.entity.ScavengerEntity;
+import mielon.thesift.entity.SeedlingEntity;
 import mielon.thesift.entity.SingerEntity;
 import mielon.thesift.entity.SingerSummoner;
+import mielon.thesift.entity.SlabberEntity;
+import mielon.thesift.entity.StalkerEntity;
 import mielon.thesift.fluid.IchorWaterlogging;
 import mielon.thesift.fluid.ModFluids;
 import mielon.thesift.item.BlubItems;
+import mielon.thesift.item.ModFuels;
 import mielon.thesift.item.ModItems;
+import mielon.thesift.loot.AncientCitySoulshaleLoot;
+import mielon.thesift.map.SiftExplorationMaps;
+import mielon.thesift.network.MapColorsPayload;
+import mielon.thesift.network.MonarchFlightPayload;
 import mielon.thesift.network.RiftLoadingPayload;
 import mielon.thesift.network.SiftIntroReadyPayload;
 import mielon.thesift.particle.ModParticles;
@@ -24,7 +36,6 @@ import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents;
 import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents.ServerStopped;
 import mielon.thesift.platform.NeoEvents.ServerTickEvents;
 import mielon.thesift.platform.NeoEvents.ServerTickEvents.EndTick;
-import mielon.thesift.portal.PortalGrowth;
 import mielon.thesift.portal.SonorousAutoplay;
 import mielon.thesift.portal.SonorousConsoles;
 import mielon.thesift.portal.SonorousIgnition;
@@ -32,18 +43,24 @@ import mielon.thesift.sound.ModSounds;
 import mielon.thesift.world.RiftDirectory;
 import mielon.thesift.world.RiftManager;
 import mielon.thesift.world.SiftLocateCommand;
+import mielon.thesift.world.SiftPortalStructure;
 import mielon.thesift.world.SiftTeleportManager;
+import mielon.thesift.world.SiftTideResumeMigration;
 import mielon.thesift.world.SiftWeatherCommand;
 import mielon.thesift.world.SiftiteRecoveryManager;
 import mielon.thesift.worldgen.ModWorldgen;
 import mielon.thesift.worldgen.SiftFeaturePlacementGuard;
 import mielon.thesift.worldgen.SiftLandmarkTracker;
+import mielon.thesift.worldgen.SiftTerrainFeatureMemory;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
 import net.neoforged.neoforge.event.ModifyDefaultComponentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -64,6 +81,10 @@ public final class TheSiftMod {
 
    public TheSiftMod(IEventBus modBus) {
       NeoEvents.bootstrap();
+      NeoForge.EVENT_BUS.addListener(ModFuels::onDefaultDataComponentsBound);
+      // Map/loot codecs do not construct blocks and can be queued before events.
+      SiftExplorationMaps.initialize();
+      AncientCitySoulshaleLoot.register();
       modBus.addListener(this::registerContent);
       modBus.addListener(this::commonSetup);
       modBus.addListener(TheSiftMod::registerEntityAttributes);
@@ -76,7 +97,9 @@ public final class TheSiftMod {
    }
 
    private void registerContent(RegisterEvent event) {
-      if (event.getRegistryKey().equals(BuiltInRegistries.PARTICLE_TYPE.key())) {
+      if (event.getRegistryKey().equals(BuiltInRegistries.GAME_RULE.key())) {
+         RiftManager.registerGameRules();
+      } else if (event.getRegistryKey().equals(BuiltInRegistries.PARTICLE_TYPE.key())) {
          ModParticles.initialize();
       } else if (event.getRegistryKey().equals(BuiltInRegistries.SOUND_EVENT.key())) {
          ModSounds.initialize();
@@ -89,7 +112,9 @@ public final class TheSiftMod {
       } else if (event.getRegistryKey().equals(BuiltInRegistries.ITEM.key())) {
          ModItems.bootstrap();
          BlubItems.initialize();
+         SiftExplorationMaps.initializeItems();
       } else if (event.getRegistryKey().equals(BuiltInRegistries.FEATURE_TYPE.key())) {
+         // Minecraft 26.3 registers feature codecs in FEATURE_TYPE after blocks.
          ModWorldgen.initialize();
       } else if (event.getRegistryKey().equals(NeoForgeRegistries.Keys.ATTACHMENT_TYPES)) {
          ModAttachments.initialize();
@@ -104,9 +129,9 @@ public final class TheSiftMod {
 
    private void onInitialize() {
       ModBlocks.initialize();
+      ModFluids.initialize();
       ModFluids.registerNeoForgeInteractions();
       SiftPlantInteractions.register();
-      SiftLocateCommand.register();
       SiftWeatherCommand.register();
       ModItems.initialize();
       ModAdvancements.register();
@@ -116,7 +141,6 @@ public final class TheSiftMod {
       SingerSummoner.register();
       SonorousAutoplay.register();
       registerServerLifecycle();
-      PortalGrowth.register();
       LOGGER.info("The Sift initialized.");
    }
 
@@ -125,10 +149,23 @@ public final class TheSiftMod {
       event.put(ModEntities.ECHO_GOLEM, EchoGolemEntity.createAttributes().build());
       event.put(ModEntities.DARK_SNIFFER, DarkSnifferEntity.createAttributes().build());
       event.put(ModEntities.BLUB, BlubEntity.createAttributes().build());
-      event.put(ModEntities.SIFTER, SifterEntity.createAttributes().build());
+      event.put(ModEntities.SEEDLING, SeedlingEntity.createAttributes().build());
+      event.put(ModEntities.NESTER, NesterEntity.createAttributes().build());
+      event.put(ModEntities.SLABBER, SlabberEntity.createAttributes().build());
+      event.put(ModEntities.NUZZLE, NuzzleEntity.createAttributes().build());
+      event.put(ModEntities.STALKER, StalkerEntity.createAttributes().build());
+      event.put(ModEntities.SCAVENGER, ScavengerEntity.createAttributes().build());
+      event.put(ModEntities.MONARCH, MonarchEntity.createAttributes().build());
+      event.put(ModEntities.MONARCH_ECHO, MonarchEntity.createEchoAttributes().build());
+      event.put(ModEntities.POLLINATOR, PollinatorEntity.createAttributes().build());
    }
 
    private static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+      // The Sift uses natural vanilla Sniffer spawning; NeoForge requires its predicate.
+      event.register(
+         EntityTypes.SNIFFER, SpawnPlacementTypes.ON_GROUND,
+         Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules, Operation.REPLACE
+      );
       event.register(
          ModEntities.ECHO_GOLEM,
          SpawnPlacementTypes.ON_GROUND,
@@ -136,8 +173,15 @@ public final class TheSiftMod {
          EchoGolemEntity::checkEchoGolemSpawnRules,
          Operation.REPLACE
       );
+      event.register(ModEntities.DARK_SNIFFER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, DarkSnifferEntity::checkDarkSnifferSpawnRules, Operation.REPLACE);
       event.register(ModEntities.BLUB, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, BlubEntity::checkBlubSpawnRules, Operation.REPLACE);
-      event.register(ModEntities.SIFTER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, SifterEntity::checkSifterSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.SEEDLING, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, SeedlingEntity::checkSeedlingSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.NESTER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, NesterEntity::checkNesterSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.SLABBER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, SlabberEntity::checkSlabberSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.NUZZLE, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, NuzzleEntity::checkNuzzleSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.STALKER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, StalkerEntity::checkStalkerSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.SCAVENGER, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, ScavengerEntity::checkScavengerSpawnRules, Operation.REPLACE);
+      event.register(ModEntities.POLLINATOR, SpawnPlacementTypes.ON_GROUND, Types.MOTION_BLOCKING_NO_LEAVES, PollinatorEntity::checkPollinatorSpawnRules, Operation.REPLACE);
    }
 
    private static void modifyDefaultComponents(ModifyDefaultComponentsEvent event) {
@@ -152,6 +196,8 @@ public final class TheSiftMod {
    private static void registerPayloads(RegisterPayloadHandlersEvent event) {
       RiftLoadingPayload.register(event);
       SiftIntroReadyPayload.register(event);
+      MapColorsPayload.register(event);
+      MonarchFlightPayload.register(event);
    }
 
    private static void registerCauldronFluidContent(RegisterCauldronFluidContentEvent event) {
@@ -163,11 +209,15 @@ public final class TheSiftMod {
    }
 
    private static void registerServerLifecycle() {
+      ServerLifecycleEvents.SERVER_STARTED.register(SiftPortalStructure::prepare);
+      ServerLifecycleEvents.SERVER_STARTED.register(SiftTideResumeMigration::resumeRequestedClock);
       ServerTickEvents.END_SERVER_TICK.register((EndTick)server -> {
+         ModAdvancements.tick(server);
          SiftTeleportManager.tick(server);
          RiftManager.tick(server);
          SiftiteRecoveryManager.tick(server);
          IchorWaterlogging.tick(server);
+         SiftTerrainFeatureMemory.tick(server);
       });
       ServerLifecycleEvents.SERVER_STOPPED.register((ServerStopped)server -> {
          SonorousConsoles.clearTransientBuffers();
@@ -175,9 +225,11 @@ public final class TheSiftMod {
          RiftManager.clearTransientState();
          SiftiteRecoveryManager.clearTransientState();
          SiftFeaturePlacementGuard.clear();
+         SiftLocateCommand.clearPendingSearches();
          EchoGolemEntity.clearTransientState();
          IchorWaterlogging.clear();
       });
+      ServerLifecycleEvents.SERVER_STOPPING.register(SiftTerrainFeatureMemory::flush);
       ServerLifecycleEvents.SERVER_STOPPING.register(SiftLandmarkTracker::flush);
       ServerLifecycleEvents.SERVER_STOPPING.register(IchorWaterlogging::flush);
    }

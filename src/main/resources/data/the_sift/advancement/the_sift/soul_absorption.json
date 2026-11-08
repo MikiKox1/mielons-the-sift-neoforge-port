@@ -1,0 +1,30 @@
+{
+  "parent": "the_sift:the_sift/blood_of_the_gods",
+  "display": {
+    "icon": {
+      "id": "the_sift:siftite_chestplate",
+      "components": {
+        "minecraft:enchantments": {
+          "the_sift:soul_absorption": 2
+        }
+      }
+    },
+    "title": {
+      "translate": "advancement.the_sift.soul_absorption.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.soul_absorption.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

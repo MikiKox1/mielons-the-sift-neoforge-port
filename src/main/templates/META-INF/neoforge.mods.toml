@@ -1,4 +1,6 @@
 modLoader="javafml"
+# NeoForge MC26.3 provides FML Java language provider 12.
+# This is NOT the NeoForge compatibility version range below.
 loaderVersion="[12,)"
 license="${mod_license}"
 
@@ -7,11 +9,11 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_author}"
-credits="Community NeoForge 26.3 port: MikiKox1, assisted by AI; ImpSteve — Dark Sniffer texture; Fuzja Jądrowa — Rift music disc; StrawberrySushi_ — Korean localization; Echo_Dev — Wellspring remix"
-displayURL="https://github.com/MikiKox1/mielons-the-sift-neoforge-26.3"
-# Preserve the metadata key supported by the minimum NeoForge 26.3.0.64-beta.
-# On newer FML this key is deprecated but accepted; avoid weakening min support.
-logoFile="assets/the_sift/icon.png"
+credits="Development NeoForge 26.3 port: MikiKox1, assisted by AI; original author Mielon; ImpSteve — Dark Sniffer texture; Fuzja Jądrowa — Rift music disc; StrawberrySushi_ — Korean localization; Frumptle — Russian localization; Grelinho — Brazilian Portuguese localization; Echo_Dev — Wellspring remix; Lealeanz — ambient music"
+displayURL="https://github.com/MikiKox1/mielons-the-sift-neoforge-port"
+# FML 11.0.16 (NeoForge 26.2.0.90) explicitly recommends iconFile over the
+# deprecated logoFile. This does not change the mod's loader version range.
+iconFile="assets/the_sift/icon.png"
 description='''${mod_description}'''
 
 [[mixins]]

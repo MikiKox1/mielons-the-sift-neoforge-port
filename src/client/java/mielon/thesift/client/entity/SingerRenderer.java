@@ -1,28 +1,38 @@
 package mielon.thesift.client.entity;
 
+import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.renderer.GeoEntityRenderer;
-import mielon.thesift.client.light.SingerHeadLightBridge;
+import com.geckolib.renderer.base.RenderPassInfo;
+import mielon.thesift.client.light.SingerSoulLightBridge;
 import mielon.thesift.entity.SingerEntity;
-import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
 public class SingerRenderer extends GeoEntityRenderer<SingerEntity, EntityRenderState> {
-   // Use the resting GeoModel head_light height for one stable source.
-   // A deferred locator callback cannot guarantee dynamic light registration.
-   private static final double LIGHT_HEIGHT = 34.0 / 16.0;
+   private static final DataTicket<SingerEntity> SINGER_ENTITY = DataTicket.create("the_sift_singer_entity", SingerEntity.class);
 
    public SingerRenderer(Context context) {
       super(context, new SingerModel());
       this.withRenderLayer(new SingerSoulBlockLayer(context, this));
-      this.withRenderLayer(new SingerGlowingGeoLayer(this));
-      this.withRenderLayer(new SiftGlowingOutlineLayer(this));
+      this.withRenderLayer(new SiftGlowingOutlineLayer<>(this));
       this.shadowRadius = 0.0F;
    }
 
+   public void addRenderData(SingerEntity animatable, Void relatedObject, EntityRenderState renderState, float partialTick) {
+      super.addRenderData(animatable, relatedObject, renderState, partialTick);
+      renderState.addGeckolibData(SINGER_ENTITY, animatable);
+   }
+
    @Override
-   public boolean shouldRender(SingerEntity singer, Frustum frustum, double cameraX, double cameraY, double cameraZ, float partialTick) {
-      SingerHeadLightBridge.update(singer, singer.getPosition(partialTick).add(0.0, LIGHT_HEIGHT, 0.0));
-      return super.shouldRender(singer, frustum, cameraX, cameraY, cameraZ, partialTick);
+   public void preRenderPass(RenderPassInfo<EntityRenderState> renderPassInfo, SubmitNodeCollector renderTasks) {
+      SingerEntity singer = renderPassInfo.getGeckolibData(SINGER_ENTITY);
+      if (singer != null) {
+         renderPassInfo.addLocatorPositionListener("soul_light", (worldPos, modelPos, localPos) -> {
+            if (worldPos != null) {
+               SingerSoulLightBridge.update(singer, worldPos);
+            }
+         });
+      }
    }
 }
