@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:mul",
+    "argument1": 0.15,
+    "argument2": {
+      "type": "minecraft:noise",
+      "noise": "the_sift:strata_elevation",
+      "xz_scale": 0.9,
+      "y_scale": 0
+    }
+  }
+}

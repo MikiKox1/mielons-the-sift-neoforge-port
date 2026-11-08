@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "the_sift:overgrown_lotus"
+    "the_sift:blue_saucer_bloom"
   ],
   "result": {
     "id": "minecraft:light_blue_dye"

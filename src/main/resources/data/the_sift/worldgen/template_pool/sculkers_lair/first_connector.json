@@ -1,0 +1,42 @@
+{
+  "name": "the_sift:sculkers_lair/first_connector",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/first_connector_1",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/first_connector_2",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/first_connector_3",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/first_connector_4",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

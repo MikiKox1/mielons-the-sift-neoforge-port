@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "the_sift:block/healthy_sculk_cartilage_sprout",
+        "y": 0
+      },
+      {
+        "model": "the_sift:block/healthy_sculk_cartilage_sprout",
+        "y": 90
+      },
+      {
+        "model": "the_sift:block/healthy_sculk_cartilage_sprout",
+        "y": 180
+      },
+      {
+        "model": "the_sift:block/healthy_sculk_cartilage_sprout",
+        "y": 270
+      }
+    ]
+  }
+}

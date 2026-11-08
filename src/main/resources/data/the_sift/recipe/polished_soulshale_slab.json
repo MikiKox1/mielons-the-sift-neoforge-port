@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": "the_sift:polished_soulshale"
+  },
+  "result": {
+    "id": "the_sift:polished_soulshale_slab",
+    "count": 6
+  }
+}

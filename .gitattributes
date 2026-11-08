@@ -1,0 +1,7 @@
+# Preserve exact reviewed resource bytes, including their original CRLF style.
+# Resource SHA checks remain strict; code and script whitespace checks stay on.
+src/main/resources/assets/** -text -whitespace
+src/main/resources/data/** -text -whitespace
+src/client/resources/assets/** -text -whitespace
+src/client/resources/data/** -text -whitespace
+tools/upstream-26.2.accesswidener -text

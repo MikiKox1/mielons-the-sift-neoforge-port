@@ -1,8 +1,8 @@
 {
-  "parent": "the_sift:the_sift/friend_of_the_sift",
+  "parent": "the_sift:the_sift/root",
   "display": {
     "icon": {
-      "id": "the_sift:soul_block"
+      "id": "the_sift:blubby_berries"
     },
     "title": {
       "translate": "advancement.the_sift.blub.title"

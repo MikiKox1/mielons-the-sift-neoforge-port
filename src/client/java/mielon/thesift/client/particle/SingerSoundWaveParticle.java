@@ -43,6 +43,7 @@ public final class SingerSoundWaveParticle extends SingleQuadParticle {
       this.setSize(0.2F, 0.2F);
    }
 
+   @Override
    public void tick() {
       this.xo = this.x;
       this.yo = this.y;
@@ -56,19 +57,23 @@ public final class SingerSoundWaveParticle extends SingleQuadParticle {
       }
    }
 
+   @Override
    public float getQuadSize(float partialTickTime) {
       float progress = Math.min(1.0F, (this.age + partialTickTime) / Math.max(1, this.travelLifetime));
       return this.startSize * (1.0F + progress);
    }
 
+   @Override
    public FacingCameraMode getFacingCameraMode() {
       return FacingCameraMode.LOOKAT_XYZ;
    }
 
+   @Override
    public int getLightCoords(float partialTickTime) {
       return 15728880;
    }
 
+   @Override
    protected Layer getLayer() {
       return Layer.bySprite(this.sprite);
    }

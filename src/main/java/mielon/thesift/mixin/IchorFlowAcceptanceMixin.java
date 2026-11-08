@@ -15,11 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class IchorFlowAcceptanceMixin {
    @Inject(method = {"canHoldFluid", "canHoldSpecificFluid"}, at = @At("HEAD"), cancellable = true)
    private static void theSift$acceptIchor(BlockGetter level, BlockPos pos, BlockState state, Fluid fluid, CallbackInfoReturnable<Boolean> cir) {
-      if (IchorWaterlogging.isIchor(fluid) && IchorWaterlogging.canIchorlog(state)) {
-         // FlowingFluid asks with FLOWING_ICHOR while planning normal spread.
-         // Vanilla SimpleWaterloggedBlock rejects FLOWING_WATER here; mirror
-         // that source-only contract so a flowing stream cannot mint sources.
-         cir.setReturnValue(IchorWaterlogging.isIchorSource(fluid) && IchorWaterlogging.canFill(state));
+      if (IchorWaterlogging.isIchor(fluid) && IchorWaterlogging.flowBreaksPlant(state)) {
+         cir.setReturnValue(true);
+      } else {
+         if (IchorWaterlogging.isIchor(fluid) && IchorWaterlogging.canIchorlog(state)) {
+            cir.setReturnValue(false);
+         }
       }
    }
 }

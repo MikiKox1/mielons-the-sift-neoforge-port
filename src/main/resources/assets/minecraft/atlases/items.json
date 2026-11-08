@@ -1,0 +1,28 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/monarch_membrane"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/monarch_upgrade_smithing_template"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/monarch_elytra_overlay"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/monarch_elytra_broken_overlay"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/raw_nuzzle_meat"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "the_sift:item/cooked_nuzzle_meat"
+    }
+  ]
+}

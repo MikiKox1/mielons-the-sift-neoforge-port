@@ -4,22 +4,15 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.WeatherEffectRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome.Precipitation;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-/**
- * Minecraft 26.1.2 retrieves precipitation with the private
- * WeatherEffectRenderer.getPrecipitationAt(Level, BlockPos) method.
- * Intercept the return value instead of a fragile STORE/ordinal/local capture:
- * this path is shared by rain columns and particle checks and ensures
- * no changes to precipitation outside The Sift dimension.
- */
 @Mixin(WeatherEffectRenderer.class)
 public abstract class SiftWeatherTextureMixin {
    private static final Identifier VANILLA_RAIN = Identifier.withDefaultNamespace("textures/environment/rain.png");
@@ -27,6 +20,8 @@ public abstract class SiftWeatherTextureMixin {
    private static final Identifier VANILLA_SNOW = Identifier.withDefaultNamespace("textures/environment/snow.png");
    private static final Identifier ICHOR_SNOW = Identifier.fromNamespaceAndPath("the_sift", "textures/environment/ichor_snow.png");
 
+   // 26.1.2 uses getPrecipitationAt(Level, BlockPos) for both columns and
+   // weather particles; later versions store a local in extractRenderState.
    @ModifyReturnValue(method = "getPrecipitationAt", at = @At("RETURN"))
    private Precipitation theSift$restrictSnowColumns(Precipitation original, Level level, BlockPos pos) {
       if (!level.dimension().equals(TheSiftDimension.LEVEL_KEY)) {
@@ -39,9 +34,7 @@ public abstract class SiftWeatherTextureMixin {
    }
 
    @ModifyArg(
-      // NeoForge 26.1.2 adds a two-argument compatibility overload which only
-      // forwards to the three-argument renderer. Target the precise overload
-      // that actually calls TextureManager.getTexture twice.
+      // The two-argument NeoForge compatibility shim has no texture calls.
       method = "render(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/state/level/WeatherRenderState;Lnet/minecraft/client/renderer/state/level/LevelRenderState;)V",
       at = @At(
          value = "INVOKE",
@@ -55,10 +48,12 @@ public abstract class SiftWeatherTextureMixin {
          if (original.equals(VANILLA_RAIN)) {
             return ICHOR_RAIN;
          }
+
          if (original.equals(VANILLA_SNOW)) {
             return ICHOR_SNOW;
          }
       }
+
       return original;
    }
 }

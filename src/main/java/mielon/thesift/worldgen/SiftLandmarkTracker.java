@@ -1,13 +1,18 @@
 package mielon.thesift.worldgen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.LongStream;
 import mielon.thesift.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
@@ -15,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class SiftLandmarkTracker {
    private static final int SAVE_INTERVAL_TICKS = 600;
@@ -22,6 +28,8 @@ public final class SiftLandmarkTracker {
    private static final Map<SiftLandmarkTracker.Kind, Set<Long>> POSITIONS = new EnumMap<>(SiftLandmarkTracker.Kind.class);
    private static final Map<SiftLandmarkTracker.Kind, Map<Long, Set<Long>>> POSITIONS_BY_CHUNK = new EnumMap<>(SiftLandmarkTracker.Kind.class);
    private static final Map<Long, SiftLandmarkTracker.CanyonActivity> LEGACY_CANYON_ACTIVITY = new ConcurrentHashMap<>();
+   private static final Set<SiftLandmarkTracker.Region> DIRTY_REGIONS = ConcurrentHashMap.newKeySet();
+   private static final Map<SiftLandmarkTracker.Kind, Set<Long>> REGIONS = new EnumMap<>(SiftLandmarkTracker.Kind.class);
    private static volatile boolean dirty;
    private static boolean loaded;
    private static int saveCooldown;
@@ -29,11 +37,24 @@ public final class SiftLandmarkTracker {
    private SiftLandmarkTracker() {
    }
 
+   public static synchronized boolean tryClaimShelter(BlockPos entrance, double minimumDistance) {
+      if (nearestOther(SiftLandmarkTracker.Kind.SOULSHALE_SHELTER, entrance, minimumDistance, null).isPresent()) {
+         return false;
+      }
+
+      record(SiftLandmarkTracker.Kind.SOULSHALE_SHELTER, entrance);
+      return true;
+   }
+
+   public static boolean hasRecorded(SiftLandmarkTracker.Kind kind, BlockPos pos) {
+      return POSITIONS.get(kind).contains(pos.asLong());
+   }
+
    public static void record(SiftLandmarkTracker.Kind kind, BlockPos pos) {
       long packed = pos.asLong();
       if (POSITIONS.get(kind).add(packed)) {
          index(kind, packed);
-         dirty = true;
+         changed(kind, packed);
       }
    }
 
@@ -41,7 +62,7 @@ public final class SiftLandmarkTracker {
       long packed = pos.asLong();
       if (POSITIONS.get(kind).remove(packed)) {
          unindex(kind, packed);
-         dirty = true;
+         changed(kind, packed);
       }
    }
 
@@ -70,19 +91,70 @@ public final class SiftLandmarkTracker {
    public static Optional<BlockPos> nearest(SiftLandmarkTracker.Kind kind, BlockPos origin) {
       BlockPos best = null;
       double bestDistance = Double.POSITIVE_INFINITY;
+      ArrayList<Entry<Long, Set<Long>>> chunks = new ArrayList<>(POSITIONS_BY_CHUNK.get(kind).entrySet());
+      chunks.sort(Comparator.comparingDouble(entryx -> chunkDistanceSqr((Long)entryx.getKey(), origin)));
 
-      for (long packed : POSITIONS.get(kind)) {
-         BlockPos candidate = BlockPos.of(packed);
-         double dx = candidate.getX() - origin.getX();
-         double dz = candidate.getZ() - origin.getZ();
-         double distance = dx * dx + dz * dz;
-         if (distance < bestDistance) {
-            bestDistance = distance;
-            best = candidate;
+      for (Entry<Long, Set<Long>> entry : chunks) {
+         if (chunkDistanceSqr(entry.getKey(), origin) > bestDistance) {
+            break;
+         }
+
+         for (long packed : entry.getValue()) {
+            BlockPos candidate = BlockPos.of(packed);
+            double distance = horizontalDistanceSqr(candidate, origin);
+            if (distance < bestDistance || distance == bestDistance && (best == null || packed < best.asLong())) {
+               bestDistance = distance;
+               best = candidate;
+            }
          }
       }
 
       return Optional.ofNullable(best);
+   }
+
+   private static double chunkDistanceSqr(long chunk, BlockPos origin) {
+      int x = (int)(chunk >> 32) * 16;
+      int z = (int)chunk * 16;
+      double dx = Math.max(0, Math.max(x - origin.getX(), origin.getX() - (x + 15)));
+      double dz = Math.max(0, Math.max(z - origin.getZ(), origin.getZ() - (z + 15)));
+      return dx * dx + dz * dz;
+   }
+
+   public static List<BlockPos> near(SiftLandmarkTracker.Kind kind, BlockPos origin, int radius) {
+      List<BlockPos> result = new ArrayList<>();
+      Map<Long, Set<Long>> index = POSITIONS_BY_CHUNK.get(kind);
+
+      for (int x = origin.getX() - radius >> 4; x <= origin.getX() + radius >> 4; x++) {
+         for (int z = origin.getZ() - radius >> 4; z <= origin.getZ() + radius >> 4; z++) {
+            Set<Long> bucket = index.get(chunkKey(x, z));
+            if (bucket != null) {
+               for (long packed : bucket) {
+                  BlockPos pos = BlockPos.of(packed);
+                  if (horizontalDistanceSqr(origin, pos) <= (double)radius * radius) {
+                     result.add(pos);
+                  }
+               }
+            }
+         }
+      }
+
+      return result;
+   }
+
+   private static long regionKey(long packed) {
+      BlockPos pos = BlockPos.of(packed);
+      return chunkKey(pos.getX() >> 9, pos.getZ() >> 9);
+   }
+
+   private static void changed(SiftLandmarkTracker.Kind kind, long packed) {
+      long region = regionKey(packed);
+      REGIONS.get(kind).add(region);
+      DIRTY_REGIONS.add(new SiftLandmarkTracker.Region(kind, region));
+      dirty = true;
+   }
+
+   private static Identifier regionId(SiftLandmarkTracker.Kind kind, long key) {
+      return Identifier.fromNamespaceAndPath("the_sift_landmarks_" + Long.toUnsignedString(key, 16), kind.storageKey());
    }
 
    public static Optional<BlockPos> nearestOther(SiftLandmarkTracker.Kind kind, BlockPos origin, double maximumDistance, BlockPos excluded) {
@@ -123,8 +195,50 @@ public final class SiftLandmarkTracker {
       return Optional.ofNullable(best);
    }
 
+   public static void initialize(MinecraftServer server) {
+      ensureLoaded(server);
+   }
+
+   public static BlockPos nearestInVolume(SiftLandmarkTracker.Kind kind, BlockPos origin, int horizontal, int vertical) {
+      BlockPos result = null;
+      double best = Double.POSITIVE_INFINITY;
+      Map<Long, Set<Long>> index = POSITIONS_BY_CHUNK.get(kind);
+
+      for (int cx = origin.getX() - horizontal >> 4; cx <= origin.getX() + horizontal >> 4; cx++) {
+         for (int cz = origin.getZ() - horizontal >> 4; cz <= origin.getZ() + horizontal >> 4; cz++) {
+            Set<Long> positions = index.get(chunkKey(cx, cz));
+            if (positions != null) {
+               for (long packed : positions) {
+                  BlockPos candidate = BlockPos.of(packed);
+                  if (Math.abs(candidate.getY() - origin.getY()) <= vertical && !(horizontalDistanceSqr(candidate, origin) > horizontal * horizontal)) {
+                     double distance = candidate.distSqr(origin);
+                     if (distance < best) {
+                        best = distance;
+                        result = candidate;
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      return result;
+   }
+
+   public static List<BlockPos> nearPlayers(SiftLandmarkTracker.Kind kind, ServerLevel level, int radius) {
+      Set<BlockPos> result = new LinkedHashSet<>();
+
+      for (ServerPlayer player : level.players()) {
+         if (player.isAlive() && !player.isSpectator()) {
+            result.addAll(near(kind, player.blockPosition(), radius));
+         }
+      }
+
+      return List.copyOf(result);
+   }
+
    public static List<BlockPos> snapshot(SiftLandmarkTracker.Kind kind) {
-      return POSITIONS.get(kind).stream().<BlockPos>map(BlockPos::of).toList();
+      return POSITIONS.get(kind).stream().map(BlockPos::of).toList();
    }
 
    public static Optional<BlockPos> nearestActiveSoulCanyon(ServerLevel level, BlockPos origin, double maximumDistance) {
@@ -298,13 +412,43 @@ public final class SiftLandmarkTracker {
       if (!loaded) {
          loaded = true;
          CompoundTag stored = server.getCommandStorage().get(STORAGE_ID);
+         if (stored.getIntOr("format", 0) >= 2) {
+            for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
+               for (long region : stored.getLongArray(kind.storageKey()).orElse(new long[0])) {
+                  REGIONS.get(kind).add(region);
+                  CompoundTag shard = server.getCommandStorage()
+                     .get(
+                        stored.getIntOr("format", 0) == 2
+                           ? Identifier.fromNamespaceAndPath("the_sift", "generated_landmarks/" + kind.storageKey() + "/" + Long.toUnsignedString(region, 16))
+                           : regionId(kind, region)
+                     );
 
-         for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
-            long[] positions = stored.getLongArray(kind.storageKey()).orElse(new long[0]);
+                  for (long packed : shard.getLongArray("positions").orElse(new long[0])) {
+                     if (POSITIONS.get(kind).add(packed)) {
+                        index(kind, packed);
+                     }
 
-            for (long position : positions) {
-               if (POSITIONS.get(kind).add(position)) {
-                  index(kind, position);
+                     if (stored.getIntOr("format", 0) == 2) {
+                        changed(kind, packed);
+                     }
+                  }
+               }
+            }
+         } else {
+            for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
+               long[] positions = stored.getLongArray(kind.storageKey()).orElse(new long[0]);
+               if (kind == SiftLandmarkTracker.Kind.SOULSHALE_SHELTER && stored.contains("grimstone_shelters")) {
+                  positions = LongStream.concat(Arrays.stream(positions), Arrays.stream(stored.getLongArray("grimstone_shelters").orElse(new long[0])))
+                     .distinct()
+                     .toArray();
+                  dirty = true;
+               }
+
+               for (long position : positions) {
+                  if (POSITIONS.get(kind).add(position)) {
+                     index(kind, position);
+                     changed(kind, position);
+                  }
                }
             }
          }
@@ -313,14 +457,36 @@ public final class SiftLandmarkTracker {
 
    private static void writeStorage(MinecraftServer server) {
       dirty = false;
-      CompoundTag stored = new CompoundTag();
 
-      for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
-         long[] positions = POSITIONS.get(kind).stream().mapToLong(Long::longValue).sorted().toArray();
-         stored.putLongArray(kind.storageKey(), positions);
+      for (SiftLandmarkTracker.Region region : new ArrayList<>(DIRTY_REGIONS)) {
+         DIRTY_REGIONS.remove(region);
+         ArrayList<Long> positions = new ArrayList<>();
+         int regionX = (int)(region.key() >> 32);
+         int regionZ = (int)region.key();
+         Map<Long, Set<Long>> index = POSITIONS_BY_CHUNK.get(region.kind());
+
+         for (int x = regionX * 32; x < regionX * 32 + 32; x++) {
+            for (int z = regionZ * 32; z < regionZ * 32 + 32; z++) {
+               Set<Long> bucket = index.get(chunkKey(x, z));
+               if (bucket != null) {
+                  positions.addAll(bucket);
+               }
+            }
+         }
+
+         CompoundTag shard = new CompoundTag();
+         shard.putLongArray("positions", positions.stream().mapToLong(Long::longValue).sorted().toArray());
+         server.getCommandStorage().set(regionId(region.kind(), region.key()), shard);
       }
 
-      server.getCommandStorage().set(STORAGE_ID, stored);
+      CompoundTag manifest = new CompoundTag();
+      manifest.putInt("format", 3);
+
+      for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
+         manifest.putLongArray(kind.storageKey(), REGIONS.get(kind).stream().mapToLong(Long::longValue).sorted().toArray());
+      }
+
+      server.getCommandStorage().set(STORAGE_ID, manifest);
    }
 
    public static void clearTransientState() {
@@ -333,6 +499,8 @@ public final class SiftLandmarkTracker {
       }
 
       LEGACY_CANYON_ACTIVITY.clear();
+      DIRTY_REGIONS.clear();
+      REGIONS.values().forEach(Set::clear);
       dirty = false;
       loaded = false;
       saveCooldown = 0;
@@ -340,6 +508,7 @@ public final class SiftLandmarkTracker {
 
    static {
       for (SiftLandmarkTracker.Kind kind : SiftLandmarkTracker.Kind.values()) {
+         REGIONS.put(kind, ConcurrentHashMap.newKeySet());
          POSITIONS.put(kind, ConcurrentHashMap.newKeySet());
          POSITIONS_BY_CHUNK.put(kind, new ConcurrentHashMap<>());
       }
@@ -349,13 +518,37 @@ public final class SiftLandmarkTracker {
    }
 
    public enum Kind {
+      SOULSHALE_SHELTER("soulshale_shelters"),
+      PORTAL_VEGETATION_REPAIRED("portal_vegetation_repaired"),
       ABANDONED_MAIN_PORTAL("abandoned_main_portals"),
       SNIFFER_CAVE("sniffer_caves"),
       SOUL_CANYON_ENTRANCE("soul_canyon_entrances"),
       SOUL_CANYON_CLUSTER("soul_canyon_clusters"),
       SOUL_CANYON_MIDPOINT("soul_canyon_midpoints"),
       SOUL_CANYON_SOUL_BLOCK("soul_canyon_soul_blocks"),
-      SOUL_CANYON_GOLEM_PENDING("soul_canyon_golems_pending");
+      SOUL_CANYON_GOLEM_PENDING("soul_canyon_golems_pending"),
+      SCULK_BLOB_MEMBER_SPAWNED("sculk_blob_members_spawned"),
+      SCULK_BLOB_RESIDENT_PENDING("sculk_blob_residents_pending"),
+      SCULK_BLOB_RESIDENT_SPAWNED("sculk_blob_residents_spawned"),
+      FLOWER_BLUE_SAUCER("flower_blue_saucer"),
+      FLOWER_GREEN_SAUCER("flower_green_saucer"),
+      FLOWER_SUNBURST("flower_sunburst"),
+      FLOWER_WHISPERBLOOM("flower_whisperbloom"),
+      FLOWER_TORCHFLOWER("flower_torchflower"),
+      FLOWER_PITCHERFLOWER("flower_pitcherflower"),
+      FLOWER_WILDFLOWERS("flower_wildflowers"),
+      FLOWER_SURVEYED_CHUNK("flower_surveyed_chunks"),
+      ABANDONED_PORTAL_SIFT_WASTES("abandoned_portal_sift_wastes"),
+      ABANDONED_PORTAL_OVERGROWN_CLEARING("abandoned_portal_overgrown_clearing"),
+      ABANDONED_PORTAL_OVERGROWN_FOREST("abandoned_portal_overgrown_forest"),
+      ABANDONED_PORTAL_ICHOR_SNOWY_PEAKS("abandoned_portal_ichor_snowy_peaks"),
+      ABANDONED_PORTAL_SIFTSLATE_CAVES("abandoned_portal_siftslate_caves"),
+      ABANDONED_PORTAL_OVERGROWN_CAVES("abandoned_portal_overgrown_caves"),
+      ABANDONED_PORTAL_SOULSHALE_CAVES("abandoned_portal_soulshale_caves"),
+      ABANDONED_PORTAL_ORGANIC_DESERT("abandoned_portal_organic_desert"),
+      ABANDONED_PORTAL_CORAL_MEADOW("abandoned_portal_coral_meadow"),
+      ABANDONED_PORTAL_CORAL_FOREST("abandoned_portal_coral_forest"),
+      ABANDONED_PORTAL_CORRUPTED_SIFT("abandoned_portal_corrupted_sift");
 
       private final String storageKey;
 
@@ -366,5 +559,8 @@ public final class SiftLandmarkTracker {
       private String storageKey() {
          return this.storageKey;
       }
+   }
+
+   private record Region(SiftLandmarkTracker.Kind kind, long key) {
    }
 }

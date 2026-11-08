@@ -6,7 +6,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -17,15 +16,12 @@ public final class SiftslatePlantPatchFeature extends Feature<NoneFeatureConfigu
       super(NoneFeatureConfiguration.CODEC);
    }
 
-
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
-      BlockPos origin = context.origin();
-      int centerX = (origin.getX() & -16) + 8;
-      int centerZ = (origin.getZ() & -16) + 8;
+      int centerX = (context.origin().getX() & -16) + 8;
+      int centerZ = (context.origin().getZ() & -16) + 8;
       int target = 4 + random.nextInt(4);
       int placed = 0;
 

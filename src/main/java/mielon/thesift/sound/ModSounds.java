@@ -24,11 +24,11 @@ public final class ModSounds {
    public static final SoundEvent SINGER_HURT = register("entity.singer.hurt");
    public static final SoundEvent SINGER_DEATH = register("entity.singer.death");
    public static final SoundEvent SINGER_HAPPY = register("entity.singer.happy");
-   public static final SoundEvent SIFTER_AMBIENT = register("entity.sifter.ambient");
-   public static final SoundEvent SIFTER_HURT = register("entity.sifter.hurt");
-   public static final SoundEvent SIFTER_DEATH = register("entity.sifter.death");
-   public static final SoundEvent SIFTER_STEP = register("entity.sifter.step");
-   public static final SoundEvent SIFTER_ATTACK = register("entity.sifter.attack");
+   public static final SoundEvent SEEDLING_AMBIENT = register("entity.seedling.ambient");
+   public static final SoundEvent SEEDLING_HURT = register("entity.seedling.hurt");
+   public static final SoundEvent SEEDLING_DEATH = register("entity.seedling.death");
+   public static final SoundEvent SEEDLING_STEP = register("entity.seedling.step");
+   public static final SoundEvent SEEDLING_ATTACK = register("entity.seedling.attack");
    public static final SoundEvent BLUB_IDLE_WATER = register("entity.blub.idle_water");
    public static final SoundEvent BLUB_IDLE_AIR = register("entity.blub.idle_air");
    public static final SoundEvent BLUB_HURT = register("entity.blub.hurt");
@@ -66,6 +66,65 @@ public final class ModSounds {
       SONOROUS_DEEPSLATE_SOUND_7,
       SONOROUS_DEEPSLATE_SOUND_8
    };
+   public static final SoundEvent SEEDLING_AGGRESSIVE = register("entity.seedling.aggressive");
+   public static final SoundEvent SEEDLING_OPEN_MOUTH = register("entity.seedling.open_mouth");
+   public static final SoundEvent SEEDLING_RUN = register("entity.seedling.run");
+   public static final SoundEvent BLUB_HOP = register("entity.blub.hop");
+   public static final SoundEvent ECHO_GOLEM_AMBIENT = register("entity.echo_golem.ambient");
+   public static final SoundEvent NESTER_AMBIENT = register("entity.nester.ambient");
+   public static final SoundEvent NESTER_AGGRESSIVE = register("entity.nester.aggressive");
+   public static final SoundEvent NESTER_ENRAGED = register("entity.nester.enraged");
+   public static final SoundEvent NESTER_HURT = register("entity.nester.hurt");
+   public static final SoundEvent NESTER_DEATH = register("entity.nester.death");
+   public static final SoundEvent NESTER_STEP = register("entity.nester.step");
+   public static final SoundEvent NESTER_ATTACK = register("entity.nester.attack");
+   public static final SoundEvent NUZZLE_AMBIENT = register("entity.nuzzle.ambient");
+   public static final SoundEvent NUZZLE_HURT = register("entity.nuzzle.hurt");
+   public static final SoundEvent NUZZLE_DEATH = register("entity.nuzzle.death");
+   public static final SoundEvent NUZZLE_STEP = register("entity.nuzzle.step");
+   public static final SoundEvent POLLINATOR_AMBIENT = register("entity.pollinator.ambient");
+   public static final SoundEvent POLLINATOR_AGGRESSIVE = register("entity.pollinator.aggressive");
+   public static final SoundEvent POLLINATOR_HURT = register("entity.pollinator.hurt");
+   public static final SoundEvent POLLINATOR_DEATH = register("entity.pollinator.death");
+   public static final SoundEvent POLLINATOR_STEP = register("entity.pollinator.step");
+   public static final SoundEvent POLLINATOR_INHALE = register("entity.pollinator.inhale");
+   public static final SoundEvent POLLINATOR_EXHALE = register("entity.pollinator.exhale");
+   public static final SoundEvent POLLINATOR_RUN = register("entity.pollinator.run");
+   public static final SoundEvent POLLINATOR_DROOL_FIRE = register("entity.pollinator.drool_fire");
+   public static final SoundEvent POLLINATOR_DROOL_LAND = register("entity.pollinator.drool_land");
+   public static final SoundEvent POLLINATOR_DROOL_EXPLOSION = register("entity.pollinator.drool_explosion");
+   public static final SoundEvent SCAVENGER_AMBIENT = register("entity.scavenger.ambient");
+   public static final SoundEvent SCAVENGER_HURT = register("entity.scavenger.hurt");
+   public static final SoundEvent SCAVENGER_DEATH = register("entity.scavenger.death");
+   public static final SoundEvent SCAVENGER_MOVEMENT = register("entity.scavenger.movement");
+   public static final SoundEvent SCAVENGER_PROJECTILE_LAUNCH = register("entity.scavenger.projectile_launch");
+   public static final SoundEvent SCAVENGER_PROJECTILE_LOOP = register("entity.scavenger.projectile_loop");
+   public static final SoundEvent SCAVENGER_PROJECTILE_EXPLODE = register("entity.scavenger.projectile_explode");
+   public static final SoundEvent SLABBER_AMBIENT = register("entity.slabber.ambient");
+   public static final SoundEvent SLABBER_HURT = register("entity.slabber.hurt");
+   public static final SoundEvent SLABBER_DEATH = register("entity.slabber.death");
+   public static final SoundEvent SLABBER_STEP = register("entity.slabber.step");
+   public static final SoundEvent STALKER_AMBIENT = register("entity.stalker.ambient");
+   public static final SoundEvent STALKER_HURT = register("entity.stalker.hurt");
+   public static final SoundEvent STALKER_DEATH = register("entity.stalker.death");
+   public static final SoundEvent MONARCH_DEATH = register("entity.monarch.death");
+   public static final SoundEvent MONARCH_AMBIENT = register("entity.monarch.ambient");
+   public static final SoundEvent MONARCH_HURT = register("entity.monarch.hurt");
+   public static final SoundEvent MONARCH_STEP = register("entity.monarch.step");
+   public static final SoundEvent MONARCH_ATTACK = register("entity.monarch.attack");
+   public static final SoundEvent MONARCH_DASH = register("entity.monarch.dash");
+   public static final SoundEvent MONARCH_PROJECTILE_LAUNCH = register("entity.monarch.projectile_launch");
+   public static final SoundEvent MONARCH_PROJECTILE_LOOP = register("entity.monarch.projectile_loop");
+   public static final SoundEvent MONARCH_PROJECTILE_EXPLODE = register("entity.monarch.projectile_explode");
+   public static final SoundEvent ROYAL_SCULK_ACTIVATE = register("block.royal_sculk.activate");
+   public static final SoundEvent ROYAL_SCULK_DEACTIVATE = register("block.royal_sculk.deactivate");
+   public static final SoundEvent STALKER_STEP = register("entity.stalker.step");
+   public static final SoundEvent STALKER_ATTACK = register("entity.stalker.attack");
+   public static final SoundEvent STALKER_DASH = register("entity.stalker.dash");
+   public static final SoundEvent SOULSHALE_BREAK = register("block.soulshale.break");
+   public static final SoundEvent SOULSHALE_HIT = register("block.soulshale.hit");
+   public static final SoundEvent SOULSHALE_PLACE = register("block.soulshale.place");
+   public static final SoundEvent SOULSHALE_STEP = register("block.soulshale.step");
 
    private ModSounds() {
    }
@@ -75,15 +134,23 @@ public final class ModSounds {
 
    private static SoundEvent register(String path) {
       ResourceKey<SoundEvent> key = key(path);
-      return (SoundEvent)ModRegistration.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key.identifier()));
+      return ModRegistration.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key.identifier()));
    }
 
    private static SoundEvent registerFixedRange(String path, float range) {
       ResourceKey<SoundEvent> key = key(path);
-      return (SoundEvent)ModRegistration.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createFixedRangeEvent(key.identifier(), range));
+      return ModRegistration.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createFixedRangeEvent(key.identifier(), range));
    }
 
    private static ResourceKey<SoundEvent> key(String path) {
       return ResourceKey.create(BuiltInRegistries.SOUND_EVENT.key(), Identifier.fromNamespaceAndPath("the_sift", path));
+   }
+
+   static {
+      for (String biome : new String[]{
+         "overgrown", "coral", "ichor_snowy_peaks", "sift_wastes", "siftslate_caves", "soulshale_caves", "corrupted_sift", "organic_desert"
+      }) {
+         register("music.biome." + biome);
+      }
    }
 }

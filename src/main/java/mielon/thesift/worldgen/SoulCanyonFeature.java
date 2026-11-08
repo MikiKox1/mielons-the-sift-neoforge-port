@@ -16,7 +16,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -26,20 +25,22 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
       super(NoneFeatureConfiguration.CODEC);
    }
 
-
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
       BlockPos origin = context.origin();
-      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), origin, 12, 6003110614342389337L, 1)) {
+      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), origin, 10, 6003110614342389337L, 3)) {
          return false;
       }
 
       int centerX = (origin.getX() & -16) + 8;
       int centerZ = (origin.getZ() & -16) + 8;
       if (SiftFeaturePlacementGuard.intersectsPortal(new BlockPos(centerX, 0, centerZ), 34)) {
+         return false;
+      }
+
+      if (SiftCampProtection.near(level, centerX, centerZ, 34)) {
          return false;
       }
 
@@ -52,16 +53,36 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
       SoulCanyonFeature.CanyonPlan plan = null;
       List<BlockPos> soulBlocks = null;
 
-      for (int attempt = 0; attempt < 8 && plan == null; attempt++) {
-         int orientation = firstOrientation + attempt & 3;
-         double candidatePhase = phase + attempt / 4 * 1.941611038725466;
-         SoulCanyonFeature.CanyonPlan candidate = buildPlan(level, bounds, centerX, centerZ, length, baseRadius, maximumDepth, candidatePhase, orientation);
-         if (candidate != null && canCarve(level, candidate.columns().values())) {
-            List<BlockPos> candidateSoulBlocks = selectSoulVeins(candidate, candidatePhase, maximumDepth);
-            if (candidateSoulBlocks.size() >= 8) {
-               plan = candidate;
-               soulBlocks = candidateSoulBlocks;
+      for (int[] offset : new int[][]{{0, 0}, {4, 0}, {-4, 0}, {0, 4}, {0, -4}}) {
+         int candidateX = centerX + offset[0];
+         int candidateZ = centerZ + offset[1];
+
+         for (int referenceY : SiftLandmarkTerrain.exposedSurfaces(level, candidateX, candidateZ)) {
+            for (int attempt = 0; attempt < 24 && plan == null; attempt++) {
+               int tier = attempt / 8;
+               int candidateLength = tier == 0 ? length : (tier == 1 ? 37 : 31);
+               int candidateDepth = tier == 0 ? maximumDepth : (tier == 1 ? 12 : 7);
+               int orientation = firstOrientation + attempt & 3;
+               double candidatePhase = phase + attempt / 4 * 1.941611038725466;
+               SoulCanyonFeature.CanyonPlan candidate = buildPlan(
+                  level, bounds, candidateX, candidateZ, candidateLength, baseRadius, candidateDepth, candidatePhase, orientation, referenceY
+               );
+               if (candidate != null && canCarve(level, candidate.columns().values())) {
+                  List<BlockPos> candidateSoulBlocks = selectSoulVeins(candidate, candidatePhase, candidateDepth);
+                  if (candidateSoulBlocks.size() >= 8) {
+                     plan = candidate;
+                     soulBlocks = candidateSoulBlocks;
+                  }
+               }
             }
+
+            if (plan != null) {
+               break;
+            }
+         }
+
+         if (plan != null) {
+            break;
          }
       }
 
@@ -83,6 +104,7 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
          }
 
          for (SoulCanyonFeature.CanyonColumn column : plan.columns().values()) {
+            SiftTerrainFeatureMemory.canyon(column.x(), column.z(), column.floorY(), column.surfaceY());
             MutableBlockPos cursor = new MutableBlockPos();
 
             for (int y = column.floorY() - 2; y <= column.floorY(); y++) {
@@ -115,7 +137,16 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
    }
 
    private static SoulCanyonFeature.CanyonPlan buildPlan(
-      WorldGenLevel level, SiftWorldgenBounds bounds, int centerX, int centerZ, int length, int baseRadius, int maximumDepth, double phase, int orientation
+      WorldGenLevel level,
+      SiftWorldgenBounds bounds,
+      int centerX,
+      int centerZ,
+      int length,
+      int baseRadius,
+      int maximumDepth,
+      double phase,
+      int orientation,
+      int referenceY
    ) {
       double directionX = (orientation & 1) == 0 ? 0.7071067811865476 : -0.7071067811865476;
       double directionZ = (orientation & 2) == 0 ? 0.7071067811865476 : -0.7071067811865476;
@@ -137,7 +168,7 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
          double exactCenterZ = centerZ + directionZ * offset + sideZ * meander;
          int centerXAtStep = (int)Math.round(exactCenterX);
          int centerZAtStep = (int)Math.round(exactCenterZ);
-         int centerSurface = findTerrainSurfaceBlockY(level, centerXAtStep, centerZAtStep);
+         int centerSurface = SiftLandmarkTerrain.surfaceNearY(level, centerXAtStep, centerZAtStep, referenceY, 8);
          if (centerSurface == Integer.MIN_VALUE) {
             return null;
          }
@@ -193,7 +224,7 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
 
                   double sideRatio = sideDistance / (radius + 0.35);
                   double arch = Math.sqrt(Math.max(0.0, 1.0 - sideRatio * sideRatio));
-                  int surfaceY = findTerrainSurfaceBlockY(level, x, z);
+                  int surfaceY = SiftLandmarkTerrain.surfaceNearY(level, x, z, referenceY, 8);
                   if (surfaceY == Integer.MIN_VALUE) {
                      return null;
                   }
@@ -433,9 +464,17 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
       MutableBlockPos cursor = new MutableBlockPos();
 
       for (SoulCanyonFeature.CanyonColumn column : columns) {
+         for (int supportY = column.floorY() - 4; supportY <= column.floorY(); supportY++) {
+            if (!SiftLandmarkTerrain.isGround(level.getBlockState(new BlockPos(column.x(), supportY, column.z())))) {
+               return false;
+            }
+         }
+
          for (int y = column.floorY() - 2; y <= Math.max(column.surfaceY() + 3, column.floorY() + 3); y++) {
             cursor.set(column.x(), y, column.z());
-            if (!SiftLandmarkTerrain.canReplace(level.getBlockState(cursor)) || !level.ensureCanWrite(cursor)) {
+            if (!SiftLandmarkTerrain.canReplace(level.getBlockState(cursor))
+               || !level.ensureCanWrite(cursor)
+               || SiftTerrainFeatureMemory.isSupport(column.x(), y, column.z())) {
                return false;
             }
          }
@@ -465,7 +504,7 @@ public final class SoulCanyonFeature extends Feature<NoneFeatureConfiguration> {
       value ^= value >>> 30;
       value *= -4658895280553007687L;
       value ^= value >>> 27;
-      return ((value ^ value >>> 31) >>> 11) * 0x1.0p-53;
+      return ((value ^ value >>> 31) >>> 11) * 1.110223E-16F;
    }
 
    private record CanyonColumn(int x, int z, int surfaceY, int floorY, int depth, double progress, int alongStep, int sideDistance, double signedSide) {

@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/regicide",
+  "display": {
+    "icon": {
+      "id": "the_sift:monarch_elytra"
+    },
+    "title": {
+      "translate": "advancement.the_sift.skys_no_longer_a_limit.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.skys_no_longer_a_limit.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

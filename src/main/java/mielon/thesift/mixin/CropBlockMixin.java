@@ -17,7 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class CropBlockMixin {
    @Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
    private void theSift$allowCropsOnSiftSoil(BlockState floor, BlockGetter level, BlockPos floorPos, CallbackInfoReturnable<Boolean> cir) {
-      if (floor.is(ModBlocks.HEALTHY_SCULK) || floor.is(ModBlocks.DRY_HEALTHY_SCULK) || (Object)this == Blocks.TORCHFLOWER_CROP && theSift$isSiftSoil(floor)) {
+      if (floor.is(ModBlocks.HEALTHY_SCULK)
+         || floor.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || floor.is(ModBlocks.HEALTHY_SCULK_PORES)
+         || floor.is(ModBlocks.DRY_HEALTHY_SCULK)
+         || (Object)this == Blocks.TORCHFLOWER_CROP && theSift$isSiftSoil(floor)) {
          cir.setReturnValue(true);
       }
    }
@@ -32,17 +36,26 @@ public abstract class CropBlockMixin {
    )
    private static BlockState theSift$useHydratedSoilGrowth(BlockGetter level, BlockPos pos) {
       BlockState soil = level.getBlockState(pos);
-      return !soil.is(ModBlocks.HEALTHY_SCULK) && !soil.is(ModBlocks.DRY_HEALTHY_SCULK)
+      return !soil.is(ModBlocks.HEALTHY_SCULK)
+            && !soil.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+            && !soil.is(ModBlocks.HEALTHY_SCULK_PORES)
+            && !soil.is(ModBlocks.DRY_HEALTHY_SCULK)
          ? soil
-         : (BlockState)Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7);
+         : Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7);
    }
 
    private static boolean theSift$isSiftSoil(BlockState floor) {
       return floor.is(ModBlocks.SIFTSLATE)
          || floor.is(ModBlocks.SIFTSLATE_GROWTH)
          || floor.is(ModBlocks.HEALTHY_SCULK)
+         || floor.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || floor.is(ModBlocks.HEALTHY_SCULK_PORES)
          || floor.is(ModBlocks.DRY_HEALTHY_SCULK)
          || floor.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-         || floor.is(ModBlocks.OVERGROWN_WILLOW_FOLIAGE);
+         || floor.is(ModBlocks.OVERGROWN_WILLOW_FOLIAGE)
+         || floor.is(ModBlocks.ASH_WILLOW_FOLIAGE)
+         || floor.is(ModBlocks.CORAL_SOIL)
+         || floor.is(ModBlocks.CORAL_GROWTH)
+         || floor.is(ModBlocks.BRIGHT_CORAL_GROWTH);
    }
 }

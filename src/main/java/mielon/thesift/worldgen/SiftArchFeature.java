@@ -3,31 +3,29 @@ package mielon.thesift.worldgen;
 import java.util.ArrayList;
 import java.util.List;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
+   private static final int[][] AXES = new int[][]{{1, 0}, {0, 1}, {1, 1}, {1, -1}};
+
    public SiftArchFeature() {
       super(NoneFeatureConfiguration.CODEC);
    }
 
-   private static final int[][] AXES = new int[][]{{1, 0}, {0, 1}, {1, 1}, {1, -1}};
-
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
-      BlockPos origin = context.origin();
-      BlockPos placementOrigin = origin;
+      BlockPos placementOrigin = context.origin();
       SiftWorldgenBounds bounds = SiftWorldgenBounds.aroundWithNeighbourMargin(placementOrigin);
       int centerX = (placementOrigin.getX() & -16) + 8 + random.nextInt(3) - 1;
       int centerZ = (placementOrigin.getZ() & -16) + 8 + random.nextInt(3) - 1;
@@ -38,6 +36,10 @@ public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
 
       int centerY = SiftMonolithFeature.findTerrainSurface(level, centerX, centerZ);
       if (centerY < 0) {
+         return false;
+      }
+
+      if (SiftCampProtection.near(level, centerX, centerZ, 24)) {
          return false;
       }
 
@@ -63,8 +65,9 @@ public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
       boolean healthyGround = isHealthy(leftFloor) || isHealthy(rightFloor);
       boolean growthGround = leftFloor.is(ModBlocks.SIFTSLATE_GROWTH) || rightFloor.is(ModBlocks.SIFTSLATE_GROWTH);
       float healthyChance = healthyGround ? 0.78F : (growthGround ? 0.22F : 0.43F);
-      boolean healthy = random.nextFloat() < healthyChance;
-      BlockState body = (healthy ? ModBlocks.HEALTHY_SCULK : ModBlocks.SIFTSLATE).defaultBlockState();
+      boolean coral = TheSiftDimension.isCoralBiome(level.getBiome(new BlockPos(centerX, centerY, centerZ)));
+      boolean healthy = random.nextFloat() < healthyChance && !coral;
+      BlockState body = (coral ? ModBlocks.SOULSHALE : (healthy ? ModBlocks.HEALTHY_SCULK : ModBlocks.SIFTSLATE)).defaultBlockState();
       boolean growthVariant = !healthy && growthGround;
       double baseThickness = 2.45 + random.nextDouble() * 0.9;
       int span = best.halfSpan * 2;
@@ -160,6 +163,7 @@ public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
                && level.ensureCanWrite(pos)
                && !archBlocks.contains(abovePos.asLong())
                && isOpenCrownSpace(level.getBlockState(abovePos))
+               && SiftLandmarkTerrain.allowsGrowth(level, pos)
                && level.getBlockState(pos).is(ModBlocks.SIFTSLATE)) {
                level.setBlock(pos, ModBlocks.SIFTSLATE_GROWTH.defaultBlockState(), 2);
             }
@@ -269,7 +273,13 @@ public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
                         && dy < 0
                         && stripeSeed / 8 % 7 == 3
                         && hash01(cursor.getX(), cursor.getY(), cursor.getZ(), salt ^ -7046029254386353131L) < 0.58;
-                     level.setBlock(cursor, dryVein ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState() : mainState, 2);
+                     level.setBlock(
+                        cursor,
+                        TheSiftDimension.isCoralBiome(level.getBiome(cursor))
+                           ? ModBlocks.SOULSHALE.defaultBlockState()
+                           : (dryVein ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState() : mainState),
+                        2
+                     );
                      placedBlocks.add(cursor.asLong());
                      placed++;
                   }
@@ -343,7 +353,7 @@ public final class SiftArchFeature extends Feature<NoneFeatureConfiguration> {
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 
    private static double smootherstep(double value) {

@@ -35,8 +35,6 @@ final class IchorCauldronInteractions {
       if (!registered) {
          registered = true;
          Dispatcher ichor = IchorCauldronBlock.INTERACTIONS;
-         // MC26.1.2 keeps this vanilla helper package-private; preserve its exact three
-         // bucket handlers via a targeted invoker rather than approximating interactions.
          CauldronInteractionsInvoker.theSift$addDefaultInteractions(ichor);
          itemInteractions(CauldronInteractions.EMPTY)
             .put(
@@ -47,7 +45,7 @@ final class IchorCauldronInteractions {
                   player,
                   hand,
                   stack,
-                  (BlockState)ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3),
+                  ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3),
                   ModSounds.ICHOR_BUCKET_EMPTY
                )
             );
@@ -64,7 +62,7 @@ final class IchorCauldronInteractions {
                   hand,
                   stack,
                   new ItemStack(ModFluids.ICHOR_BUCKET),
-                  candidate -> candidate.is(ModBlocks.ICHOR_CAULDRON) && (Integer)candidate.getValue(LayeredCauldronBlock.LEVEL) == 3,
+                  candidate -> candidate.is(ModBlocks.ICHOR_CAULDRON) && candidate.getValue(LayeredCauldronBlock.LEVEL) == 3,
                   ModSounds.ICHOR_BUCKET_FILL
                )
             );
@@ -77,7 +75,7 @@ final class IchorCauldronInteractions {
    }
 
    private static InteractionResult fillFromBottle(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
-      int currentLevel = state.is(ModBlocks.ICHOR_CAULDRON) ? (Integer)state.getValue(LayeredCauldronBlock.LEVEL) : 0;
+      int currentLevel = state.is(ModBlocks.ICHOR_CAULDRON) ? state.getValue(LayeredCauldronBlock.LEVEL) : 0;
       if (currentLevel >= 3) {
          return InteractionResult.PASS;
       }
@@ -87,7 +85,7 @@ final class IchorCauldronInteractions {
          player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, emptyBottle));
          player.awardStat(Stats.USE_CAULDRON);
          player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
-         BlockState next = (BlockState)ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, currentLevel + 1);
+         BlockState next = ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, currentLevel + 1);
          level.setBlockAndUpdate(pos, next);
          level.playSound(null, pos, ModSounds.ICHOR_BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
          level.gameEvent(player, GameEvent.FLUID_PLACE, pos);

@@ -3,12 +3,7 @@
   "biomes": [
     "the_sift:overgrown_forest",
     "the_sift:overgrown_clearing",
-    "the_sift:overgrown_slopes",
-    "the_sift:overgrown_peaks",
-    "the_sift:overgrown_forest_slopes",
     "the_sift:sift_wastes",
-    "the_sift:siftslate_slopes",
-    "the_sift:siftslate_peaks",
     "the_sift:ichor_snowy_peaks"
   ],
   "spawn_overrides": {},

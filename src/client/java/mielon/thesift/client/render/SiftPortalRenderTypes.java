@@ -1,41 +1,55 @@
 package mielon.thesift.client.render;
 
+import mielon.thesift.client.compat.SiftShaderCompat;
+
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.pipeline.RenderPipeline.Snippet;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import java.util.Optional;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 public final class SiftPortalRenderTypes {
-   private static final Identifier PIPELINE_ID = Identifier.fromNamespaceAndPath("the_sift", "pipeline/sift_portal");
-   private static final Identifier SHADER_ID = Identifier.fromNamespaceAndPath("the_sift", "core/sift_portal");
-   private static final Identifier MIST_TEXTURE = Identifier.fromNamespaceAndPath("the_sift", "textures/block/sift_portal_mist.png");
-   private static final RenderPipeline SIFT_PORTAL_PIPELINE = RenderPipeline.builder(
-      RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.GLOBALS_SNIPPET, RenderPipelines.FOG_SNIPPET)
-      .withLocation(PIPELINE_ID)
-      .withVertexShader(SHADER_ID)
-      .withFragmentShader(SHADER_ID)
-      .withSampler("Sampler0")
-      .withSampler("Sampler1")
-      .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-      .withDepthStencilState(DepthStencilState.DEFAULT)
-      .withCull(true)
-      .withShaderDefine("PORTAL_LAYERS", 15)
+   private static final Identifier WHITE = Identifier.fromNamespaceAndPath("the_sift", "textures/misc/portal_white.png");
+   public static final RenderType SURFACE = RenderTypes.beaconBeam(WHITE, true);
+   public static final RenderType RIM = SURFACE;
+   public static final RenderType CORE = RenderTypes.beaconBeam(WHITE, false);
+   private static final RenderType SHADER_SURFACE = RenderTypes.entityTranslucent(WHITE);
+   public static final RenderType SHADER_BACKDROP = RenderTypes.entityCutout(WHITE);
+   private static final RenderPipeline DEPTH_PIPELINE = RenderPipeline.builder(RenderPipelines.BEACON_BEAM_SNIPPET)
+      .withLocation(Identifier.fromNamespaceAndPath("the_sift", "pipeline/portal_depth_mask"))
+      .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_NONE))
+      .withDepthStencilState(new DepthStencilState(DepthStencilState.DEFAULT.depthTest(), true))
+      .withCull(false)
       .build();
-   public static final RenderType SIFT_PORTAL = RenderType.create(
-      "the_sift_portal",
-      RenderSetup.builder(SIFT_PORTAL_PIPELINE).withTexture("Sampler0", MIST_TEXTURE).withTexture("Sampler1", MIST_TEXTURE).createRenderSetup()
+   public static final RenderType DEPTH = RenderType.create(
+      "the_sift_portal_depth", RenderSetup.builder(DEPTH_PIPELINE).withTexture("Sampler0", WHITE).createRenderSetup()
    );
 
-   private SiftPortalRenderTypes() {
+   public static RenderType surface(boolean shaderPack) {
+      return shaderPack ? SHADER_SURFACE : SURFACE;
+   }
+
+   public static RenderType rim(boolean shaderPack) {
+      return shaderPack ? SHADER_SURFACE : RIM;
+   }
+
+   public static RenderType core(boolean shaderPack) {
+      return shaderPack ? SHADER_SURFACE : CORE;
    }
 
    public static void registerPipelines(RegisterRenderPipelinesEvent event) {
-      event.registerPipeline(SIFT_PORTAL_PIPELINE);
+      event.registerPipeline(DEPTH_PIPELINE);
+   }
+
+   public static void initialize() {
+      SiftShaderCompat.assignPipeline(DEPTH_PIPELINE, "BEACON_BEAM");
+   }
+
+   private SiftPortalRenderTypes() {
    }
 }

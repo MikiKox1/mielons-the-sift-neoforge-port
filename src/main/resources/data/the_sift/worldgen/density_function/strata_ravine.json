@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:abs",
+    "argument": {
+      "type": "minecraft:add",
+      "argument1": {
+        "type": "minecraft:noise",
+        "noise": "the_sift:strata_ravines",
+        "xz_scale": 1.05,
+        "y_scale": 0
+      },
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": 0.018,
+        "argument2": "the_sift:strata_local_relief"
+      }
+    }
+  }
+}

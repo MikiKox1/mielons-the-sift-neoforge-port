@@ -1,12 +1,12 @@
 package mielon.thesift.worldgen;
 
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -20,10 +20,9 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
       this.lush = lush;
    }
 
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
       BlockPos placementOrigin = context.origin();
       int centerX = (placementOrigin.getX() & -16) + 8 + random.nextInt(5) - 2;
@@ -34,6 +33,14 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
       }
 
       BlockPos origin = new BlockPos(centerX, centerY, centerZ);
+      if (TheSiftDimension.isGrimSurfaceBiome(level.getBiome(origin.below()))) {
+         return false;
+      }
+
+      if (SiftCampProtection.near(level, centerX, centerZ, 24)) {
+         return false;
+      }
+
       if (!isDrySupportedSurface(level, centerX, centerY, centerZ, 6)) {
          return false;
       }
@@ -103,7 +110,7 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
                double edgeRadius = radius + edgeNoise;
                if (!(dx * dx + dz * dz > edgeRadius * edgeRadius)) {
                   cursor.set(centerX + dx, baseY + dy, centerZ + dz);
-                  if (canReplace(level.getBlockState(cursor)) && level.ensureCanWrite(cursor)) {
+                  if (canReplace(level.getBlockState(cursor)) && level.ensureCanWrite(cursor) && !TheSiftDimension.isCoralBiome(level.getBiome(cursor))) {
                      level.setBlock(cursor, ModBlocks.SIFTSLATE.defaultBlockState(), 2);
                      placed++;
                   }
@@ -124,12 +131,12 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
             double edgeRadius = topRadius + (hash01(topX + dx, topY, topZ + dz, salt ^ 1779033703L) - 0.5) * 0.7;
             if (!(dx * dx + dz * dz > edgeRadius * edgeRadius)) {
                capPos.set(topX + dx, topY, topZ + dz);
-               if (canReplace(level.getBlockState(capPos)) && level.ensureCanWrite(capPos)) {
-                  level.setBlock(capPos, cap, 2);
+               if (canReplace(level.getBlockState(capPos)) && level.ensureCanWrite(capPos) && !TheSiftDimension.isCoralBiome(level.getBiome(capPos))) {
+                  level.setBlock(capPos, SiftLandmarkTerrain.growthSurface(level, capPos, cap), 2);
                   placed++;
                }
 
-               if (withGrowth) {
+               if (withGrowth && !TheSiftDimension.isCoralBiome(level.getBiome(capPos))) {
                   SiftSurfaceDecorator.decorate(level, random, capPos, 1.08F);
                }
             }
@@ -160,7 +167,7 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
                   if (localSurface <= targetTop + 1) {
                      for (int y = localSurface - 2; y <= targetTop; y++) {
                         cursor.set(x, y, z);
-                        if (level.ensureCanWrite(cursor) && canReplace(level.getBlockState(cursor))) {
+                        if (level.ensureCanWrite(cursor) && canReplace(level.getBlockState(cursor)) && !TheSiftDimension.isCoralBiome(level.getBiome(cursor))) {
                            level.setBlock(cursor, ModBlocks.SIFTSLATE.defaultBlockState(), 2);
                            placed++;
                         }
@@ -216,9 +223,15 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
    }
 
    static boolean isSiftTerrain(BlockState state) {
-      return state.is(ModBlocks.SIFTSLATE)
+      return state.is(ModBlocks.SOULSHALE)
+         || state.is(ModBlocks.CORAL_SOIL)
+         || state.is(ModBlocks.CORAL_GROWTH)
+         || state.is(ModBlocks.BRIGHT_CORAL_GROWTH)
+         || state.is(ModBlocks.SIFTSLATE)
          || state.is(ModBlocks.SIFTSLATE_GROWTH)
          || state.is(ModBlocks.HEALTHY_SCULK)
+         || state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || state.is(ModBlocks.HEALTHY_SCULK_PORES)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH);
    }
@@ -239,13 +252,17 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
    }
 
    static boolean canReplace(BlockState state) {
-      return state.isAir()
+      return state.is(ModBlocks.CORAL_BUSH)
+         || state.is(ModBlocks.BRIGHT_CORAL_BUSH)
+         || state.isAir()
          || isSiftTerrain(state)
          || state.is(ModBlocks.OVERGROWN_CHARD)
          || state.is(ModBlocks.OVERGROWN_STALKS)
          || state.is(ModBlocks.OVERGROWN_FRONDS)
          || state.is(ModBlocks.SIFTSLATE_STALKS)
          || state.is(ModBlocks.HEALTHY_SCULK_SPROUTS)
+         || state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE_SPROUT)
+         || state.is(ModBlocks.GRIM_BUSH)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK_SPROUTS);
    }
 
@@ -275,6 +292,6 @@ public final class SiftMonolithFeature extends Feature<NoneFeatureConfiguration>
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 }

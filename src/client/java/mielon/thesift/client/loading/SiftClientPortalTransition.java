@@ -51,7 +51,15 @@ public final class SiftClientPortalTransition {
       SiftIntroClient.tick();
       if (SiftLoadingScreenState.isActive()) {
          Screen screen = minecraft.screen;
-         if (!(screen instanceof SiftTransitionScreen) && !(screen instanceof LevelLoadingScreen)) {
+         if (screen instanceof SiftTransitionScreen
+            && minecraft.level != null
+            && minecraft.player != null
+            && !minecraft.level.dimension().equals(SiftLoadingScreenState.sourceDimension())
+            && minecraft.level.hasChunkAt(minecraft.player.blockPosition())) {
+            awaitingServer = false;
+            SiftLoadingScreenState.clear();
+            minecraft.setScreen(null);
+         } else if (!(screen instanceof SiftTransitionScreen) && !(screen instanceof LevelLoadingScreen)) {
             SiftLoadingScreenState.clear();
          } else if (SiftLoadingScreenState.isOlderThanSeconds(35.0)) {
             SiftLoadingScreenState.clear();

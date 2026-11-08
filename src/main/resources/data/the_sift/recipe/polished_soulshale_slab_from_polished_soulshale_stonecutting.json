@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "the_sift:polished_soulshale",
+  "result": {
+    "id": "the_sift:polished_soulshale_slab",
+    "count": 2
+  }
+}

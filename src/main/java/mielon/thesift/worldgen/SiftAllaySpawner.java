@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.phys.AABB;
 
 public final class SiftAllaySpawner {
-   private static final int CHECK_INTERVAL = 80;
+   private static final int CHECK_INTERVAL = 200;
    private static int checkCooldown;
 
    private SiftAllaySpawner() {
@@ -20,12 +20,12 @@ public final class SiftAllaySpawner {
 
    public static void tick(MinecraftServer server) {
       if (--checkCooldown <= 0) {
-         checkCooldown = 80;
+         checkCooldown = 200;
          ServerLevel level = server.getLevel(TheSiftDimension.LEVEL_KEY);
-         if (level != null) {
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-               if (player.level() == level && player.isAlive() && !player.isSpectator() && trySpawnNear(level, player.blockPosition())) {
-                  return;
+         if (level != null && SiftSpawnBudget.enabled(level)) {
+            for (ServerPlayer player : level.players()) {
+               if (player.level() == level && player.isAlive() && !player.isSpectator()) {
+                  trySpawnNear(level, player.blockPosition());
                }
             }
          }
@@ -51,13 +51,14 @@ public final class SiftAllaySpawner {
 
                AABB local = new AABB(center).inflate(96.0, 48.0, 96.0);
                int localPopulation = level.getEntitiesOfClass(Allay.class, local).size();
-               int available = profile.localCap() - localPopulation;
-               if (available < profile.minimumGroup()) {
+               int available = Math.min(profile.localCap() - localPopulation, SiftSpawnBudget.availableAllays(level, center));
+               if (available <= 0) {
                   return false;
                }
 
                int maximumGroup = Math.min(profile.maximumGroup(), available);
-               int groupSize = profile.minimumGroup() + level.getRandom().nextInt(maximumGroup - profile.minimumGroup() + 1);
+               int minimumGroup = Math.min(profile.minimumGroup(), maximumGroup);
+               int groupSize = minimumGroup + level.getRandom().nextInt(maximumGroup - minimumGroup + 1);
                return spawnGroup(level, center, profile, groupSize);
             }
          }
@@ -75,20 +76,22 @@ public final class SiftAllaySpawner {
          for (int attempt = 0; attempt < 10 && feet == null; attempt++) {
             int x = center.getX() + level.getRandom().nextInt(9) - 4;
             int z = center.getZ() + level.getRandom().nextInt(9) - 4;
-            int y = level.getHeight(Types.WORLD_SURFACE, x, z) + 5 + level.getRandom().nextInt(8);
-            BlockPos candidate = new BlockPos(x, y, z);
-            if (profileAt(level, candidate) == profile
-               && level.getBlockState(candidate).getCollisionShape(level, candidate).isEmpty()
-               && level.getBlockState(candidate.above()).getCollisionShape(level, candidate.above()).isEmpty()) {
-               feet = candidate;
+            if (level.getChunkSource().getChunkNow(Math.floorDiv(x, 16), Math.floorDiv(z, 16)) != null) {
+               int y = level.getHeight(Types.WORLD_SURFACE, x, z) + 5 + level.getRandom().nextInt(8);
+               BlockPos candidate = new BlockPos(x, y, z);
+               if (profileAt(level, candidate) == profile
+                  && level.getBlockState(candidate).getCollisionShape(level, candidate).isEmpty()
+                  && level.getBlockState(candidate.above()).getCollisionShape(level, candidate.above()).isEmpty()) {
+                  feet = candidate;
+               }
             }
          }
 
-         if (feet != null) {
-            Allay allay = (Allay)EntityType.ALLAY.create(level, EntitySpawnReason.NATURAL);
+         if (feet != null && SiftSpawnBudget.availableAllays(level, feet) > 0) {
+            Allay allay = EntityType.ALLAY.create(level, EntitySpawnReason.NATURAL);
             if (allay != null) {
                allay.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-               if (level.noCollision(allay) && level.addFreshEntity(allay)) {
+               if (level.noCollision(allay) && !level.getBiome(allay.blockPosition()).is(TheSiftDimension.CORRUPTED_SIFT) && level.addFreshEntity(allay)) {
                   spawned++;
                } else {
                   allay.discard();
@@ -101,7 +104,9 @@ public final class SiftAllaySpawner {
    }
 
    private static SiftAllaySpawner.SpawnProfile profileAt(ServerLevel level, BlockPos pos) {
-      if (level.getBiome(pos).is(TheSiftDimension.OVERGROWN_FOREST)) {
+      if (TheSiftDimension.isCoralBiome(level.getBiome(pos))) {
+         return SiftAllaySpawner.SpawnProfile.CORAL;
+      } else if (level.getBiome(pos).is(TheSiftDimension.OVERGROWN_FOREST)) {
          return SiftAllaySpawner.SpawnProfile.FOREST;
       } else if (level.getBiome(pos).is(TheSiftDimension.SIFT_WASTES)) {
          return SiftAllaySpawner.SpawnProfile.WASTES;
@@ -115,9 +120,10 @@ public final class SiftAllaySpawner {
    }
 
    private enum SpawnProfile {
-      FOREST(0.72, 2, 4, 16),
-      WASTES(0.5, 2, 3, 12),
-      CLEARING(0.32, 1, 3, 8);
+      CORAL(0.15, 1, 2, 3),
+      FOREST(0.55, 2, 3, 6),
+      WASTES(0.4, 1, 2, 4),
+      CLEARING(0.35, 1, 2, 4);
 
       private final double chance;
       private final int minimumGroup;

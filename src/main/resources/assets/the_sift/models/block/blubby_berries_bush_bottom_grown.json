@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "the_sift:block/blubby_berries_bush_bottom_grown"
+  },
+  "render_type": "minecraft:cutout"
+}

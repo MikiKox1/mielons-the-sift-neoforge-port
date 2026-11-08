@@ -33,7 +33,7 @@ public abstract class IchorWaterParticleMixin {
       ClientLevel level = Minecraft.getInstance().level;
       if (level != null) {
          boolean siftRain = options.getType() == ParticleTypes.RAIN && level.dimension().equals(TheSiftDimension.LEVEL_KEY) && level.isRaining();
-         ParticleType<?> replacement = (ParticleType<?>)(siftRain ? ModParticles.ICHOR_RAIN_SPLASH : theSift$replacement(options.getType()));
+         ParticleType<?> replacement = siftRain ? ModParticles.ICHOR_RAIN_SPLASH : theSift$replacement(options.getType());
          if (replacement != null
             && (siftRain || theSift$isNearIchor(level, BlockPos.containing(x, y, z)))
             && replacement instanceof ParticleOptions replacementOptions) {
@@ -47,7 +47,7 @@ public abstract class IchorWaterParticleMixin {
    private void theSift$tintIchorWaterParticles(
       ParticleOptions options, double x, double y, double z, double xd, double yd, double zd, CallbackInfoReturnable<Particle> cir
    ) {
-      Particle particle = (Particle)cir.getReturnValue();
+      Particle particle = cir.getReturnValue();
       ClientLevel level = Minecraft.getInstance().level;
       if (level != null && theSift$isWaterParticle(options.getType())) {
          BlockPos pos = BlockPos.containing(x, y, z);

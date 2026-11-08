@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 
 public final class IchorState {
+   public static final int LIGHT_LEVEL = 12;
    public static final BooleanProperty ICHORLOGGED = BooleanProperty.create("ichorlogged");
    public static FluidState source;
 
@@ -12,6 +13,6 @@ public final class IchorState {
    }
 
    public static BlockState dryDefault(BlockState state) {
-      return state.hasProperty(ICHORLOGGED) ? (BlockState)state.setValue(ICHORLOGGED, false) : state;
+      return state.hasProperty(ICHORLOGGED) ? state.setValue(ICHORLOGGED, false) : state;
    }
 }

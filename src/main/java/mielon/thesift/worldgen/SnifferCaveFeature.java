@@ -1,11 +1,15 @@
 package mielon.thesift.worldgen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.fluid.ModFluids;
+import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -15,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -42,19 +45,17 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
       this.candidateCount = candidateCount;
    }
 
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
-      BlockPos origin = context.origin();
-      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), origin, this.cellChunks, this.placementSalt, this.candidateCount)) {
+      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), context.origin(), this.cellChunks, this.placementSalt, this.candidateCount)) {
          return false;
       }
 
-      SiftWorldgenBounds bounds = SiftWorldgenBounds.aroundWithNeighbourMargin(origin);
-      int length = 14 + random.nextInt(3);
-      SnifferCaveFeature.CaveEntrance entrance = findEntrance(level, origin);
+      SiftWorldgenBounds bounds = SiftWorldgenBounds.aroundWithNeighbourMargin(context.origin());
+      int length = 10 + random.nextInt(5);
+      SnifferCaveFeature.CaveEntrance entrance = findEntrance(context);
       Direction direction = entrance == null ? null : chooseDirection(level, bounds, entrance.pos(), length, random);
       if (entrance != null && direction != null) {
          Set<BlockPos> interior = new HashSet<>();
@@ -66,7 +67,7 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
          for (int distance = 0; distance <= length; distance += 2) {
             double progress = (double)distance / length;
             int lateral = (int)Math.round(Math.sin(phase + progress * Math.PI * 1.7) * (0.6 + progress * 1.35));
-            int lift = (int)Math.round(Math.sin(progress * Math.PI) * 0.9) - (int)Math.round(progress * 9.0);
+            int lift = (int)Math.round(Math.sin(progress * Math.PI) * 0.9) - (int)Math.round(progress * 6.0);
             BlockPos center = entrance.pos().relative(direction, distance).relative(sideways, lateral).above(lift);
             double swell = Math.sin(progress * Math.PI);
             double radiusXz = 2.1 + swell * 1.65 + random.nextDouble() * 0.35;
@@ -88,18 +89,43 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
          writes.addAll(basin.fluid());
          writes.addAll(basin.lining());
          writes.addAll(basin.clearance());
-         if (!SiftFeaturePlacementGuard.intersectsPortal(nestCenter, 12) && validMass(level, bounds, nestCenter) && canCarveAll(level, bounds, writes)) {
+
+         for (BlockPos write : writes) {
+            if (TheSiftDimension.isOrganicDesert(SiftCaveHabitat.surfaceBiome(level, write.getX(), write.getZ()))) {
+               return false;
+            }
+         }
+
+         if (!SiftFeaturePlacementGuard.intersectsPortal(nestCenter, 12)
+            && validMass(level, bounds, nestCenter)
+            && canCarveAll(level, bounds, writes)
+            && enclosedShell(level, shell, entrance.pos())) {
+            Map<Long, int[]> spans = new HashMap<>();
+
+            for (BlockPos pos : writes) {
+               long column = BlockPos.asLong(pos.getX(), 0, pos.getZ());
+               int[] span = spans.computeIfAbsent(column, key -> new int[]{pos.getY(), pos.getY()});
+               span[0] = Math.min(span[0], pos.getY());
+               span[1] = Math.max(span[1], pos.getY());
+            }
+
+            for (Entry<Long, int[]> entry : spans.entrySet()) {
+               BlockPos column = BlockPos.of(entry.getKey());
+               SiftTerrainFeatureMemory.protectTerrain(column.getX(), column.getZ(), entry.getValue()[0], entry.getValue()[1]);
+               SiftTerrainFeatureMemory.excludeRibs(column.getX(), column.getZ(), entry.getValue()[0], entry.getValue()[1]);
+            }
+
             for (BlockPos pos : shell) {
                if (!bounds.contains(pos)) {
                   return false;
                }
 
                BlockState current = level.getBlockState(pos);
-               if (isSiftTerrain(current) && level.ensureCanWrite(pos)) {
+               if ((isSiftTerrain(current) || current.isAir())
+                  && level.ensureCanWrite(pos)
+                  && (isSiftTerrain(current) || distanceSquared(pos, entrance.pos()) > 64)) {
                   float healthyChance = 0.18F + (distanceSquared(pos, nestCenter) < 90 ? 0.13F : 0.0F);
-                  BlockState lining = random.nextFloat() < healthyChance
-                     ? ModBlocks.HEALTHY_SCULK.defaultBlockState()
-                     : ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState();
+                  BlockState lining = caveSoil(level, pos, random.nextFloat() < healthyChance);
                   level.setBlock(pos, lining, 2);
                }
             }
@@ -129,10 +155,11 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
       }
    }
 
-   private static SnifferCaveFeature.CaveEntrance findEntrance(WorldGenLevel level, BlockPos origin) {
-      int x = (origin.getX() & -16) + 8;
-      int z = (origin.getZ() & -16) + 8;
-      int surface = level.getHeight(Types.WORLD_SURFACE_WG, x, z);
+   private static SnifferCaveFeature.CaveEntrance findEntrance(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+      WorldGenLevel level = context.level();
+      int x = (context.origin().getX() & -16) + 8;
+      int z = (context.origin().getZ() & -16) + 8;
+      int surface = SiftCaveHabitat.rockTop(level, x, z) + 1;
       BlockPos entrance = new BlockPos(x, surface, z);
       return surface > level.getMinY() + 18 && isSiftTerrain(level.getBlockState(entrance.below())) ? new SnifferCaveFeature.CaveEntrance(entrance) : null;
    }
@@ -143,7 +170,7 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
 
       for (int index = 0; index < HORIZONTAL.length; index++) {
          Direction direction = HORIZONTAL[(start + index) % HORIZONTAL.length];
-         BlockPos end = entrance.relative(direction, length + 1).below(8);
+         BlockPos end = entrance.relative(direction, length + 1).below(5);
          if (bounds.contains(end.offset(6, 4, 6)) && bounds.contains(end.offset(-6, -5, -6))) {
             int surface = level.getHeight(Types.WORLD_SURFACE_WG, end.getX(), end.getZ());
             int cover = surface - end.getY();
@@ -283,12 +310,43 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
       }
 
       for (BlockPos pos : basin.lining()) {
-         level.setBlock(pos, (random.nextFloat() < 0.55F ? ModBlocks.HEALTHY_SCULK : ModBlocks.DRY_HEALTHY_SCULK).defaultBlockState(), 2);
+         level.setBlock(pos, caveSoil(level, pos, random.nextFloat() < 0.55F), 2);
       }
 
       for (BlockPos pos : basin.fluid()) {
          level.setBlock(pos, ModFluids.ICHOR_BLOCK.defaultBlockState(), 2);
       }
+   }
+
+   private static boolean enclosedShell(WorldGenLevel level, Set<BlockPos> shell, BlockPos entrance) {
+      int gaps = 0;
+      int checked = 0;
+
+      for (BlockPos pos : shell) {
+         if (distanceSquared(pos, entrance) > 64) {
+            checked++;
+            if (!isSiftTerrain(level.getBlockState(pos))) {
+               if (!level.isEmptyBlock(pos)) {
+                  return false;
+               }
+
+               boolean rockNearby = false;
+
+               for (Direction direction : Direction.values()) {
+                  if (isSiftTerrain(level.getBlockState(pos.relative(direction)))) {
+                     rockNearby = true;
+                     break;
+                  }
+               }
+
+               if (!rockNearby || ++gaps > shell.size() / 8) {
+                  return false;
+               }
+            }
+         }
+      }
+
+      return checked > 0;
    }
 
    private static boolean canCarveAll(WorldGenLevel level, SiftWorldgenBounds bounds, Set<BlockPos> interior) {
@@ -302,10 +360,13 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
 
          BlockState state = level.getBlockState(pos);
          if (state.is(ModBlocks.REINFORCED_SIFTSLATE)
+            || state.is(ModBlocks.REINFORCED_SOULSHALE)
             || state.is(ModBlocks.SIFT_PORTAL)
             || state.is(ModBlocks.SONOROUS_DEEPSLATE)
             || state.is(ModBlocks.OVERGROWN_WILLOW_LOG)
-            || state.is(ModBlocks.OVERGROWN_WILLOW_WOOD)) {
+            || state.is(ModBlocks.OVERGROWN_WILLOW_WOOD)
+            || state.is(ModBlocks.ASH_WILLOW_LOG)
+            || state.is(ModBlocks.ASH_WILLOW_WOOD)) {
             protectedBlocks++;
          } else if (isSiftTerrain(state)) {
             siftMass++;
@@ -337,7 +398,7 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
          }
       }
 
-      return solid >= total * 0.56;
+      return solid >= total * 0.78;
    }
 
    private static void scatterSnifferPlants(WorldGenLevel level, RandomSource random, Set<BlockPos> interior, BlockPos nestCenter) {
@@ -350,7 +411,7 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
          BlockPos floor = findFloor(level, air.getX(), air.getZ(), nestCenter.getY());
          if (floor != null && level.isEmptyBlock(floor.above())) {
             BlockState floorState = level.getBlockState(floor);
-            if (floorState.is(ModBlocks.HEALTHY_SCULK) || floorState.is(ModBlocks.DRY_HEALTHY_SCULK)) {
+            if (caveFloor(floorState)) {
                BlockPos plantPos = floor.above();
                if (SiftSnifferPlantPlacement.place(level, plantPos, blobType, random)) {
                   placed++;
@@ -360,9 +421,34 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
       }
    }
 
+   static boolean coralCave(WorldGenLevel level, BlockPos pos) {
+      return TheSiftDimension.isCoralBiome(SiftCaveHabitat.surfaceBiome(level, pos.getX(), pos.getZ()));
+   }
+
+   static BlockState caveSoil(WorldGenLevel level, BlockPos pos, boolean growth) {
+      if (!coralCave(level, pos)) {
+         return (growth ? ModBlocks.HEALTHY_SCULK : ModBlocks.DRY_HEALTHY_SCULK).defaultBlockState();
+      } else {
+         return !growth
+            ? ModBlocks.CORAL_SOIL.defaultBlockState()
+            : (CoralSurfaceFeature.brightPatch(level.getSeed(), pos.getX(), pos.getZ()) ? ModBlocks.BRIGHT_CORAL_GROWTH : ModBlocks.CORAL_GROWTH)
+               .defaultBlockState();
+      }
+   }
+
+   private static boolean caveFloor(BlockState state) {
+      return state.is(ModBlocks.HEALTHY_SCULK)
+         || state.is(ModBlocks.DRY_HEALTHY_SCULK)
+         || state.is(ModBlocks.CORAL_SOIL)
+         || state.is(ModBlocks.CORAL_GROWTH)
+         || state.is(ModBlocks.BRIGHT_CORAL_GROWTH);
+   }
+
    private static List<BlockPos> buildNest(WorldGenLevel level, RandomSource random, BlockPos center) {
       List<BlockPos> nest = new ArrayList<>();
-      BlockState foliage = (BlockState)ModBlocks.OVERGROWN_WILLOW_FOLIAGE.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+      BlockState foliage = (coralCave(level, center) ? ModBlocks.ASH_WILLOW_FOLIAGE : ModBlocks.OVERGROWN_WILLOW_FOLIAGE)
+         .defaultBlockState()
+         .setValue(LeavesBlock.PERSISTENT, true);
 
       for (int dx = -3; dx <= 3; dx++) {
          for (int dz = -3; dz <= 3; dz++) {
@@ -371,7 +457,7 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
                BlockPos floor = findFloor(level, center.getX() + dx, center.getZ() + dz, center.getY());
                if (floor != null && level.isEmptyBlock(floor.above())) {
                   BlockState current = level.getBlockState(floor);
-                  if (current.is(ModBlocks.HEALTHY_SCULK) || current.is(ModBlocks.DRY_HEALTHY_SCULK)) {
+                  if (caveFloor(current)) {
                      level.setBlock(floor, foliage, 2);
                      nest.add(floor);
                   }
@@ -424,7 +510,9 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
    }
 
    private static boolean isCarvableVegetation(BlockState state) {
-      return state.is(ModBlocks.OVERGROWN_FRONDS)
+      return state.is(ModBlocks.CORAL_BUSH)
+         || state.is(ModBlocks.BRIGHT_CORAL_BUSH)
+         || state.is(ModBlocks.OVERGROWN_FRONDS)
          || state.is(ModBlocks.OVERGROWN_CHARD)
          || state.is(ModBlocks.OVERGROWN_STALKS)
          || state.is(ModBlocks.SIFTSLATE_STALKS)
@@ -435,7 +523,11 @@ public final class SnifferCaveFeature extends Feature<NoneFeatureConfiguration> 
    }
 
    private static boolean isSiftTerrain(BlockState state) {
-      return state.is(ModBlocks.SIFTSLATE)
+      return state.is(ModBlocks.SOULSHALE)
+         || state.is(ModBlocks.CORAL_SOIL)
+         || state.is(ModBlocks.CORAL_GROWTH)
+         || state.is(ModBlocks.BRIGHT_CORAL_GROWTH)
+         || state.is(ModBlocks.SIFTSLATE)
          || state.is(ModBlocks.SIFTSLATE_GROWTH)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
          || state.is(ModBlocks.HEALTHY_SCULK)

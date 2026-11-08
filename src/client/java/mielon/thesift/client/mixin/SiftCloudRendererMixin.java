@@ -3,7 +3,7 @@ package mielon.thesift.client.mixin;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import mielon.thesift.client.compat.SiftShaderCompat;
 import mielon.thesift.client.render.SiftCloudRenderPipelines;
-import mielon.thesift.world.SiftDayNightCycle;
+import mielon.thesift.world.SiftTides;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,7 +27,7 @@ public abstract class SiftCloudRendererMixin {
             return fadedAlpha << 24 | originalColor & 16777215;
          }
 
-         float night = SiftDayNightCycle.nightBlend(level.getDefaultClockTime());
+         float night = SiftTides.nightBlend(level.getDefaultClockTime());
          int brightness = Math.round(255.0F * (1.0F - night * 0.24F));
          return fadedAlpha << 24 | brightness << 16 | brightness << 8 | brightness;
       } else {
@@ -47,7 +47,7 @@ public abstract class SiftCloudRendererMixin {
       } else if (SiftShaderCompat.isShaderPackInUse()) {
          return original;
       } else {
-         return original == RenderPipelines.FLAT_CLOUDS ? SiftCloudRenderPipelines.FLAT : (original == RenderPipelines.CLOUDS ? SiftCloudRenderPipelines.FANCY : original);
+         return original == RenderPipelines.FLAT_CLOUDS ? SiftCloudRenderPipelines.FLAT : SiftCloudRenderPipelines.FANCY;
       }
    }
 }

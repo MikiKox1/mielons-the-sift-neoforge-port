@@ -1,0 +1,99 @@
+{
+  "parent": "the_sift:the_sift/certified_sifter",
+  "display": {
+    "icon": {
+      "id": "the_sift:raw_sifter_meat"
+    },
+    "title": {
+      "translate": "advancement.the_sift.sifters_diet.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.sifters_diet.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "the_sift:raw_slabber_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:raw_slabber_meat"
+        }
+      }
+    },
+    "the_sift:cooked_slabber_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:cooked_slabber_meat"
+        }
+      }
+    },
+    "the_sift:raw_nuzzle_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:raw_nuzzle_meat"
+        }
+      }
+    },
+    "the_sift:cooked_nuzzle_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:cooked_nuzzle_meat"
+        }
+      }
+    },
+    "the_sift:raw_sifter_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:raw_sifter_meat"
+        }
+      }
+    },
+    "the_sift:cooked_sifter_meat": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:cooked_sifter_meat"
+        }
+      }
+    },
+    "the_sift:blubby_berries": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "the_sift:blubby_berries"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "the_sift:raw_slabber_meat"
+    ],
+    [
+      "the_sift:cooked_slabber_meat"
+    ],
+    [
+      "the_sift:raw_nuzzle_meat"
+    ],
+    [
+      "the_sift:cooked_nuzzle_meat"
+    ],
+    [
+      "the_sift:raw_sifter_meat"
+    ],
+    [
+      "the_sift:cooked_sifter_meat"
+    ],
+    [
+      "the_sift:blubby_berries"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  }
+}

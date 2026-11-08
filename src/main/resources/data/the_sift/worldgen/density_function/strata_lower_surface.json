@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:add",
+  "argument1": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:y_clamped_gradient",
+      "from_y": 0,
+      "to_y": 256,
+      "from_value": 1.1375,
+      "to_value": -1.6625
+    },
+    "argument2": -0.35
+  },
+  "argument2": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:mul",
+      "argument1": 0.8,
+      "argument2": "the_sift:strata_regional_relief"
+    },
+    "argument2": {
+      "type": "minecraft:add",
+      "argument1": {
+        "type": "minecraft:mul",
+        "argument1": 0.11,
+        "argument2": {
+          "type": "minecraft:noise",
+          "noise": "the_sift:strata_lower_hills",
+          "xz_scale": 0.9,
+          "y_scale": 0
+        }
+      },
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": 0.025,
+        "argument2": "the_sift:strata_local_relief"
+      }
+    }
+  }
+}

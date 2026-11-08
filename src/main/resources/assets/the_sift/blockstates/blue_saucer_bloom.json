@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "the_sift:block/blue_saucer_bloom",
+        "y": 0
+      },
+      {
+        "model": "the_sift:block/blue_saucer_bloom",
+        "y": 90
+      },
+      {
+        "model": "the_sift:block/blue_saucer_bloom",
+        "y": 180
+      },
+      {
+        "model": "the_sift:block/blue_saucer_bloom",
+        "y": 270
+      }
+    ]
+  }
+}

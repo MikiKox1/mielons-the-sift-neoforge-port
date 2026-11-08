@@ -1,0 +1,104 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_1"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_2"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_3"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_4"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_5"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_6"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_7"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_8"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_9"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_10"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "projection": "rigid",
+        "processors": "the_sift:abandoned_camp_coral",
+        "location": "the_sift:abandoned_camp_coral/addon_11"
+      }
+    }
+  ]
+}

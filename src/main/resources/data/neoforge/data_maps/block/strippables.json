@@ -1,10 +1,9 @@
 {
+  "replace": false,
   "values": {
-    "the_sift:overgrown_willow_log": {
-      "stripped_block": "the_sift:stripped_overgrown_willow_log"
-    },
-    "the_sift:overgrown_willow_wood": {
-      "stripped_block": "the_sift:stripped_overgrown_willow_wood"
-    }
+    "the_sift:overgrown_willow_log": {"stripped_block": "the_sift:stripped_overgrown_willow_log"},
+    "the_sift:overgrown_willow_wood": {"stripped_block": "the_sift:stripped_overgrown_willow_wood"},
+    "the_sift:ash_willow_log": {"stripped_block": "the_sift:stripped_ash_willow_log"},
+    "the_sift:ash_willow_wood": {"stripped_block": "the_sift:stripped_ash_willow_wood"}
   }
 }

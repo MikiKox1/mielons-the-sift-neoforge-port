@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:min",
+    "argument1": {
+      "type": "minecraft:add",
+      "argument1": 0.075,
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": -1,
+        "argument2": "the_sift:strata_bridge_a"
+      }
+    },
+    "argument2": {
+      "type": "minecraft:add",
+      "argument1": 0.075,
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": -1,
+        "argument2": "the_sift:strata_bridge_b"
+      }
+    }
+  }
+}

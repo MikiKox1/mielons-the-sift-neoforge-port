@@ -24,6 +24,7 @@ public final class IchorBucketItem extends BucketItem {
       super(fluid, properties);
    }
 
+   @Override
    public InteractionResult use(Level level, Player player, InteractionHand hand) {
       ItemStack stack = player.getItemInHand(hand);
       BlockHitResult hit = getPlayerPOVHitResult(level, player, net.minecraft.world.level.ClipContext.Fluid.NONE);
@@ -61,6 +62,7 @@ public final class IchorBucketItem extends BucketItem {
       }
    }
 
+   @Override
    protected void playEmptySound(@Nullable LivingEntity user, LevelAccessor level, BlockPos pos) {
       level.playSound(null, pos, ModSounds.ICHOR_BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
    }

@@ -19,7 +19,10 @@ public final class SiftStemMixins {
    public abstract static class Attached {
       @Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
       private void theSift$allowHealthySoil(BlockState floor, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-         if (floor.is(ModBlocks.HEALTHY_SCULK) || floor.is(ModBlocks.DRY_HEALTHY_SCULK)) {
+         if (floor.is(ModBlocks.HEALTHY_SCULK)
+            || floor.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+            || floor.is(ModBlocks.HEALTHY_SCULK_PORES)
+            || floor.is(ModBlocks.DRY_HEALTHY_SCULK)) {
             cir.setReturnValue(true);
          }
       }
@@ -29,7 +32,10 @@ public final class SiftStemMixins {
    public abstract static class Growing {
       @Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
       private void theSift$allowHealthySoil(BlockState floor, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-         if (floor.is(ModBlocks.HEALTHY_SCULK) || floor.is(ModBlocks.DRY_HEALTHY_SCULK)) {
+         if (floor.is(ModBlocks.HEALTHY_SCULK)
+            || floor.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+            || floor.is(ModBlocks.HEALTHY_SCULK_PORES)
+            || floor.is(ModBlocks.DRY_HEALTHY_SCULK)) {
             cir.setReturnValue(true);
          }
       }

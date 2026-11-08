@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "the_sift:block/soulshale",
+    "side": "the_sift:block/soulshale_growth_side",
+    "top": "the_sift:block/soulshale_growth_top"
+  }
+}

@@ -23,6 +23,12 @@ sourceSets {
         resources.srcDir 'src/client/resources'
         resources.srcDir 'src/generated/resources'
     }
+    coreTest {
+        // Package-private production helpers can be tested on a plain classpath,
+        // but must not split their package across two FML modules.
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
 }
 
 repositories {
@@ -35,37 +41,133 @@ repositories {
         }
     }
 
-    // LambDynamicLights API is optional at runtime; 26.1.2 requires its own target ABI.
+    // Optional at runtime; consume the exact MC26.1.2 API.
     maven {
         name = 'Gegy'
         url = uri('https://maven.gegy.dev')
     }
 }
 
+// Compile only the annotations against the supported minimum API. FabricMixin
+// 0.17.4 changed Redirect.at to At[], but minimum100's MixinExtras0.5.4 expects
+// one AnnotationNode. Older single-At bytecode is valid on both loader versions.
+// No runtime dependency is downgraded, added or bundled by this configuration.
+configurations {
+    minimumMixinAnnotationApi {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+dependencies {
+    minimumMixinAnnotationApi 'net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7'
+}
+tasks.named('compileJava', JavaCompile) {
+    def currentTargetClasspath = classpath
+    classpath = configurations.minimumMixinAnnotationApi + currentTargetClasspath
+}
+
 neoForge {
     version = project.neo_version
+    addModdingDependenciesTo sourceSets.test
 
     runs {
         client {
             client()
-            // Keep local client runs separate from existing player worlds.
-            gameDirectory = project.file("run/client")
+            // Standalone Prime 2 stage smoke; never the user's Modrinth profile.
+            // A new loader release must never reuse a previous test world's directory.
+            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-alpha4")
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
             server()
             // Must remain separate from the client and all player saves.
-            gameDirectory = project.file("run/server")
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4")
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        serverEasyMagic {
+            server()
+            // Disposable integration check only; Easy Magic and Puzzles Lib
+            // are copied into this run's mods folder, never the production jar.
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4-easymagic")
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        serverT11 {
+            server()
+            gameDirectory = project.file("run/server-T11-${project.neo_version}-mc2612-alpha4-routing")
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'the_sift.tests.crossdimension', 'true'
+        }
+
+        gameTestServer {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.test
+            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-alpha4")
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
+        }
+        gameTestServerEasyMagic {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.test
+            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-alpha4-easymagic")
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
+        }
+        clientVisual {
+            client()
+            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-alpha4-visual-qa")
+            programArguments.addAll('--quickPlayMultiplayer', '127.0.0.1:25626')
+        }
+        serverVisual {
+            server()
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4-visual-qa")
             programArgument '--nogui'
         }
 
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.INFO
+        }
     }
 
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
+        the_sift_tests {
+            sourceSet(sourceSets.test)
+        }
     }
+}
+
+// Development tests have separate metadata and are never included in the mod JAR
+// or ordinary client/server smoke runs.
+neoForge.runs.named('client') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id)]
+}
+neoForge.runs.named('server') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id)]
+}
+neoForge.runs.named('serverEasyMagic') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id)]
+}
+neoForge.runs.named('serverT11') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
+}
+neoForge.runs.named('gameTestServer') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
+}
+neoForge.runs.named('gameTestServerEasyMagic') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
+}
+neoForge.runs.named('clientVisual') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id)]
+}
+neoForge.runs.named('serverVisual') {
+    loadedMods = [neoForge.mods.getByName(project.mod_id)]
 }
 
 configurations {
@@ -80,71 +182,63 @@ dependencies {
     compileOnly "dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${project.lambdynlights_version}+${project.minecraft_version}"
 }
 
-// NeoForge compilation is valid when it matches this Minecraft series and
-// meets the minimum supported loader. A newer Maven release is not required.
+// Prime 2 invariant: build/test on the latest published NeoForge for this
+// Minecraft line, while keeping the independent, OPEN-ENDED mod dependency
+// range [neo_min_version,) (independently >=26.1.2.100).
+// Keep the compile/test loader pinned for reproducibility and refuse tests
+// if that pin becomes stale. Do not conflate this pin with minimum support.
+// If the metadata endpoint is unreachable, fail closed rather than claim the
+// tested loader is current. This task does not install any application.
 def pinnedNeoForge = project.neo_version.toString()
 def pinnedNeoMinimum = project.neo_min_version.toString()
-def targetMinecraft = project.minecraft_version.toString()
-def targetMinecraftRange = project.minecraft_version_range.toString()
-tasks.register('verifyNeoForgeCompatibility') {
+def targetMcVersion = project.minecraft_version.toString()
+tasks.register('verifyLatestNeoForge') {
     group = 'verification'
-    description = 'Validate target Minecraft series and the minimum supported NeoForge version.'
+    description = 'Confirm the pinned MC 26.1.2 NeoForge version is still the latest official Maven release.'
     inputs.property('neo_version', pinnedNeoForge)
     inputs.property('neo_min_version', pinnedNeoMinimum)
-    inputs.property('minecraft_version', targetMinecraft)
-    inputs.property('minecraft_version_range', targetMinecraftRange)
+    inputs.property('minecraft_version', targetMcVersion)
     doLast {
-        if (targetMinecraftRange != '[' + targetMinecraft + ']') {
-            throw new GradleException('Minecraft version range must be [' +
-                targetMinecraft + '], found ' + targetMinecraftRange)
+        def metadataUrl = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml'
+        def connection = new URI(metadataUrl).toURL().openConnection()
+        connection.setUseCaches(false)
+        connection.setConnectTimeout(15000)
+        connection.setReadTimeout(15000)
+        connection.setRequestProperty('Cache-Control', 'no-cache')
+        def metadata = connection.inputStream.withCloseable { it.getText('UTF-8') }
+        def matcher = metadata =~ /<version>(26\.1\.2\.(\d+)(?:-[^<]+)?)<\/version>/
+        def candidates = []
+        matcher.each { match ->
+            candidates << [version: match[1], build: Integer.parseInt(match[2])]
         }
-
-        def parseNeoForgeVersion = { String version ->
-            def matcher = version =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)(?:-([A-Za-z0-9.-]+))?$/
-            if (!matcher.matches()) {
-                throw new GradleException('Invalid NeoForge version: ' + version)
-            }
-            return [
-                minecraft: matcher.group(1) + '.' + matcher.group(2) + '.' + matcher.group(3),
-                build: matcher.group(4).toInteger(),
-                qualifier: matcher.group(5)
-            ]
+        if (candidates.isEmpty()) {
+            throw new GradleException('Cannot verify latest NeoForge 26.1.2 in official Maven metadata; test blocked.')
         }
-
-        def expectedComponents = targetMinecraft.tokenize('.')
-        if (expectedComponents.size() == 2) {
-            expectedComponents << '0'
+        def latest = candidates.max { a, b ->
+            (a.build <=> b.build) ?: ((a.version.contains('-') ? 0 : 1) <=> (b.version.contains('-') ? 0 : 1))
+        }.version
+        if (pinnedNeoForge != latest) {
+            throw new GradleException(
+                "NeoForge BUILD/TEST pin is outdated. Latest official MC 26.1.2: ${latest}; " +
+                "neo_version=${pinnedNeoForge}. Update only neo_version for testing. " +
+                'Keep independent neo_min_version and the open-ended [minimum,) dependency.'
+            )
         }
-        if (expectedComponents.size() != 3 ||
-            !expectedComponents.every { it ==~ /\d+/ }) {
-            throw new GradleException('Unsupported Minecraft version: ' + targetMinecraft)
+        if (pinnedNeoMinimum != '26.1.2.100') {
+            throw new GradleException(
+                "The Sift MC26.1.2 independent minimum must remain 26.1.2.100 unless disproved, found ${pinnedNeoMinimum}"
+            )
         }
-        def expectedSeries = expectedComponents.join('.')
-        def compiled = parseNeoForgeVersion(pinnedNeoForge)
-        def minimum = parseNeoForgeVersion(pinnedNeoMinimum)
-        if (compiled.minecraft != expectedSeries ||
-            minimum.minecraft != expectedSeries) {
-            throw new GradleException('NeoForge compiler ' + pinnedNeoForge +
-                ' and minimum ' + pinnedNeoMinimum +
-                ' must target Minecraft ' + targetMinecraft)
-        }
-        if (compiled.build < minimum.build ||
-            (compiled.build == minimum.build && compiled.qualifier != null &&
-            (minimum.qualifier == null || compiled.qualifier != minimum.qualifier))) {
-            throw new GradleException('NeoForge compiler ' + pinnedNeoForge +
-                ' is below declared supported minimum ' + pinnedNeoMinimum)
-        }
-
-        logger.lifecycle('NeoForge compiler ' + pinnedNeoForge +
-            ' supports Minecraft ' + targetMinecraft + ' at loader minimum ' +
-            pinnedNeoMinimum + ' (without latest-version requirement)')
+        logger.lifecycle("Verified latest NeoForge for MC ${targetMcVersion} build/tests: ${latest}; " +
+            "packaged minimum: ${pinnedNeoMinimum}, no upper bound")
     }
 }
 
 tasks.matching {
-    it.name in ['build', 'check', 'compileJava', 'runData', 'runServer', 'runClient']
+    it.name in ['build', 'check', 'test', 'compileJava', 'compileTestJava', 'runData', 'runServer', 'runClient'] ||
+        it.name.startsWith('runGameTest')
 }.configureEach {
-    dependsOn tasks.named('verifyNeoForgeCompatibility')
+    dependsOn tasks.named('verifyLatestNeoForge')
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -173,10 +267,56 @@ neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xmaxerrs', '1000']
+}
+
+tasks.register('coreContract', JavaExec) {
+    group = 'verification'
+    description = 'Run source-grounded core behavior contracts without launching Minecraft.'
+    dependsOn tasks.named('coreTestClasses')
+    classpath = sourceSets.coreTest.runtimeClasspath
+    mainClass = 'mielon.thesift.worldgen.PortCoreContractTest'
+    enableAssertions = true
+}
+
+tasks.register('writePortCompileClasspath') {
+    def resolvedClasspath = sourceSets.main.compileClasspath
+    def targetFile = layout.buildDirectory.file('port-compile-classpath.txt')
+    outputs.file(targetFile)
+    doLast {
+        def file = targetFile.get().asFile
+        file.parentFile.mkdirs()
+        file.setText(resolvedClasspath.files.collect { it.absolutePath }.join('\n') + '\n', 'UTF-8')
+    }
+}
+
+tasks.register('gameTestModJar', Jar) {
+    group = 'verification'
+    description = 'Package only the development GameTests for testing the actual built mod on the minimum loader.'
+    dependsOn tasks.named('testClasses')
+    from sourceSets.test.output
+    archiveClassifier = 'gametests'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('coreContract')
+}
+
+tasks.named('test') {
+    // These sources contain native GameTests, not JUnit-annotated tests.
+    // Their own server runner enforces success/failure.
+    failOnNoDiscoveredTests = false
 }
 
 java {
     withSourcesJar()
+}
+
+tasks.named('jar', Jar) {
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md', 'TARGET-2612-PROVENANCE.json')
+}
+tasks.named('sourcesJar', Jar) {
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md', 'TARGET-2612-PROVENANCE.json')
 }
 
 publishing {
@@ -193,3 +333,6 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// Reviewed optional shader additions; required for independent artifact audit.
+tasks.named('jar', Jar) { from('SHADER-INTEGRATION-RESOURCES.json') }

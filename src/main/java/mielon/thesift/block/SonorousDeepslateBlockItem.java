@@ -18,11 +18,10 @@ public final class SonorousDeepslateBlockItem extends BlockItem {
       super(block, properties);
    }
 
+   @Override
    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag tooltipFlag) {
-      BlockItemStateProperties properties = (BlockItemStateProperties)stack.get(DataComponents.BLOCK_STATE);
-      SonorousDeepslateBlock.Mode mode = properties == null
-         ? SonorousDeepslateBlock.Mode.HORN
-         : (SonorousDeepslateBlock.Mode)properties.get(SonorousDeepslateBlock.MODE);
+      BlockItemStateProperties properties = stack.get(DataComponents.BLOCK_STATE);
+      SonorousDeepslateBlock.Mode mode = properties == null ? SonorousDeepslateBlock.Mode.HORN : properties.get(SonorousDeepslateBlock.MODE);
       if (mode == null) {
          mode = SonorousDeepslateBlock.Mode.HORN;
       }

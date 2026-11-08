@@ -14,34 +14,180 @@
   },
   "criteria": {
     "sift_wastes": {
-      "trigger": "minecraft:impossible"
-    },
-    "sift_deep_dark": {
-      "trigger": "minecraft:impossible"
-    },
-    "ichor_snowy_peaks": {
-      "trigger": "minecraft:impossible"
-    },
-    "siftslate_slopes": {
-      "trigger": "minecraft:impossible"
-    },
-    "siftslate_peaks": {
-      "trigger": "minecraft:impossible"
-    },
-    "overgrown_slopes": {
-      "trigger": "minecraft:impossible"
-    },
-    "overgrown_peaks": {
-      "trigger": "minecraft:impossible"
-    },
-    "overgrown_forest_slopes": {
-      "trigger": "minecraft:impossible"
-    },
-    "overgrown_forest": {
-      "trigger": "minecraft:impossible"
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:sift_wastes"
+              }
+            }
+          }
+        ]
+      }
     },
     "overgrown_clearing": {
-      "trigger": "minecraft:impossible"
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:overgrown_clearing"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "overgrown_forest": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:overgrown_forest"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "ichor_snowy_peaks": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:ichor_snowy_peaks"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "corrupted_sift": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:corrupted_sift"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "siftslate_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:siftslate_caves"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "soulshale_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:soulshale_caves"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "overgrown_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:overgrown_caves"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "coral_meadow": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:coral_meadow"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "coral_forest": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:coral_forest"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "organic_desert": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "location": {
+                "biomes": "the_sift:organic_desert"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "requirements": [
@@ -49,31 +195,34 @@
       "sift_wastes"
     ],
     [
-      "sift_deep_dark"
-    ],
-    [
-      "ichor_snowy_peaks"
-    ],
-    [
-      "siftslate_slopes"
-    ],
-    [
-      "siftslate_peaks"
-    ],
-    [
-      "overgrown_slopes"
-    ],
-    [
-      "overgrown_peaks"
-    ],
-    [
-      "overgrown_forest_slopes"
+      "overgrown_clearing"
     ],
     [
       "overgrown_forest"
     ],
     [
-      "overgrown_clearing"
+      "ichor_snowy_peaks"
+    ],
+    [
+      "corrupted_sift"
+    ],
+    [
+      "siftslate_caves"
+    ],
+    [
+      "soulshale_caves"
+    ],
+    [
+      "overgrown_caves"
+    ],
+    [
+      "coral_meadow"
+    ],
+    [
+      "coral_forest"
+    ],
+    [
+      "organic_desert"
     ]
   ]
 }

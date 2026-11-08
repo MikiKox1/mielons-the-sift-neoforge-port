@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "the_sift:soulshale",
+  "result": {
+    "id": "the_sift:soulshale_stairs"
+  }
+}

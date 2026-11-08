@@ -16,10 +16,21 @@
       "conditions": {
         "recipe": "the_sift:siftite_boots_smithing"
       }
+    },
+    "has_upgrade_material": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "the_sift:siftite_ingot"
+          }
+        ]
+      }
     }
   },
   "requirements": [
     [
+      "has_upgrade_material",
       "has_key_item",
       "has_the_recipe"
     ]

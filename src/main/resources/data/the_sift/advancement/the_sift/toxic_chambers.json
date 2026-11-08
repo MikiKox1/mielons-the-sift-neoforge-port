@@ -1,0 +1,28 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:filled_map",
+      "components": {
+        "minecraft:map_color": 4021061
+      }
+    },
+    "title": {
+      "translate": "advancement.the_sift.toxic_chambers.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.toxic_chambers.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

@@ -8,13 +8,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Optional Photon-only post-final sky compositing hook. Iris composites its
- * own colortexes into Minecraft.mainRenderTarget at finalizeLevelRendering's
- * end. The ordinary sky callback runs too early; its native draw gets
- * overwritten by that final pass. This hook intentionally runs AFTER it.
- *
- * @Pseudo + require=0 protect standalone instances without Iris.
- * Do not reference Iris binary classes in this mixin's method signature.
+ * Optional Iris 1.11.4 / MC26.1.2 final compositor callback.
+ * The early sky is queued under Photon; restoring at LevelRenderer TAIL is
+ * too early because Photon overwrites the main color target afterwards.
  */
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.pipeline.IrisRenderingPipeline", remap = false)

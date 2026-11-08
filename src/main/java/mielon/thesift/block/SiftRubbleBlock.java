@@ -10,14 +10,16 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 public class SiftRubbleBlock extends FallingBlock {
    public static final MapCodec<SiftRubbleBlock> CODEC = simpleCodec(SiftRubbleBlock::new);
 
-   @Override
-   protected MapCodec<? extends FallingBlock> codec() {
-      return CODEC;
-   }
    public SiftRubbleBlock(Properties properties) {
       super(properties);
    }
 
+   @Override
+   protected MapCodec<? extends FallingBlock> codec() {
+      return CODEC;
+   }
+
+   @Override
    public int getDustColor(BlockState state, BlockGetter level, BlockPos pos) {
       return 6453107;
    }

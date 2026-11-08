@@ -1,25 +1,41 @@
 package mielon.thesift.world;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import mielon.thesift.TheSiftMod;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.block.SiftPortalBlock;
+import mielon.thesift.block.SiftslateGrowthBlock;
 import mielon.thesift.worldgen.SiftFeaturePlacementGuard;
-import mielon.thesift.worldgen.SiftSurfaceDecorator;
+import mielon.thesift.worldgen.SiftLandmarkTerrain;
+import mielon.thesift.worldgen.SiftLandmarkTracker;
+import mielon.thesift.worldgen.SiftPortalVegetation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate.Sampler;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.AABB;
 
 public final class SiftPortalStructure {
    private static final Identifier TEMPLATE_ID = Identifier.fromNamespaceAndPath("the_sift", "main_portal");
@@ -349,6 +365,21 @@ public final class SiftPortalStructure {
    private static final int OUTER_SAMPLE_MARGIN = 12;
    private static final int FEATURE_CLEAR_MARGIN = 15;
    private static final int PORTAL_BUILD_FLAGS = 48;
+   private static final ThreadLocal<Map<Long, Integer>> HEIGHT_CACHE = new ThreadLocal<>();
+
+   public static void prepare(MinecraftServer server) {
+      ServerLevel level = server.getLevel(TheSiftDimension.LEVEL_KEY);
+      if (level != null) {
+         ensurePortal(server, level);
+      }
+   }
+
+   public static void restoreReservation(MinecraftServer server) {
+      SiftWorldStorage.getPortalAnchor(server)
+         .ifPresent(
+            anchor -> SiftFeaturePlacementGuard.reservePortal(anchor.offset(-PLAYER_RELATIVE.getX(), -PLAYER_RELATIVE.getY(), -PLAYER_RELATIVE.getZ()), 9, 40)
+         );
+   }
 
    private SiftPortalStructure() {
    }
@@ -358,21 +389,49 @@ public final class SiftPortalStructure {
       if (stored.isPresent()) {
          BlockPos storedOrigin = stored.get().offset(-PLAYER_RELATIVE.getX(), -PLAYER_RELATIVE.getY(), -PLAYER_RELATIVE.getZ());
          SiftFeaturePlacementGuard.reservePortal(storedOrigin, 9, 40);
+         restorePortalVegetation(sift, storedOrigin, stored.get());
          return stored;
+      }
+
+      TheSiftMod.LOGGER.info("Selecting a location for the main Sift portal.");
+      HEIGHT_CACHE.set(new HashMap<>());
+
+      SiftPortalStructure.PlacementCandidate candidate;
+      try {
+         candidate = findBestCandidate(sift);
+      } finally {
+         HEIGHT_CACHE.remove();
+      }
+
+      if (candidate == null) {
+         TheSiftMod.LOGGER.error("No main portal location outside Corrupted Sift was found.");
+         return Optional.empty();
       } else {
-      Optional<StructureTemplate> templateOptional = server.getStructureManager().get(TEMPLATE_ID);
+         BlockPos candidatePos = new BlockPos(candidate.anchorX(), candidate.groundY(), candidate.anchorZ());
+         String biomePath = sift.getBiome(candidatePos).unwrapKey().map(key -> key.identifier().getPath()).orElse("sift_wastes");
+         Identifier templateId = SiftPortalVariants.main(biomePath);
+         Optional<StructureTemplate> templateOptional = server.getStructureManager().get(templateId);
          if (templateOptional.isEmpty()) {
-            TheSiftMod.LOGGER.error("Missing portal structure template: {}", TEMPLATE_ID);
+            TheSiftMod.LOGGER.error("Missing portal structure template: {}", templateId);
             return Optional.empty();
          } else {
-            TheSiftMod.LOGGER.info("Selecting a location for the main Sift portal.");
             StructureTemplate template = templateOptional.get();
-            SiftPortalStructure.PlacementCandidate candidate = findBestCandidate(sift);
             int naturalGroundY = candidate.groundY();
             int originY = naturalGroundY - STRUCTURE_GROUND_RELATIVE_Y;
             originY = Math.max(0, Math.min(237, originY));
             BlockPos origin = new BlockPos(candidate.anchorX() - MARKER_RELATIVE.getX(), originY, candidate.anchorZ() - MARKER_RELATIVE.getZ());
             SiftFeaturePlacementGuard.reservePortal(origin, 9, 40);
+            int markerY = originY + MARKER_RELATIVE.getY();
+            TheSiftMod.LOGGER
+               .debug(
+                  "Main portal candidate: anchor=({}, {}, {}), markerY={}, origin={}, roughness={}",
+                  candidate.anchorX(),
+                  naturalGroundY,
+                  candidate.anchorZ(),
+                  markerY,
+                  origin,
+                  candidate.roughness()
+               );
             clearLargeFeaturesAroundPortal(sift, origin);
             blendTerrainIntoPortal(sift, origin);
             sealPortalFoundation(sift, origin);
@@ -382,21 +441,43 @@ public final class SiftPortalStructure {
                .setIgnoreEntities(true)
                .setKnownShape(true)
                .setRandom(RandomSource.create(sift.getSeed() ^ 1397311060L));
+            clearPortalEntities(sift, origin);
             boolean placed = template.placeInWorld(sift, origin, origin, settings, RandomSource.create(sift.getSeed() ^ 88301613891916L), 48);
             if (!placed) {
                TheSiftMod.LOGGER.error("Failed to place the main Sift portal at {}", origin);
                return Optional.empty();
             } else {
                BlockPos marker = origin.offset(MARKER_RELATIVE.getX(), MARKER_RELATIVE.getY(), MARKER_RELATIVE.getZ());
-               setDuringPortalBuild(sift, marker, ModBlocks.REINFORCED_SIFTSLATE.defaultBlockState());
-               normalizeCoveredGrowth(sift, origin);
+               Block reinforced = SiftLandmarkTerrain.stoneForBiome(sift.getBiome(candidatePos)) == ModBlocks.SOULSHALE
+                  ? ModBlocks.REINFORCED_SOULSHALE
+                  : ModBlocks.REINFORCED_SIFTSLATE;
+               setDuringPortalBuild(sift, marker, reinforced.defaultBlockState());
                BlockPos playerAnchor = origin.offset(PLAYER_RELATIVE.getX(), PLAYER_RELATIVE.getY(), PLAYER_RELATIVE.getZ());
-               decoratePortalAndBlend(sift, origin, playerAnchor);
+               normalizeCoveredGrowth(sift, origin);
+               restorePortalVegetation(sift, origin, playerAnchor);
+               clearPortalEntities(sift, origin);
                SiftWorldStorage.setPortalAnchor(server, playerAnchor);
                TheSiftMod.LOGGER.info("Main Sift portal ready at {}", playerAnchor);
                return Optional.of(playerAnchor);
             }
          }
+      }
+   }
+
+   public static void repairMainPortalAxis(ServerLevel level, BlockPos pos, BlockState state) {
+      if (state.is(ModBlocks.SIFT_PORTAL) && state.getValue(SiftPortalBlock.AXIS) != Axis.Z && level.dimension().equals(TheSiftDimension.LEVEL_KEY)) {
+         SiftWorldStorage.getPortalAnchor(level.getServer())
+            .ifPresent(
+               anchor -> {
+                  if (pos.getX() == anchor.getX()
+                     && pos.getY() >= anchor.getY()
+                     && pos.getY() <= anchor.getY() + 5
+                     && pos.getZ() >= anchor.getZ() - 9
+                     && pos.getZ() <= anchor.getZ() + 10) {
+                     level.setBlock(pos, state.setValue(SiftPortalBlock.AXIS, Axis.Z), 18);
+                  }
+               }
+            );
       }
    }
 
@@ -410,8 +491,13 @@ public final class SiftPortalStructure {
                cursor.set(origin.getX() + x, origin.getY() + y, origin.getZ() + z);
                if (level.getBlockState(cursor).is(ModBlocks.SIFTSLATE_GROWTH)) {
                   above.set(cursor.getX(), cursor.getY() + 1, cursor.getZ());
-                  if (level.getBlockState(above).isCollisionShapeFullBlock(level, above)) {
-                     setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE.defaultBlockState());
+                  BlockState growth = level.getBlockState(cursor);
+                  BlockState cover = level.getBlockState(above);
+                  boolean snowy = SiftslateGrowthBlock.isIchorSnowCover(cover);
+                  if (!snowy && cover.isCollisionShapeFullBlock(level, above)) {
+                     setDuringPortalBuild(level, cursor, SiftLandmarkTerrain.stoneForBiome(level.getBiome(cursor)).defaultBlockState());
+                  } else if (growth.getValue(SiftslateGrowthBlock.SNOWY) != snowy) {
+                     setDuringPortalBuild(level, cursor, growth.setValue(SiftslateGrowthBlock.SNOWY, snowy));
                   }
                }
             }
@@ -428,18 +514,20 @@ public final class SiftPortalStructure {
 
       for (int x = minX; x <= maxX; x++) {
          for (int z = minZ; z <= maxZ; z++) {
-            int generatedTop = generatedSurfaceBlockY(level, x, z);
-            int actualTop = level.getHeight(Types.WORLD_SURFACE, x, z) - 1;
+            if (isPortalBaseColumn(x - origin.getX(), z - origin.getZ())) {
+               int generatedTop = generatedSurfaceBlockY(level, x, z);
+               int actualTop = level.getHeight(Types.WORLD_SURFACE, x, z) - 1;
 
-            for (int y = actualTop; y > generatedTop; y--) {
-               cursor.set(x, y, z);
-               BlockState state = level.getBlockState(cursor);
-               if (!state.isAir()) {
-                  if (!isSiftTerrain(state) && !isSiftPlant(state)) {
-                     break;
+               for (int y = actualTop; y > generatedTop; y--) {
+                  cursor.set(x, y, z);
+                  BlockState state = level.getBlockState(cursor);
+                  if (!state.isAir()) {
+                     if (!isSiftTerrain(state) && !isSiftPlant(state)) {
+                        break;
+                     }
+
+                     setDuringPortalBuild(level, cursor, Blocks.AIR.defaultBlockState());
                   }
-
-                  setDuringPortalBuild(level, cursor, Blocks.AIR.defaultBlockState());
                }
             }
          }
@@ -448,15 +536,19 @@ public final class SiftPortalStructure {
 
    private static SiftPortalStructure.PlacementCandidate findBestCandidate(ServerLevel level) {
       SiftPortalStructure.PlacementCandidate coarse = searchArea(level, -96, 96, -96, 96, 16);
-      if (coarse == null) {
-         int height = generatedSurfaceBlockY(level, 0, 0);
-         return new SiftPortalStructure.PlacementCandidate(0, 0, height, 999.0);
-      } else {
-         SiftPortalStructure.PlacementCandidate refined = searchArea(
-            level, coarse.anchorX() - 16, coarse.anchorX() + 16, coarse.anchorZ() - 16, coarse.anchorZ() + 16, 4
-         );
-         return refined != null ? refined : coarse;
+
+      for (int radius = 192; coarse == null && radius <= 6144; radius *= 2) {
+         coarse = searchArea(level, -radius, radius, -radius, radius, 64);
       }
+
+      if (coarse == null) {
+         return null;
+      }
+
+      SiftPortalStructure.PlacementCandidate refined = searchArea(
+         level, coarse.anchorX() - 16, coarse.anchorX() + 16, coarse.anchorZ() - 16, coarse.anchorZ() + 16, 4
+      );
+      return refined != null ? refined : coarse;
    }
 
    private static SiftPortalStructure.PlacementCandidate searchArea(ServerLevel level, int minSearchX, int maxSearchX, int minSearchZ, int maxSearchZ, int step) {
@@ -466,16 +558,25 @@ public final class SiftPortalStructure {
 
       while (x <= maxSearchX) {
          for (int z = minSearchZ; z <= maxSearchZ; z += step) {
-            SiftPortalStructure.TerrainSample sample = sampleFootprintWithoutLoadingChunks(level, x, z);
-            SiftPortalStructure.PlacementCandidate candidate = new SiftPortalStructure.PlacementCandidate(x, z, sample.medianHeight(), sample.roughness());
-            double candidateScore = score(candidate, x, z) + sample.range() * 135.0 + sample.outerRange() * 75.0;
-            if (sample.medianHeight() < 12 || sample.medianHeight() > 232) {
-               candidateScore += 10000.0;
-            }
+            int centerY = generatedSurfaceBlockY(level, x, z);
+            ServerChunkCache source = level.getChunkSource();
+            if (!source.getGenerator()
+               .getBiomeSource()
+               .getNoiseBiome(x >> 2, centerY >> 2, z >> 2, source.randomState().sampler())
+               .is(TheSiftDimension.CORRUPTED_SIFT)) {
+               SiftPortalStructure.TerrainSample sample = sampleFootprintWithoutLoadingChunks(level, x, z);
+               if (isPortalSiteAllowed(level, x, sample.medianHeight(), z)) {
+                  SiftPortalStructure.PlacementCandidate candidate = new SiftPortalStructure.PlacementCandidate(x, z, sample.medianHeight(), sample.roughness());
+                  double candidateScore = score(candidate, x, z) + sample.range() * 135.0 + sample.outerRange() * 75.0;
+                  if (sample.medianHeight() < 12 || sample.medianHeight() > 232) {
+                     candidateScore += 10000.0;
+                  }
 
-            if (candidateScore < bestScore) {
-               bestScore = candidateScore;
-               best = candidate;
+                  if (candidateScore < bestScore) {
+                     bestScore = candidateScore;
+                     best = candidate;
+                  }
+               }
             }
          }
 
@@ -483,6 +584,41 @@ public final class SiftPortalStructure {
       }
 
       return best;
+   }
+
+   private static boolean isPortalSiteAllowed(ServerLevel level, int anchorX, int groundY, int anchorZ) {
+      ServerChunkCache chunkSource = level.getChunkSource();
+      BiomeSource source = chunkSource.getGenerator().getBiomeSource();
+      Sampler sampler = chunkSource.randomState().sampler();
+      int minX = anchorX - MARKER_RELATIVE.getX() - 2 >> 2;
+      int minZ = anchorZ - MARKER_RELATIVE.getZ() - 2 >> 2;
+      int maxX = (anchorX - MARKER_RELATIVE.getX() + 9 - 3 >> 2) + 1;
+      int maxZ = (anchorZ - MARKER_RELATIVE.getZ() + 40 - 3 >> 2) + 1;
+      int minY = groundY - 2 >> 2;
+      int maxY = (groundY + 19 - 3 >> 2) + 1;
+
+      for (int x = minX; x <= maxX; x++) {
+         for (int z = minZ; z <= maxZ; z++) {
+            for (int y = minY; y <= maxY; y++) {
+               if (source.getNoiseBiome(x, y, z, sampler).is(TheSiftDimension.CORRUPTED_SIFT)) {
+                  return false;
+               }
+            }
+         }
+      }
+
+      return true;
+   }
+
+   private static void clearPortalEntities(ServerLevel level, BlockPos origin) {
+      AABB structure = new AABB(origin.getX(), origin.getY(), origin.getZ(), origin.getX() + 9, origin.getY() + 19, origin.getZ() + 40);
+      AABB affected = new AABB(origin.getX() - 52, level.getMinY(), origin.getZ() - 52, origin.getX() + 9 + 52, level.getMaxY(), origin.getZ() + 40 + 52);
+
+      for (Entity entity : level.getEntities((Entity)null, affected, entityx -> !(entityx instanceof Player))) {
+         if (entity.getBoundingBox().intersects(structure) || level.getBlockCollisions(entity, entity.getBoundingBox()).iterator().hasNext()) {
+            entity.discard();
+         }
+      }
    }
 
    private static double score(SiftPortalStructure.PlacementCandidate candidate, int x, int z) {
@@ -623,7 +759,7 @@ public final class SiftPortalStructure {
                   cursor.set(x, y, z);
                   BlockState state = level.getBlockState(cursor);
                   if (state.isAir() || isSiftPlant(state)) {
-                     setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE.defaultBlockState());
+                     setDuringPortalBuild(level, cursor, SiftLandmarkTerrain.stoneForBiome(level.getBiome(cursor)).defaultBlockState());
                   }
                }
             }
@@ -728,6 +864,22 @@ public final class SiftPortalStructure {
    }
 
    private static void lowerTerrainColumn(ServerLevel level, int x, int z, int naturalY, int desiredY, BlockState originalTop, boolean preserveSurface) {
+      BlockPos oldPlantPos = new BlockPos(x, naturalY + 1, z);
+      BlockState oldPlant = level.getBlockState(oldPlantPos);
+      boolean preservePlant = preserveSurface
+         && !oldPlant.isAir()
+         && oldPlant.canBeReplaced()
+         && oldPlant.getFluidState().isEmpty()
+         && !oldPlant.hasBlockEntity();
+      BlockState oldUpper = level.getBlockState(oldPlantPos.above());
+      boolean preserveUpper = preservePlant && oldPlant.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && oldUpper.getBlock() == oldPlant.getBlock();
+      if (preservePlant) {
+         setDuringPortalBuild(level, oldPlantPos, Blocks.AIR.defaultBlockState());
+         if (preserveUpper) {
+            setDuringPortalBuild(level, oldPlantPos.above(), Blocks.AIR.defaultBlockState());
+         }
+      }
+
       MutableBlockPos cursor = new MutableBlockPos();
 
       for (int y = naturalY; y > desiredY; y--) {
@@ -743,50 +895,85 @@ public final class SiftPortalStructure {
       cursor.set(x, desiredY, z);
       BlockState exposed = level.getBlockState(cursor);
       if (!preserveSurface && isSiftTerrain(exposed)) {
-         setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE.defaultBlockState());
-      } else if (exposed.is(ModBlocks.SIFTSLATE)) {
-         if (originalTop.is(ModBlocks.SIFTSLATE_GROWTH)) {
-            setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE_GROWTH.defaultBlockState());
-         } else if (originalTop.is(ModBlocks.HEALTHY_SCULK)) {
-            setDuringPortalBuild(level, cursor, ModBlocks.HEALTHY_SCULK.defaultBlockState());
+         setDuringPortalBuild(level, cursor, SiftLandmarkTerrain.stoneForBiome(level.getBiome(cursor)).defaultBlockState());
+      } else if (isSiftTerrain(exposed) && isSiftTerrain(originalTop)) {
+         setDuringPortalBuild(level, cursor, originalTop);
+      }
+
+      SiftPortalVegetation.register(new BlockPos(x, desiredY, z));
+      if (preservePlant) {
+         BlockPos newPlantPos = new BlockPos(x, desiredY + 1, z);
+         if (level.getBlockState(newPlantPos).isAir() && oldPlant.canSurvive(level, newPlantPos)) {
+            setDuringPortalBuild(level, newPlantPos, oldPlant);
+            if (preserveUpper && level.getBlockState(newPlantPos.above()).isAir()) {
+               setDuringPortalBuild(level, newPlantPos.above(), oldUpper);
+            }
          }
       }
    }
 
    private static void raiseTerrainColumn(ServerLevel level, int x, int z, int naturalY, int desiredY, BlockState originalTop, boolean preserveSurface) {
+      BlockPos oldPlantPos = new BlockPos(x, naturalY + 1, z);
+      BlockState oldPlant = level.getBlockState(oldPlantPos);
+      boolean preservePlant = preserveSurface
+         && !oldPlant.isAir()
+         && oldPlant.canBeReplaced()
+         && oldPlant.getFluidState().isEmpty()
+         && !oldPlant.hasBlockEntity();
+      BlockState oldUpper = level.getBlockState(oldPlantPos.above());
+      boolean preserveUpper = preservePlant && oldPlant.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && oldUpper.getBlock() == oldPlant.getBlock();
+      if (preservePlant) {
+         setDuringPortalBuild(level, oldPlantPos, Blocks.AIR.defaultBlockState());
+         if (preserveUpper) {
+            setDuringPortalBuild(level, oldPlantPos.above(), Blocks.AIR.defaultBlockState());
+         }
+      }
+
       MutableBlockPos cursor = new MutableBlockPos();
 
       for (int y = naturalY + 1; y <= desiredY; y++) {
          cursor.set(x, y, z);
-         setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE.defaultBlockState());
+         setDuringPortalBuild(level, cursor, SiftLandmarkTerrain.stoneForBiome(level.getBiome(cursor)).defaultBlockState());
       }
 
       cursor.set(x, desiredY, z);
       if (!preserveSurface) {
-         setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE.defaultBlockState());
-      } else if (originalTop.is(ModBlocks.SIFTSLATE_GROWTH)) {
-         setDuringPortalBuild(level, cursor, ModBlocks.SIFTSLATE_GROWTH.defaultBlockState());
-      } else if (originalTop.is(ModBlocks.HEALTHY_SCULK)) {
-         setDuringPortalBuild(level, cursor, ModBlocks.HEALTHY_SCULK.defaultBlockState());
+         setDuringPortalBuild(level, cursor, SiftLandmarkTerrain.stoneForBiome(level.getBiome(cursor)).defaultBlockState());
+      } else if (isSiftTerrain(originalTop)) {
+         setDuringPortalBuild(level, cursor, originalTop);
+      }
+
+      SiftPortalVegetation.register(new BlockPos(x, desiredY, z));
+      if (preservePlant) {
+         BlockPos newPlantPos = new BlockPos(x, desiredY + 1, z);
+         if (level.getBlockState(newPlantPos).isAir() && oldPlant.canSurvive(level, newPlantPos)) {
+            setDuringPortalBuild(level, newPlantPos, oldPlant);
+            if (preserveUpper && level.getBlockState(newPlantPos.above()).isAir()) {
+               setDuringPortalBuild(level, newPlantPos.above(), oldUpper);
+            }
+         }
       }
    }
 
-   private static void decoratePortalAndBlend(ServerLevel level, BlockPos origin, BlockPos playerAnchor) {
-      RandomSource random = RandomSource.create(level.getSeed() ^ 22601841507586892L);
-      int structureMinX = origin.getX();
-      int structureMaxX = origin.getX() + 9 - 1;
-      int structureMinZ = origin.getZ();
-      int structureMaxZ = origin.getZ() + 40 - 1;
+   private static void restorePortalVegetation(ServerLevel level, BlockPos origin, BlockPos playerAnchor) {
+      SiftLandmarkTracker.Kind kind = SiftLandmarkTracker.Kind.PORTAL_VEGETATION_REPAIRED;
+      if (!SiftLandmarkTracker.hasRecorded(kind, origin)) {
+         List<BlockPos> floors = new ArrayList<>(SiftPortalVegetation.around(origin, 9, 40, 52));
 
-      for (int x = structureMinX; x <= structureMaxX; x++) {
-         for (int z = structureMinZ; z <= structureMaxZ; z++) {
-            for (int y = origin.getY(); y < origin.getY() + 19; y++) {
-               BlockPos floor = new BlockPos(x, y, z);
-               if (!isPortalApproach(floor, playerAnchor)) {
-                  SiftSurfaceDecorator.decorateStructureSurface(level, random, floor, 0.92F, 48);
+         for (int x = 0; x < 9; x++) {
+            for (int z = 0; z < 40; z++) {
+               for (int y = 0; y < 19; y++) {
+                  BlockPos floor = origin.offset(x, y, z);
+                  if (SiftPortalVegetation.soil(level.getBlockState(floor)) && level.getBlockState(floor.above()).isAir()) {
+                     floors.add(floor);
+                  }
                }
             }
          }
+
+         floors.removeIf(floorx -> isPortalApproach(floorx, playerAnchor));
+         SiftPortalVegetation.restore(level, floors);
+         SiftLandmarkTracker.record(kind, origin);
       }
    }
 
@@ -813,18 +1000,37 @@ public final class SiftPortalStructure {
    private static boolean isPortalApproach(BlockPos pos, BlockPos playerAnchor) {
       int dx = Math.abs(pos.getX() - playerAnchor.getX());
       int dz = Math.abs(pos.getZ() - playerAnchor.getZ());
-      return dx <= 4 && dz <= 5;
+      return dx <= 1 && dz <= 2 && Math.abs(pos.getY() - (playerAnchor.getY() - 1)) <= 1;
    }
 
    private static boolean isSiftTerrain(BlockState state) {
-      return state.is(ModBlocks.SIFTSLATE)
+      return state.is(Blocks.SCULK)
+         || state.is(ModBlocks.ICHOR_SNOW_BLOCK)
+         || state.is(ModBlocks.SOULSHALE)
+         || state.is(ModBlocks.SOULSHALE_GROWTH)
+         || state.is(ModBlocks.CORAL_SOIL)
+         || state.is(ModBlocks.CORAL_GROWTH)
+         || state.is(ModBlocks.BRIGHT_CORAL_GROWTH)
+         || state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || state.is(ModBlocks.HEALTHY_SCULK_PORES)
+         || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
+         || state.is(ModBlocks.SIFTSLATE)
          || state.is(ModBlocks.SIFTSLATE_GROWTH)
          || state.is(ModBlocks.HEALTHY_SCULK)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK);
    }
 
    private static boolean isSiftPlant(BlockState state) {
-      return state.is(ModBlocks.OVERGROWN_CHARD)
+      return state.is(ModBlocks.CORAL_BUSH)
+         || state.is(ModBlocks.BRIGHT_CORAL_BUSH)
+         || state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE_SPROUT)
+         || state.is(ModBlocks.GRIM_BUSH)
+         || state.is(ModBlocks.ASH_WILLOW_FOLIAGE)
+         || state.is(ModBlocks.ASH_WILLOW_VINES)
+         || state.is(ModBlocks.ASH_WILLOW_VINES_PLANT)
+         || state.is(ModBlocks.ASH_WILLOW_LOG)
+         || state.is(ModBlocks.ASH_WILLOW_WOOD)
+         || state.is(ModBlocks.OVERGROWN_CHARD)
          || state.is(ModBlocks.OVERGROWN_STALKS)
          || state.is(ModBlocks.OVERGROWN_FRONDS)
          || state.is(ModBlocks.SIFTSLATE_STALKS)
@@ -876,8 +1082,18 @@ public final class SiftPortalStructure {
    }
 
    private static int generatedSurfaceBlockY(ServerLevel level, int x, int z) {
+      Map<Long, Integer> cache = HEIGHT_CACHE.get();
+      long key = (long)x << 32 ^ z & 4294967295L;
+      if (cache != null && cache.containsKey(key)) {
+         return cache.get(key);
+      }
+
       ServerChunkCache chunkSource = level.getChunkSource();
       int firstFreeY = chunkSource.getGenerator().getBaseHeight(x, z, Types.WORLD_SURFACE_WG, level, chunkSource.randomState());
+      if (cache != null) {
+         cache.put(key, firstFreeY - 1);
+      }
+
       return firstFreeY - 1;
    }
 

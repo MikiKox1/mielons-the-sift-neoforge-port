@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "ingredient": "the_sift:cobbled_siftslate",
+  "result": {
+    "id": "the_sift:siftslate"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

@@ -24,23 +24,22 @@ public final class SiftWeatherCommand {
    }
 
    private static void registerDimensionArguments(CommandDispatcher<CommandSourceStack> dispatcher) {
-      LiteralArgumentBuilder<CommandSourceStack> root = (LiteralArgumentBuilder<CommandSourceStack>)Commands.literal("weather")
-         .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
+      LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("weather").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
 
       for (SiftWeatherCommand.Mode mode : SiftWeatherCommand.Mode.values()) {
          root.then(
-            ((LiteralArgumentBuilder)Commands.literal(mode.commandName)
-                  .then(
-                     Commands.argument("dimension", DimensionArgument.dimension())
-                        .executes(context -> set((CommandSourceStack)context.getSource(), DimensionArgument.getDimension(context, "dimension"), mode, -1, true))
-                  ))
+            Commands.literal(mode.commandName)
+               .then(
+                  Commands.argument("dimension", DimensionArgument.dimension())
+                     .executes(context -> set(context.getSource(), DimensionArgument.getDimension(context, "dimension"), mode, -1, true))
+               )
                .then(
                   Commands.argument("duration", TimeArgument.time(1))
                      .then(
                         Commands.argument("dimension", DimensionArgument.dimension())
                            .executes(
                               context -> set(
-                                 (CommandSourceStack)context.getSource(),
+                                 context.getSource(),
                                  DimensionArgument.getDimension(context, "dimension"),
                                  mode,
                                  IntegerArgumentType.getInteger(context, "duration"),

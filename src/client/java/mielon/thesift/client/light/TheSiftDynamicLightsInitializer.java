@@ -15,9 +15,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class TheSiftDynamicLightsInitializer implements DynamicLightsInitializer {
+   @Override
    public void onInitializeDynamicLights(DynamicLightsContext context) {
       DynamicLightBehaviorManager manager = context.dynamicLightBehaviorManager();
-      SingerHeadLightBridge.install(new TheSiftDynamicLightsInitializer.SingerLightHandler(manager));
+      SingerSoulLightBridge.install(new TheSiftDynamicLightsInitializer.SingerLightHandler(manager));
       EchoGolemLightBridge.install(new TheSiftDynamicLightsInitializer.EchoLightHandler(manager));
    }
 
@@ -42,6 +43,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          this.z = position.z;
       }
 
+      @Override
       public double lightAtPos(BlockPos pos, double falloffRatio) {
          EchoGolemEntity entity = this.golem.get();
          if (entity != null && entity.hasSoulBlock()) {
@@ -54,6 +56,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          }
       }
 
+      @Override
       public BoundingBox getBoundingBox() {
          int blockX = Mth.floor(this.x);
          int blockY = Mth.floor(this.y);
@@ -61,6 +64,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          return new BoundingBox(blockX, blockY, blockZ, blockX + 1, blockY + 1, blockZ + 1);
       }
 
+      @Override
       public boolean hasChanged() {
          if (Double.compare(this.x, this.previousX) == 0 && Double.compare(this.y, this.previousY) == 0 && Double.compare(this.z, this.previousZ) == 0) {
             return false;
@@ -72,6 +76,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          return true;
       }
 
+      @Override
       public boolean isRemoved() {
          EchoGolemEntity entity = this.golem.get();
          return entity == null || entity.isRemoved() || !entity.hasSoulBlock();
@@ -106,8 +111,37 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
       }
    }
 
-   private static final class SingerHeadLightBehavior implements DynamicLightBehavior {
+   private static final class SingerLightHandler implements SingerSoulLightBridge.Handler {
+      private final DynamicLightBehaviorManager manager;
+      private final Map<SingerEntity, TheSiftDynamicLightsInitializer.SingerSoulLightBehavior> sources = new WeakHashMap<>();
+
+      private SingerLightHandler(DynamicLightBehaviorManager manager) {
+         this.manager = manager;
+      }
+
+      @Override
+      public void update(SingerEntity singer, Vec3 position) {
+         TheSiftDynamicLightsInitializer.SingerSoulLightBehavior source = this.sources.get(singer);
+         if (!singer.isHoldingSoulBlock()) {
+            if (source != null) {
+               this.manager.remove(source);
+               this.sources.remove(singer);
+            }
+         } else {
+            if (source != null && !source.isRemoved()) {
+               source.setPosition(position);
+            } else {
+               source = new TheSiftDynamicLightsInitializer.SingerSoulLightBehavior(singer, position);
+               this.sources.put(singer, source);
+               this.manager.add(source);
+            }
+         }
+      }
+   }
+
+   private static final class SingerSoulLightBehavior implements DynamicLightBehavior {
       private static final double LUMINANCE = 15.0;
+      private boolean removed;
       private final WeakReference<SingerEntity> singer;
       private double x;
       private double y;
@@ -116,7 +150,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
       private double previousY = Double.NaN;
       private double previousZ = Double.NaN;
 
-      private SingerHeadLightBehavior(SingerEntity singer, Vec3 position) {
+      private SingerSoulLightBehavior(SingerEntity singer, Vec3 position) {
          this.singer = new WeakReference<>(singer);
          this.setPosition(position);
       }
@@ -127,14 +161,21 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          this.z = position.z;
       }
 
+      @Override
       public double lightAtPos(BlockPos pos, double falloffRatio) {
-         double dx = pos.getX() + 0.5 - this.x;
-         double dy = pos.getY() + 0.5 - this.y;
-         double dz = pos.getZ() + 0.5 - this.z;
-         double distanceSquared = dx * dx + dy * dy + dz * dz;
-         return Math.max(15.0 - Math.sqrt(distanceSquared) * falloffRatio, 0.0);
+         SingerEntity entity = this.singer.get();
+         if (entity != null && !entity.isRemoved() && entity.isHoldingSoulBlock()) {
+            double dx = pos.getX() + 0.5 - this.x;
+            double dy = pos.getY() + 0.5 - this.y;
+            double dz = pos.getZ() + 0.5 - this.z;
+            double distanceSquared = dx * dx + dy * dy + dz * dz;
+            return Math.max(15.0 - Math.sqrt(distanceSquared) * falloffRatio, 0.0);
+         } else {
+            return 0.0;
+         }
       }
 
+      @Override
       public BoundingBox getBoundingBox() {
          int blockX = Mth.floor(this.x);
          int blockY = Mth.floor(this.y);
@@ -142,6 +183,7 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          return new BoundingBox(blockX, blockY, blockZ, blockX + 1, blockY + 1, blockZ + 1);
       }
 
+      @Override
       public boolean hasChanged() {
          if (Double.compare(this.x, this.previousX) == 0 && Double.compare(this.y, this.previousY) == 0 && Double.compare(this.z, this.previousZ) == 0) {
             return false;
@@ -153,30 +195,11 @@ public final class TheSiftDynamicLightsInitializer implements DynamicLightsIniti
          return true;
       }
 
+      @Override
       public boolean isRemoved() {
          SingerEntity entity = this.singer.get();
-         return entity == null || entity.isRemoved();
-      }
-   }
-
-   private static final class SingerLightHandler implements SingerHeadLightBridge.Handler {
-      private final DynamicLightBehaviorManager manager;
-      private final Map<SingerEntity, TheSiftDynamicLightsInitializer.SingerHeadLightBehavior> sources = new WeakHashMap<>();
-
-      private SingerLightHandler(DynamicLightBehaviorManager manager) {
-         this.manager = manager;
-      }
-
-      @Override
-      public void update(SingerEntity singer, Vec3 position) {
-         TheSiftDynamicLightsInitializer.SingerHeadLightBehavior source = this.sources.get(singer);
-         if (source == null || source.isRemoved()) {
-            source = new TheSiftDynamicLightsInitializer.SingerHeadLightBehavior(singer, position);
-            this.sources.put(singer, source);
-            this.manager.add(source);
-         } else {
-            source.setPosition(position);
-         }
+         this.removed = this.removed | (entity == null || entity.isRemoved() || !entity.isHoldingSoulBlock());
+         return this.removed;
       }
    }
 }

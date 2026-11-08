@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.block.SiftPortalBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -27,16 +28,23 @@ public class PortalFrameScanner {
    }
 
    private static boolean isFrame(Level level, BlockPos pos) {
-      return level.getBlockState(pos).is(Blocks.REINFORCED_DEEPSLATE);
+      return level.hasChunkAt(pos) && level.getBlockState(pos).is(Blocks.REINFORCED_DEEPSLATE);
    }
 
    public static boolean isAirLikeInterior(Level level, BlockPos pos) {
+      if (!level.hasChunkAt(pos)) {
+         return false;
+      }
+
       BlockState state = level.getBlockState(pos);
-      return state.isAir() || state.is(Blocks.SCULK_VEIN) || state.is(Blocks.GLOW_LICHEN) || state.is(Blocks.SCULK_CATALYST);
+      return state.is(ModBlocks.SIFT_PORTAL) && !state.getValue(SiftPortalBlock.ACTIVE)
+         || state.isAir()
+         || state.is(Blocks.SCULK_VEIN)
+         || state.is(Blocks.GLOW_LICHEN);
    }
 
    private static boolean isOpenInterior(Level level, BlockPos pos, boolean closing) {
-      return isAirLikeInterior(level, pos) ? true : closing && level.getBlockState(pos).is(ModBlocks.SIFT_PORTAL);
+      return isAirLikeInterior(level, pos) ? true : closing && level.hasChunkAt(pos) && level.getBlockState(pos).is(ModBlocks.SIFT_PORTAL);
    }
 
    private static Optional<PortalFrameScanner.Frame> scanAxis(Level level, BlockPos clicked, Axis axis, boolean closing) {

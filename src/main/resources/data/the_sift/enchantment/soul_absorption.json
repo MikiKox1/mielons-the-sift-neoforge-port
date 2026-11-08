@@ -1,0 +1,21 @@
+{
+  "description": {
+    "translate": "enchantment.the_sift.soul_absorption"
+  },
+  "supported_items": "#the_sift:soul_absorption_chestplates",
+  "weight": 2,
+  "max_level": 2,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 35,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "chest"
+  ],
+  "effects": {}
+}

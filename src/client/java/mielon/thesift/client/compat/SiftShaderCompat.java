@@ -35,10 +35,6 @@ public final class SiftShaderCompat {
                   assignPipeline = null;
                   irisProgramClass = null;
                }
-
-               // Iris API v0 deliberately doesn't expose pack names. This
-               // guarded lookup routes ONLY the known Photon translucent
-               // gbuffer issue away from the non-sky shaderpack pipeline.
                try {
                   currentPackName = Class.forName("net.irisshaders.iris.Iris").getMethod("getCurrentPackName");
                } catch (ReflectiveOperationException | LinkageError ignored) {
@@ -46,20 +42,6 @@ public final class SiftShaderCompat {
                }
 
                TheSiftMod.LOGGER.info("Iris detected; The Sift shader compatibility is enabled.");
-               // ALPHA3 evidence: log only once at initial client setup so
-               // the experiment can prove Photon pack detection without
-               // reading or changing the user's shaderpack configuration.
-               if (currentPackName != null) {
-                  try {
-                     Object name = currentPackName.invoke(null);
-                     TheSiftMod.LOGGER.info(
-                        "The Sift MC26.1.2 loaded Iris pack '{}'; Photon-specific sky compositing: {}",
-                        name, isPhotonShaderPackSelected()
-                     );
-                  } catch (ReflectiveOperationException ignored) {
-                     TheSiftMod.LOGGER.debug("Iris shaderpack name not available during initial client setup.");
-                  }
-               }
             } catch (ReflectiveOperationException | LinkageError exception) {
                irisApi = null;
                isShaderPackInUse = null;
@@ -90,29 +72,23 @@ public final class SiftShaderCompat {
       }
    }
 
-   /**
-    * Detects whether the currently selected Iris shaderpack uses Photon.
-    * Photon has a dedicated sky and portal rendering path.
-    * Native rendering and other shaderpacks retain their own routes.
-    * Reflection keeps Iris as an optional runtime integration.
-    * Missing Iris APIs are handled safely without changing gameplay.
-    * Models and sky content remain shared with the standard renderer.
-    */
    public static boolean isPhotonShaderPackSelected() {
-      initialize();
-      // Iris reports isShaderPackInUse=false in some lifecycle phases even
-      // after a valid Photon pack was selected and loaded. The renderer
-      // already independently checks shaderActive before choosing a GPU
-      // pipeline; do not gate pack identity detection a second time.
-      if (currentPackName == null) {
-         return false;
+      return activePackName().startsWith("photon");
+   }
+
+   public static boolean isComplementaryShaderPackSelected() {
+      return activePackName().startsWith("complementary");
+   }
+
+   private static String activePackName() {
+      if (!isShaderPackInUse() || currentPackName == null) {
+         return "";
       }
       try {
-         Object value = currentPackName.invoke(null);
-         return value instanceof String name
-            && name.toLowerCase(Locale.ROOT).startsWith("photon");
-      } catch (ReflectiveOperationException | RuntimeException exception) {
-         return false;
+         Object name = currentPackName.invoke(null);
+         return name instanceof String value ? value.toLowerCase(Locale.ROOT).trim() : "";
+      } catch (ReflectiveOperationException | RuntimeException ignored) {
+         return "";
       }
    }
 
@@ -123,7 +99,7 @@ public final class SiftShaderCompat {
             Object program = enumValue(irisProgramClass, irisProgram);
             assignPipeline.invoke(irisApi, pipeline, program);
          } catch (ReflectiveOperationException | IllegalArgumentException exception) {
-            TheSiftMod.LOGGER.warn("Could not assign The Sift pipeline {} to Iris program {}.", new Object[]{pipeline.getLocation(), irisProgram, exception});
+            TheSiftMod.LOGGER.warn("Could not assign The Sift pipeline {} to Iris program {}.", pipeline.getLocation(), irisProgram, exception);
          }
       }
    }
