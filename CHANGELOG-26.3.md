@@ -25,18 +25,6 @@ A major update to the unofficial NeoForge port of Mielon's The Sift, bringing th
 - **Visual compatibility:** Preserved the eight-layer Sift sky, Sonorous beams, portals and Ichor weather, with optional **Photon / Complementary** integrations via Iris/Sodium and native rendering without shaders.
 - **Optional integrations:** Retained Charoite enchanting and rerolls with matching **Easy Magic + Puzzles Lib**, plus optional LambDynamicLights and compatible shader mods.
 
-### Requirements
-
-- **Minecraft:** 26.3 (exact version)
-- **NeoForge:** matching Minecraft 26.3 loader; see [README.md](README.md) for the verified minimum.
-- **Java:** 25
-- **GeckoLib:** matching Minecraft 26.3 version, compatible 5.x (required).
-- **Optional:** Easy Magic (with Puzzles Lib), LambDynamicLights, Iris/Sodium, Photon and Complementary; use releases for the same Minecraft version.
-
-### Credits
-
-**Original mod:** Mielon (MIT License). **Unofficial NeoForge port:** MikiKox1 (AI-assisted). Original contributor and asset credits are preserved in [SOURCE_PROVENANCE.md](SOURCE_PROVENANCE.md).
-
 [Port 2.0.1 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.3-neoforge)
 
 ## Port 1.1.2.1 — Minecraft 26.3
