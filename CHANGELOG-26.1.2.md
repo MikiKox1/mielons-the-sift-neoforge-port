@@ -2,7 +2,7 @@
 
 Released versions are listed **newest first**.
 
-## Port 2.0.1 ALPHA4 — Minecraft 26.1.2
+## Port 2.0.1 — Minecraft 26.1.2
 
 The Sift 2.0.1 is a major content update to the existing unofficial NeoForge port. This build brings the original 2.0.1 gameplay to Minecraft 26.1.2, together with version-specific NeoForge compatibility work.
 
@@ -41,7 +41,7 @@ The Sift 2.0.1 is a major content update to the existing unofficial NeoForge por
 
 **Requirements:** Minecraft **26.1.2**; **Java 25**; **NeoForge 26.1.2.100 or newer** (same Minecraft line; no upper bound); **GeckoLib 5.5.2 or compatible 5.x**. Easy Magic, Puzzles Lib, Iris, Sodium, Photon and Complementary are optional and must match the selected Minecraft version.
 
-[Port 2.0.1 ALPHA4 — Minecraft 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.1.2-neoforge-alpha.4)
+[Port 2.0.1 — Minecraft 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.1.2-neoforge)
 
 ## Port 1.1.2.1 — Minecraft 26.1.2
 

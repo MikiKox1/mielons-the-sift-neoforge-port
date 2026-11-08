@@ -57,30 +57,30 @@ neoForge {
             client()
             // Standalone Prime 2 stage smoke; never the user's Modrinth profile.
             // A new loader release must never reuse a previous test world's directory.
-            gameDirectory = project.file("run/client-${project.neo_version}-port-2.0.1-mc263-alpha4-alpha1")
+            gameDirectory = project.file("run/client-${project.neo_version}-port-2.0.1-mc263-release")
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         clientRenderOpenGL {
             client()
-            gameDirectory = project.file("run/client-${project.neo_version}-mc263-alpha4-render-opengl")
+            gameDirectory = project.file("run/client-${project.neo_version}-mc263-release-render-opengl")
             programArguments.addAll('--graphicsBackend', 'OPENGL', '--quickPlayMultiplayer', '127.0.0.1:25616')
         }
         clientRenderVulkan {
             client()
-            gameDirectory = project.file("run/client-${project.neo_version}-mc263-alpha4-render-vulkan")
+            gameDirectory = project.file("run/client-${project.neo_version}-mc263-release-render-vulkan")
             programArguments.addAll('--graphicsBackend', 'VULKAN', '--quickPlayMultiplayer', '127.0.0.1:25616')
         }
         clientVulkanBaseline {
             client()
             // Diagnostic control: same native loader/GPU, no The Sift mod loaded.
-            gameDirectory = project.file("run/client-${project.neo_version}-mc263-alpha4-vulkan-baseline")
+            gameDirectory = project.file("run/client-${project.neo_version}-mc263-release-vulkan-baseline")
             programArguments.addAll('--graphicsBackend', 'VULKAN')
         }
 
         server {
             server()
             // Must remain separate from the client and all player saves.
-            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-mc263-alpha4-alpha1")
+            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-mc263-release")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -88,33 +88,33 @@ neoForge {
             server()
             // Disposable integration check only; Easy Magic and Puzzles Lib
             // are copied into this run's mods folder, never the production jar.
-            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-mc263-alpha4-alpha1-easymagic")
+            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-mc263-release-easymagic")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         serverVisual {
             server()
-            gameDirectory = project.file("run/server-${project.neo_version}-mc263-alpha4-visual-qa")
+            gameDirectory = project.file("run/server-${project.neo_version}-mc263-release-visual-qa")
             programArgument '--nogui'
         }
 
         serverT11 {
             server()
-            gameDirectory = project.file("run/server-T11-${project.neo_version}-mc263-alpha4-routing")
+            gameDirectory = project.file("run/server-T11-${project.neo_version}-mc263-release-routing")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'the_sift.tests.crossdimension', 'true'
         }
         serverMainPortalNatural {
             server()
-            gameDirectory = project.file("run/server-T11-natural-${project.neo_version}-mainportal-alpha2")
+            gameDirectory = project.file("run/server-T11-natural-${project.neo_version}-mainportal-release")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'the_sift.tests.crossdimension', 'true'
         }
         serverCopiedPortalGeometry {
             server()
-            gameDirectory = project.file("run/server-T11-copied-${project.neo_version}-mainportal-alpha2")
+            gameDirectory = project.file("run/server-T11-copied-${project.neo_version}-mainportal-release")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'the_sift.tests.crossdimension', 'true'
@@ -124,13 +124,13 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-mc263-alpha4")
+            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-mc263-release")
             systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
         }
         gameTestServerEasyMagic {
             type = 'gameTestServer'
             sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-mc263-alpha4-easymagic")
+            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-mc263-release-easymagic")
             systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
         }
 

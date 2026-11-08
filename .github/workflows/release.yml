@@ -1,0 +1,105 @@
+name: Publish The Sift 2.0.1
+
+on:
+  push:
+    tags:
+      - 'v2.0.1-mc*-neoforge'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: the-sift-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Verify official version and target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+          version="$(sed -n 's/^mod_version=//p' gradle.properties)"
+          test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
+          test "$version" = "2.0.1-neoforge.1-mc${mc}"
+          test -s RELEASE-NOTES-2.0.1.md
+          test -s "CHANGELOG-${mc}.md"
+          if grep -Eiq 'alpha[0-9]|-alpha\.' gradle.properties README.md RELEASE-NOTES-2.0.1.md "CHANGELOG-${mc}.md"; then
+            echo 'Official release metadata contains a development version label.'
+            exit 1
+          fi
+          echo "Publishing The Sift ${version} for Minecraft ${mc}"
+
+      - name: Build and verify production JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace clean build sourcesJar
+
+      - name: Verify and prepare release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+          version="$(sed -n 's/^mod_version=//p' gradle.properties)"
+          jar="build/libs/the_sift-${version}.jar"
+          sources="build/libs/the_sift-${version}-sources.jar"
+          test -s "$jar"
+          test -s "$sources"
+          unzip -tqq "$jar"
+          unzip -tqq "$sources"
+          unzip -p "$jar" META-INF/neoforge.mods.toml | grep -F "version=\"$version\""
+          if unzip -p "$jar" META-INF/neoforge.mods.toml | grep -Eiq 'alpha[0-9]|-alpha\.'; then
+            echo 'Pre-release metadata found in production mod.'
+            exit 1
+          fi
+          mkdir -p dist
+          cp "$jar" "dist/mielons-the-sift-2.0.1-mc${mc}-neoforge-port.jar"
+          cp "$sources" "dist/mielons-the-sift-2.0.1-mc${mc}-neoforge-port-sources.jar"
+          (cd dist && sha256sum *.jar > SHA256SUMS.txt)
+          cat dist/SHA256SUMS.txt
+
+      - name: Archive built binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-sift-2.0.1-${{ github.ref_name }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish official GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+          tag="$GITHUB_REF_NAME"
+          latest=false
+          if [[ "$mc" == "26.3" ]]; then latest=true; fi
+          if gh release view "$tag" --json tagName >/dev/null 2>&1; then
+            gh release upload "$tag" dist/* --clobber
+            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file RELEASE-NOTES-2.0.1.md --prerelease=false --latest="$latest"
+          else
+            gh release create "$tag" dist/* \
+              --title "Port 2.0.1 — Minecraft $mc" \
+              --notes-file RELEASE-NOTES-2.0.1.md \
+              --verify-tag \
+              --latest="$latest"
+          fi
+          gh release view "$tag" --json tagName,isPrerelease,isDraft,url --jq '{tag: .tagName, draft: .isDraft, prerelease: .isPrerelease, url: .url}'
