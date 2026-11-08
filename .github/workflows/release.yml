@@ -2,8 +2,8 @@ name: Publish The Sift 2.0.1
 
 on:
   push:
-    tags:
-      - 'v2.0.1-mc*-neoforge'
+    branches:
+      - 'minecraft/26.2'
 
 permissions:
   contents: write
@@ -14,10 +14,11 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/minecraft/26.2'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Check out tagged source
+      - name: Check out Minecraft 26.2 source
         uses: actions/checkout@v4
 
       - name: Set up Java 25
@@ -35,7 +36,8 @@ jobs:
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
-          test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
+          test "$mc" = "26.2"
+          test "$GITHUB_REF" = "refs/heads/minecraft/${mc}"
           test "$version" = "2.0.1-neoforge.1-mc${mc}"
           test -s "CHANGELOG-${mc}.md"
           notes_file="$RUNNER_TEMP/the-sift-release-notes.md"
@@ -89,7 +91,7 @@ jobs:
       - name: Archive built binaries
         uses: actions/upload-artifact@v4
         with:
-          name: the-sift-2.0.1-${{ github.ref_name }}
+          name: the-sift-2.0.1-${{ github.run_id }}
           path: dist/*
           if-no-files-found: error
 
@@ -100,7 +102,7 @@ jobs:
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-          tag="$GITHUB_REF_NAME"
+          tag="v2.0.1-mc${mc}-neoforge"
           notes_file="$RUNNER_TEMP/the-sift-release-notes.md"
           test -s "$notes_file"
           latest=false
