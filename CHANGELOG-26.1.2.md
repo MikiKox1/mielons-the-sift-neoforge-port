@@ -4,42 +4,38 @@ Released versions are listed **newest first**.
 
 ## Port 2.0.1 — Minecraft 26.1.2
 
-The Sift 2.0.1 is a major content update to the existing unofficial NeoForge port. This build brings the original 2.0.1 gameplay to Minecraft 26.1.2, together with version-specific NeoForge compatibility work.
+A major update to the unofficial NeoForge port of Mielon's The Sift, bringing the new 2.0.1 content and gameplay to Minecraft 26.1.2.
 
-### World, structures and exploration
+### Changes
 
-- Reworked world generation with **11 biomes**, including Coral Meadow, Coral Forest, Organic Desert, Corrupted Sift and three underground environments.
-- New terrain details, large rib fossils, cave entrances, Ichor terraces, canyons and revamped biome-specific Abandoned Portals.
-- Added **Abandoned Camps, Ichor Domes, Soulshale Shelters, Soulshale Towers** and the underground **Sculkers' Lair** dungeon.
-- Explorer maps point towards camps and the Sculkers' Lair, which contains Royal Sculk and the Monarch Upgrade Smithing Template.
-- Three daily tides — **FLOW, ENDURE and THRIVE** — alter The Sift's sky and atmosphere; beds work during Endure Tide or thunderstorms. Stalkers and Scavengers become an important threat during Endure.
+- **World and biomes:** Expanded The Sift to **11 biomes**, including Coral Meadow, Coral Forest, Organic Desert, Corrupted Sift and three underground cave biomes, with reworked caves, Ichor terraces, canyons and giant rib fossils.
+- **Tides and sky:** Added the **FLOW, ENDURE and THRIVE** phases with an animated eight-layer sky, changing weather and sleeping during Endure Tide or thunderstorms.
+- **Exploration:** Added **Abandoned Camps, Ichor Domes, Soulshale Shelters, Soulshale Towers**, biome-specific Abandoned Portals and the underground **Sculkers' Lair**, plus four exploration maps.
+- **The Monarch:** Introduced the Monarch boss and its summoning ritual, Royal Sculk, Monarch Membrane and the Monarch Upgrade Smithing Template. Upgrade Elytra into **Monarch Elytra**, with upward movement while gliding.
+- **Sifters:** Introduced **Seedling, Nester and Pollinator** with distinct attacks, plus **Sifter Hide** and a **Sifter Cap** that prevents unprovoked Sifter attacks.
+- **Creatures:** Added Stalkers, Scavengers, breedable **Slabbers and Nuzzles**, dyeable and shearable Nuzzle wool, and new creature sounds.
+- **Blubs and Echo Golems:** Added Blub variants, **Blubby Berries**, stackable Blub towers and player-built Echo Golems made from Polished Soulshale and a Carved Pumpkin.
+- **Ichor and enchantments:** Reworked Ichor to damage unprotected players. **Soul Absorption I** prevents damage; **Soul Absorption II** grants Regeneration. Ichor Bottles and Ichor Snowballs also interact with the enchantment.
+- **Blocks and equipment:** Added the Soulshale block family and ores, the full **Ash Willow** wood set, coral and sculk vegetation, Charoite/Siftite storage blocks and **Siftite Beacon** support.
+- **Progression and atmosphere:** Added **16 advancements**, a 3×3 Monarch painting, ten ambient tracks by **Lealeanz**, updated loot and Singer bartering, and Polish, Russian and Brazilian Portuguese localization.
+- **Ancient City portal:** Updated portal visuals and wrong-note melody feedback; improved overlapping note attempts and prevented unloaded-chunk access during portal checks.
+- **Rifts and upstream fixes:** Added the enabled-by-default **the_sift:spawn_rifts** gamerule to control natural Rift spawning, and corrected Ichorlogged initialization and an Ichor Dome structure palette.
+- **NeoForge portal travel:** Preserved separate routes for main Ancient City portals and paired Rifts, including safer underground return locations.
+- **World and data compatibility:** Adapted the full Sculkers' Lair and original biome, loot, advancement, entity and item behavior to the target Minecraft/NeoForge APIs.
+- **Visual compatibility:** Preserved the eight-layer Sift sky, Sonorous beams, portals and Ichor weather, with optional **Photon / Complementary** integrations via Iris/Sodium and native rendering without shaders.
+- **Optional integrations:** Retained Charoite enchanting and rerolls with matching **Easy Magic + Puzzles Lib**, plus optional LambDynamicLights and compatible shader mods.
 
-### New boss, creatures and equipment
+### Requirements
 
-- **The Monarch** boss is summoned by completing a Royal Sculk totem with a Sculkflower. A Monarch Membrane and a smithing template can upgrade Elytra to **Monarch Elytra**, which gains altitude when the player presses jump while gliding.
-- The former Sifter is replaced by **Seedling, Nester and Pollinator** variants with distinct combat behavior, including explosive Pollinator projectiles. **Sifter Hide** makes a **Sifter Cap** that prevents unprovoked attacks.
-- Added **Slabbers and Nuzzles**, breedable using overgrown plants. Nuzzles support dyeing and shearing.
-- Expanded **Blubs** with variants, **Blubby Berries** for taming and feeding, and the ability to climb on one another.
-- Echo Golems can now be constructed with Polished Soulshale and a Carved Pumpkin.
-- Added Soulshale decorative families, **Ash Willow** wood and vegetation, storage blocks for **Charoite and Siftite**, and Siftite Blocks/Ingot as Beacon components.
+- **Minecraft:** 26.1.2 (exact version)
+- **NeoForge:** matching Minecraft 26.1.2 loader; see [README.md](README.md) for the verified minimum.
+- **Java:** 25
+- **GeckoLib:** matching Minecraft 26.1.2 version, compatible 5.x (required).
+- **Optional:** Easy Magic (with Puzzles Lib), LambDynamicLights, Iris/Sodium, Photon and Complementary; use releases for the same Minecraft version.
 
-### Ichor, progression and ambience
+### Credits
 
-- **Ichor now harms unprotected players**. **Soul Absorption I** on a chestplate prevents damage, while **Soul Absorption II** converts exposure into Regeneration; Ichor Bottles and Snowballs respond to the enchantment.
-- Added **16 advancements** covering new structures, exploration, the Monarch, Sifter disguises, Ichor and Blub behavior.
-- Added a **3×3 Monarch painting**, ten ambient tracks credited to Lealeanz, new creature audio, and expanded loot including Singer bartering.
-- Updated Polish localization, with Russian and Brazilian Portuguese translations; the original Korean contributor credit remains.
-- The Ancient City portal has updated visuals and audible/red-beam feedback for an incorrect note sequence. The `spawn_rifts` gamerule controls Rift spawning.
-
-### NeoForge port features
-
-- Preserves **main Ancient City portal ↔ main portal** and paired **Rift ↔ Rift** travel, with safer returns to underground portal locations.
-- Adapts Sculkers' Lair structure templates to Minecraft 26.1.2 and retains all 11-biome progression conditions.
-- Preserves target-correct advancement/loot predicates, including Sifter Cap equipment checks, and native Ash Willow sign materials and text editing.
-- Supports an eight-layer animated Sift sky, tide transitions, portal and Sonorous effects, and optional Photon/Complementary integrations alongside native no-shader rendering.
-- Keeps optional **Easy Magic 26.1.0 + Puzzles Lib** support for Charoite enchanting and Easy Magic rerolls.
-
-**Requirements:** Minecraft **26.1.2**; **Java 25**; **NeoForge 26.1.2.100 or newer** (same Minecraft line; no upper bound); **GeckoLib 5.5.2 or compatible 5.x**. Easy Magic, Puzzles Lib, Iris, Sodium, Photon and Complementary are optional and must match the selected Minecraft version.
+**Original mod:** Mielon (MIT License). **Unofficial NeoForge port:** MikiKox1 (AI-assisted). Original contributor and asset credits are preserved in [SOURCE_PROVENANCE.md](SOURCE_PROVENANCE.md).
 
 [Port 2.0.1 — Minecraft 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.1.2-neoforge)
 
