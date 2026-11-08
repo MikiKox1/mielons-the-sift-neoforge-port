@@ -2,6 +2,8 @@ name: Publish The Sift 2.0.1
 
 on:
   push:
+    branches:
+      - minecraft/26.3
     tags:
       - 'v2.0.1-mc*-neoforge'
   workflow_dispatch:
@@ -15,6 +17,12 @@ concurrency:
 
 jobs:
   release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/v2.0.1-mc') ||
+      (github.event_name == 'push' &&
+       github.ref == 'refs/heads/minecraft/26.3' &&
+       github.event.head_commit.message == 'Publish source-only 2.0.1 via Actions MC26.3')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -36,7 +44,7 @@ jobs:
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
-          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' || "$GITHUB_REF_TYPE" == 'branch' ]]; then
             test "$GITHUB_REF_NAME" = "minecraft/${mc}"
           else
             test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
@@ -82,12 +90,7 @@ jobs:
           notes="$RUNNER_TEMP/the-sift-release-notes.md"
           printf '# Port 2.0.1 — Minecraft %s\n\n' "$mc" > "$notes"
           awk '/^## Port 2\.0\.1 — Minecraft / {copy=1; next} copy && /^## Port 1\.1\.2\.1 — Minecraft / {exit} copy {print}' "CHANGELOG-${mc}.md" >> "$notes"
-          cat >> "$notes" <<'EOF'
-
-## Credits
-
-**Original mod:** Mielon (© 2026, MIT License). **Unofficial NeoForge port:** MikiKox1 (AI-assisted). Original contributor and asset credits are preserved in SOURCE_PROVENANCE.md, AI_DISCLOSURE.md and LICENSE.
-EOF
+          printf '\n## Credits\n\n**Original mod:** Mielon (© 2026, MIT License). **Unofficial NeoForge port:** MikiKox1 (AI-assisted). Original contributor credits are preserved in SOURCE_PROVENANCE.md, AI_DISCLOSURE.md and LICENSE.\n' >> "$notes"
           test "$(wc -c < "$notes")" -gt 1400
 
       - name: Save generated binaries
