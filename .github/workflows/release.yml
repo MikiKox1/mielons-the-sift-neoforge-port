@@ -96,7 +96,7 @@ jobs:
       - name: Save generated binaries
         uses: actions/upload-artifact@v4
         with:
-          name: the-sift-2.0.1-${{ github.ref_name }}
+          name: the-sift-2.0.1-${{ github.run_id }}
           path: dist/*
           if-no-files-found: error
 
