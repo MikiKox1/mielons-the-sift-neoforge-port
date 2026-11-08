@@ -57,8 +57,9 @@ jobs:
             $0 == heading { copying = 1; found = 1; print "# " substr($0, 4); next }
             copying && $0 == finish { stopped = 1; exit }
             copying && index($0, backlink) == 1 { next }
-            copying { if ($0 == "### Changes") print "## Changes"; else print }
-            END { if (!found || !stopped) exit 1 }
+            copying && /^- / && !wrote_changes { print "## Changes"; print ""; wrote_changes = 1 }
+            copying { print }
+            END { if (!found || !stopped || !wrote_changes) exit 1 }
           ' "CHANGELOG-$mc.md" > "$notes"
           test -s "$notes"
           grep -Fq '## Changes' "$notes"
