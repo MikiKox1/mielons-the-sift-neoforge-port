@@ -23,7 +23,7 @@ class Target2612Contract(unittest.TestCase):
         self.assertEqual(props["neo_version"], "26.1.2.126")
         self.assertEqual(props["neo_min_version"], "26.1.2.100")
         self.assertEqual(props["geckolib_version"], "5.5.2")
-        self.assertEqual(props["mod_version"], "2.0.1-neoforge.1-mc26.1.2-alpha.4")
+        self.assertEqual(props["mod_version"], "2.0.1-neoforge.1-mc26.1.2")
         meta = (ROOT / "src/main/templates/META-INF/neoforge.mods.toml").read_text(encoding="utf8")
         self.assertIn('loaderVersion="[11,)"', meta)
         self.assertIn('versionRange="[${neo_min_version},)"', meta)

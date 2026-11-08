@@ -76,14 +76,14 @@ neoForge {
             client()
             // Standalone Prime 2 stage smoke; never the user's Modrinth profile.
             // A new loader release must never reuse a previous test world's directory.
-            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-alpha4")
+            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-release")
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
             server()
             // Must remain separate from the client and all player saves.
-            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4")
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-release")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -91,14 +91,14 @@ neoForge {
             server()
             // Disposable integration check only; Easy Magic and Puzzles Lib
             // are copied into this run's mods folder, never the production jar.
-            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4-easymagic")
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-release-easymagic")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         serverT11 {
             server()
-            gameDirectory = project.file("run/server-T11-${project.neo_version}-mc2612-alpha4-routing")
+            gameDirectory = project.file("run/server-T11-${project.neo_version}-mc2612-release-routing")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'the_sift.tests.crossdimension', 'true'
@@ -107,23 +107,23 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-alpha4")
+            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-release")
             systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
         }
         gameTestServerEasyMagic {
             type = 'gameTestServer'
             sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-alpha4-easymagic")
+            gameDirectory = project.file("run/gametest-${project.neo_version}-mc2612-release-easymagic")
             systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
         }
         clientVisual {
             client()
-            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-alpha4-visual-qa")
+            gameDirectory = project.file("run/client-${project.neo_version}-mc2612-release-visual-qa")
             programArguments.addAll('--quickPlayMultiplayer', '127.0.0.1:25626')
         }
         serverVisual {
             server()
-            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-alpha4-visual-qa")
+            gameDirectory = project.file("run/server-${project.neo_version}-mc2612-release-visual-qa")
             programArgument '--nogui'
         }
 

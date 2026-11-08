@@ -1,0 +1,334 @@
+{
+  "target": "Minecraft26.1.2 / NeoForge",
+  "base_source_commit": "22176ab7e71ad9a5c2c624cfc72015702bb98f22",
+  "original_reference_sha256": "ae43039aef36b773a063b28080f446f7a57adbcd9cf8009b0a8c33746e725a72",
+  "original_uv_inputs": {
+    "assets/the_sift/textures/block/ash_willow_hanging_sign.png": "acd8bd5922190d4d56712a98c8547a9053c85141e92909bb4fcb56169b75a2f2",
+    "assets/the_sift/textures/block/ash_willow_sign.png": "7df0d19e25680bf96e081deedb1607860ee28050be89c41adce86633157d954a",
+    "assets/the_sift/textures/block/overgrown_willow_hanging_sign.png": "386982ac2d442305cbf5fed74db415adb57b83f567e686a67a0bcf1e2b15358c",
+    "assets/the_sift/textures/block/overgrown_willow_sign.png": "f29cc68289efc71accda4e87ab118b6747559c0f590cb1e95b513acebab05283"
+  },
+  "conversion_script": "tools/convert_sign_textures_2612.py",
+  "native_contracts": [
+    "WoodType.register custom names for both woods",
+    "Sheets.addWoodType during enqueued client setup",
+    "LayerDefinitions.createRoots iterates all registered WoodType values",
+    "Vanilla signs atlas DirectoryLister loads entity/signs across namespaces",
+    "SignEditScreen graphics.sign WoodType argument, no nonexistent texture shadow",
+    "HangingSignEditScreen real texture shadow retained"
+  ],
+  "changed_existing_resources": 36,
+  "added_resources": 8,
+  "removed_resources": 0,
+  "entries": [
+    {
+      "path": "assets/the_sift/blockstates/ash_willow_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "bd06e81fe9d7bdc4475acab4ed69a4e331ff4260fb048922166cca81bb15be2b",
+      "target_sha256": "e11da02be04bf23412d000566294ed9e0502d43a269d755f2922f7b5414fd463",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/ash_willow_sign.json",
+      "change": "changed",
+      "source_sha256": "90ed4c8f0cfd40376fb92366a94d5a80c4a00e7f0c4a165ab2263aa224802848",
+      "target_sha256": "0cd64f6b7f2bf95ebc428421a7064490bc404ff5eea09b1467d1a6d72506734b",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/ash_willow_wall_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "eab62ee1237076755932960004cfefa7cca7b1e676b87be8f324469a5282d702",
+      "target_sha256": "e11da02be04bf23412d000566294ed9e0502d43a269d755f2922f7b5414fd463",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/ash_willow_wall_sign.json",
+      "change": "changed",
+      "source_sha256": "7d5f92c470c9a59e8575f278b799462f8997bad3f6688dba3bcc3212ff4af5b4",
+      "target_sha256": "0cd64f6b7f2bf95ebc428421a7064490bc404ff5eea09b1467d1a6d72506734b",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/overgrown_willow_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "99951ffc57ef3daa19e4c369881eeeb02f6ab32ec76992ba4a53fec892c6e65f",
+      "target_sha256": "4648057bf2ed453827fb3ee4e5566886da35ca789c36cf33aeebb17f1d10db9f",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/overgrown_willow_sign.json",
+      "change": "changed",
+      "source_sha256": "4cbbb0df0d64107df76c54553542a19562d9846d0588a9627cd947dc3378b31a",
+      "target_sha256": "a34beb97447bf43972faa6a4528378218b994ef14cf845b5f68fdf55d39bb4f3",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/overgrown_willow_wall_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "b577e8f53078d744f4ef81545dbf59229d3c5dc0bdc9c76982fa52e81e8ec5a4",
+      "target_sha256": "4648057bf2ed453827fb3ee4e5566886da35ca789c36cf33aeebb17f1d10db9f",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/blockstates/overgrown_willow_wall_sign.json",
+      "change": "changed",
+      "source_sha256": "1c38a85c0c142450aeb437c3f71b63b220c6f2d784bd4d8c26370a2d025363ad",
+      "target_sha256": "a34beb97447bf43972faa6a4528378218b994ef14cf845b5f68fdf55d39bb4f3",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_attached_rot_0.json",
+      "change": "changed",
+      "source_sha256": "c3d47857fc224c40ba80e730fe93f141ca0d4152ee000eb4c056caaff7aaeb01",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_attached_rot_1.json",
+      "change": "changed",
+      "source_sha256": "bb83a581903fd9b67325521c19b1ae3ff40996a4a0bcd9c83f10d1e4e6b679df",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_attached_rot_2.json",
+      "change": "changed",
+      "source_sha256": "bc86e69fac26d605c418e7668dc5dc7a3adec8110695e0a088b6c6071a1266ec",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_attached_rot_3.json",
+      "change": "changed",
+      "source_sha256": "c091fba10f629572b0fe4a2c76788a447dfa61ae52f8479aaab2f73e0c590ea0",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_rot_0.json",
+      "change": "changed",
+      "source_sha256": "09fd76f93e08a7d240eec5aabb1824aeee07237360fbb6f1bd7acbf8fd218c54",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_rot_1.json",
+      "change": "changed",
+      "source_sha256": "786b6fdf8f1811c0d89b0fc1d2cf65fc9f02c557660433bfb43dabbf5541867f",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_rot_2.json",
+      "change": "changed",
+      "source_sha256": "a9dda29f72facdd51084a5b1e120d6d366a40b4ea57959d315a58e7393cf2f10",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign_rot_3.json",
+      "change": "changed",
+      "source_sha256": "b0313c0c3db306e89b3674476d71439d7c2bacd48d0d2a12ca612d05b3a4b62b",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_sign_rot_0.json",
+      "change": "changed",
+      "source_sha256": "3225a2da0b78c80666ca049beee270bd13fad2b45e2f016b312d83d9e0fe2a15",
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_sign_rot_1.json",
+      "change": "changed",
+      "source_sha256": "11d41964ae6c8373bbeb02a06dbb30defa2b3cdb312a24513c9785949c6bb517",
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_sign_rot_2.json",
+      "change": "changed",
+      "source_sha256": "4fe4dff5900f5d53946ef1b1220d2125bb6348facffe3ea44766d7b29106a231",
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_sign_rot_3.json",
+      "change": "changed",
+      "source_sha256": "0c44bf0fcf7e495cd6c7bbcd70d7d436f22401191cb81aef44cfce84f0ad3c5b",
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_wall_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "8aae6b6109ac8487deb1fea4a2c2ce5cc1d66b909781cac58d3616fb9eb4d6b8",
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_wall_sign.json",
+      "change": "changed",
+      "source_sha256": "333fa84cc99e44c05abb1af00657b3604f9d65be34b62a8aa8cc487cdfafb0b2",
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_attached_rot_0.json",
+      "change": "changed",
+      "source_sha256": "16d448182cf917b7809e73e10e1a6fd5f27f6a1ce0329a088dbeb5a634cf6d62",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_attached_rot_1.json",
+      "change": "changed",
+      "source_sha256": "5bf5316add46038d9e860036f41c1abcc7fcfa0bbbee189ddf3d8d48a961b243",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_attached_rot_2.json",
+      "change": "changed",
+      "source_sha256": "5ac1ef7abbc95b836bef8f84fcbca2b01428772b56ae8265331419c8b65380b5",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_attached_rot_3.json",
+      "change": "changed",
+      "source_sha256": "85ac19a7342d43c100d0bd06cc20539dfc5f59c47ec1a231cca027af72034ad3",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_rot_0.json",
+      "change": "changed",
+      "source_sha256": "507eb3b10ce9ad0b57ff05f9021b7efb6d2470c92d0cd56a304fb301c39b9b0a",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_rot_1.json",
+      "change": "changed",
+      "source_sha256": "085f0b5e479b98bd3ef58c63f581c649aaf3ac020be8b6f89ce1a6da113720c9",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_rot_2.json",
+      "change": "changed",
+      "source_sha256": "967410461b054b486e2b3cb6ffc900f1848242cda6440ca7f70998d846aa54bb",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign_rot_3.json",
+      "change": "changed",
+      "source_sha256": "4a4c51b57637cd908a64e3b5f3d86fb356db97d50cfeee2a872d8ba7e08259e9",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_sign_rot_0.json",
+      "change": "changed",
+      "source_sha256": "c6178517886799198cae4aa38f379b0bd512e083274ed5bb4cd6e121361b8055",
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_sign_rot_1.json",
+      "change": "changed",
+      "source_sha256": "fd29339e8124f1080613c395030491b856fcd628598f73444c65da61389d21aa",
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_sign_rot_2.json",
+      "change": "changed",
+      "source_sha256": "40c2b7c056ba15684f26caae7d247657aeda190df8a58953a03b200e8b13280a",
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_sign_rot_3.json",
+      "change": "changed",
+      "source_sha256": "217662571f8c4c0f99324ee28e70055a016d6b186bcdb3ee8eca9461e27b8647",
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_wall_hanging_sign.json",
+      "change": "changed",
+      "source_sha256": "5e405ed1d9ed62008a47acbef2e4f02dbdf5afa55043fe1c719fb35dccd3065c",
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_wall_sign.json",
+      "change": "changed",
+      "source_sha256": "64656531b808ff5971ad4becae1fa9e4d771988f1c820d9f5fcacbc828ae4ecf",
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_hanging_sign.json",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "e8e7a64db21db9e8d034bbdec70a35738d68bcddd8ca3677dc430ea0a9a29bd2",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/ash_willow_sign.json",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "42b006e08c0b48666f76e81a22eaa561f8e02db3fc99e762f5fbe596213686d5",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_hanging_sign.json",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "5116f5aaea6a4dbb0e1f11e377f09d4ac6ab79d9397841ff9c03d6259eadcc2c",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/models/block/overgrown_willow_sign.json",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "62545eed8374e190890f483d8d2d5ff5cc48b807b88b8c27c42cec5a25f44c9a",
+      "reason": "MC26.1.2 native SignBlockEntity rendering: one empty blockstate variant and particle-only models instead of absent MC26.2 vanilla sign templates; shape/material use actual custom WoodType and native renderer"
+    },
+    {
+      "path": "assets/the_sift/textures/entity/signs/ash_willow.png",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "b3a04c9db07e193040c82517c0746732480e6838d802e604744730ab85083e2e",
+      "reason": "Deterministic UV pixel remap from original2.0.1 32x32 Willow board/chain art to actual MC26.1.2 64x32 sign-entity sheet; no resize, Oak substitution, or new invented art; verified by convert_sign_textures_2612.py"
+    },
+    {
+      "path": "assets/the_sift/textures/entity/signs/hanging/ash_willow.png",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "76e1eb055248e8efbc53d966daa754231d2fbc45d0f112d34be8e80e0be20b7b",
+      "reason": "Deterministic UV pixel remap from original2.0.1 32x32 Willow board/chain art to actual MC26.1.2 64x32 sign-entity sheet; no resize, Oak substitution, or new invented art; verified by convert_sign_textures_2612.py"
+    },
+    {
+      "path": "assets/the_sift/textures/entity/signs/hanging/overgrown_willow.png",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "fac0be510f0e9e2d6933b6077b73ebfb69e423733a6d8ef29ecc83828d009ec1",
+      "reason": "Deterministic UV pixel remap from original2.0.1 32x32 Willow board/chain art to actual MC26.1.2 64x32 sign-entity sheet; no resize, Oak substitution, or new invented art; verified by convert_sign_textures_2612.py"
+    },
+    {
+      "path": "assets/the_sift/textures/entity/signs/overgrown_willow.png",
+      "change": "added",
+      "source_sha256": null,
+      "target_sha256": "77af38201c75622eb78221570d5c4c0f4aef6eaffe98919edd69d5c83d08bc10",
+      "reason": "Deterministic UV pixel remap from original2.0.1 32x32 Willow board/chain art to actual MC26.1.2 64x32 sign-entity sheet; no resize, Oak substitution, or new invented art; verified by convert_sign_textures_2612.py"
+    }
+  ],
+  "runtime_smoke": "Both material colors in world, normal Overgrown3DGUI and AshhangingGUI, typed text read back from server front/back; no render errors, F3+T and Siftworld passed. Owner manual24cases remain NT."
+}

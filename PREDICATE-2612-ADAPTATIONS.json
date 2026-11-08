@@ -1,0 +1,73 @@
+{
+  "source_sha256": "ae43039aef36b773a063b28080f446f7a57adbcd9cf8009b0a8c33746e725a72",
+  "target": "26.1.2",
+  "converted_objects": 51,
+  "resources": {
+    "data/the_sift/advancement/story/fallen_civilization.json": {
+      "original_sha256": "5f83d6d4d18a448bd4ef78ec9ea47f5949e5f7487668c01c678d0356aa3f23d5",
+      "target_sha256": "efa0a8c259c12e89177bcca9dbbf7629a17eaf47bf5e1229d1f4ce654a8950cb",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/advancement/the_sift/certified_sifter.json": {
+      "original_sha256": "229fce8ce2d0cf65d3452a4b8c4648e4b1e7ca11a63532dbb4988aff45200d42",
+      "target_sha256": "f891cede957cf1ba1d4286cf13a2b34af046b4d70eaa648f61b41c65cbdf584f",
+      "entity_predicates": 11,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/advancement/the_sift/lookalike.json": {
+      "original_sha256": "a9c654aef7ed64a78c0f2796772fd30c91d2efced9d908a6ce46c1e048d91d99",
+      "target_sha256": "dd7ed70f2a8a439a0f1d1206c8f6f86762bd738beec678e8f523a9aab7a18156",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/advancement/the_sift/choir_conductor.json": {
+      "original_sha256": "fe91c8f895e65bfdd913860aee8749615212bae1b6d013d208033624d9924729",
+      "target_sha256": "8e343eb494333b7e0c6173bf43c41e99d3cc0e19063eca494aaf93494fa6f350",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/advancement/the_sift/regicide.json": {
+      "original_sha256": "e8649186cfcf856c6f99d90729b26bac772a0963b0d9fae935e6e22aa69ac624",
+      "target_sha256": "ba0ed43f7483b3d27de20fd51f2b0872a1db7b78207b392cc5efc2dd27834592",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/advancement/the_sift/sift_slayer.json": {
+      "original_sha256": "00212580b465b6cf152984a74945a9b8f952e56e87354778bc38dc82fa4f6701",
+      "target_sha256": "15e2ee552ff3c77c8b0fa1d106701e876c3bce71cde969055f558b85a7fe95cb",
+      "entity_predicates": 14,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/loot_table/entities/nester.json": {
+      "original_sha256": "25350e9110d3f165d4333e390745e727331654bc718dbf3d21a11f63c7b36d29",
+      "target_sha256": "689b6b2a92a9e0e5efd8962f6a7f147b8f037c72c20cdbeada2dfad38bd220a4",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/loot_table/entities/nuzzle.json": {
+      "original_sha256": "fa8a4a05769f4c204ffe4a35e552aacc2d97dd76c15eec0f786ebb30db801e5a",
+      "target_sha256": "176ea71ed1600794d035dea285b606d19772d1fac2d0078b89aa6752f45f3030",
+      "entity_predicates": 18,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/loot_table/entities/pollinator.json": {
+      "original_sha256": "0824a2eae71c94383e63303a28eb19e513611daf013ce0c9381821a027d606e2",
+      "target_sha256": "2cc396ec145f7963670707cb79b36e8456224833cb494443ba208edeca9b137e",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/loot_table/entities/seedling.json": {
+      "original_sha256": "47271ba8b251c74f916de886524d3121b56d8bad4031d25f69816ab6ec5d7ee7",
+      "target_sha256": "f2d87a736aa6d2aebee9180c522e4d34561886d98bfdc02cfb4a8afeb20aee9b",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    },
+    "data/the_sift/loot_table/entities/slabber.json": {
+      "original_sha256": "1e5848e38648bb17a3d487c63d13448f7799b2a58414cec10a46935d27d2e2ff",
+      "target_sha256": "668f741524117a68a8cd18ac738b04294e433990ae8b58d782d840de045dc2f8",
+      "entity_predicates": 1,
+      "reason": "Exact MC26.1.2 EntityPredicate codec: unnamespaced record fields and typed sheep sub-predicate; original conditions, rewards, quantities and IDs unchanged"
+    }
+  }
+}

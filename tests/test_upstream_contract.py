@@ -119,7 +119,7 @@ class UpstreamContract(unittest.TestCase):
         self.assertEqual(props["minecraft_version"], "26.1.2")
         self.assertEqual(props["minecraft_version_range"], "[26.1.2]")
         self.assertEqual(props["neo_min_version"], "26.1.2.100")
-        self.assertEqual(props["mod_version"], "2.0.1-neoforge.1-mc26.1.2-alpha.4")
+        self.assertEqual(props["mod_version"], "2.0.1-neoforge.1-mc26.1.2")
 
 
 if __name__ == "__main__":
