@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:healthy_sculk"
+    },
+    "title": {
+      "translate": "advancement.the_sift.living_soil.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.living_soil.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

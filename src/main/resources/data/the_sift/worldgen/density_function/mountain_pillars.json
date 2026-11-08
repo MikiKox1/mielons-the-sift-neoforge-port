@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:min",
+  "left": {
+    "type": "minecraft:min",
+    "left": "the_sift:mountain_side_shape",
+    "right": "the_sift:mountain_surface"
+  },
+  "right": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:add",
+      "left": "the_sift:strata_nodes",
+      "right": {
+        "type": "minecraft:add",
+        "left": 0.035,
+        "right": {
+          "type": "minecraft:mul",
+          "left": 0.06,
+          "right": "the_sift:mountain_mask"
+        }
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": 0.035,
+      "right": {
+        "type": "minecraft:noise",
+        "noise": "the_sift:strata_erosion",
+        "xz_scale": 1.5,
+        "y_scale": 1.0
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Preserve immutable upstream bytes, including original CRLF/whitespace.
+# Runtime/resource tests verify exact SHA; code/script whitespace checks remain strict.
+src/main/resources/assets/** -text -whitespace
+src/main/resources/data/** -text -whitespace
+src/client/resources/assets/** -text -whitespace
+src/client/resources/data/** -text -whitespace
+tools/upstream-26.2.accesswidener -text

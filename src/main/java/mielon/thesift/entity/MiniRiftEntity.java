@@ -1,14 +1,17 @@
 package mielon.thesift.entity;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.UUID;
+import mielon.thesift.world.RiftBackgrounds;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.SynchedEntityData.Builder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -36,6 +39,7 @@ public final class MiniRiftEntity extends Entity {
       this.setPermanentlyInvulnerable(true);
    }
 
+   @Override
    protected void defineSynchedData(Builder builder) {
       builder.define(DATA_CLOSING, false);
    }
@@ -52,14 +56,19 @@ public final class MiniRiftEntity extends Entity {
       }
    }
 
+   public int getBackgroundVariant() {
+      return RiftBackgrounds.variant(this.getUUID());
+   }
+
    public boolean isClosing() {
-      return (Boolean)this.entityData.get(DATA_CLOSING);
+      return this.entityData.get(DATA_CLOSING);
    }
 
    public float getOpenScale(float partialTick) {
       return this.isClosing() ? Math.max(0.0F, 1.0F - (this.closingTicks + partialTick) / 12.0F) : Math.min(1.0F, (this.tickCount + partialTick) / 12.0F);
    }
 
+   @Override
    public void tick() {
       super.tick();
       this.noPhysics = true;
@@ -73,6 +82,23 @@ public final class MiniRiftEntity extends Entity {
             this.discard();
          }
       } else {
+         if (this.level() instanceof ServerLevel level && this.ownerId != null) {
+            ServerPlayer owner = level.getServer().getPlayerList().getPlayer(this.ownerId);
+            if (owner != null && owner.isAlive() && owner.level() != level) {
+               MiniRiftEntity moved = new MiniRiftEntity(ModEntities.MINI_RIFT, owner.level());
+               moved.configure(this.ownerId, new ArrayList<>(this.pending), this.batchOrder);
+               moved.batchOrder = this.batchOrder;
+               moved.nextDeliveryIndex = this.nextDeliveryIndex;
+               moved.setPos(owner.position().add(1.55, 0.75, 0.0));
+               if (owner.level().addFreshEntity(moved)) {
+                  this.pending.clear();
+                  this.discard();
+               }
+
+               return;
+            }
+         }
+
          if (this.tickCount >= 12 && this.tickCount % 5 == 0 && !this.pending.isEmpty()) {
             ItemStack stack = this.pending.getFirst();
             SiftiteReturnEntity returning = new SiftiteReturnEntity(ModEntities.SIFTITE_RETURN, this.level());
@@ -92,6 +118,7 @@ public final class MiniRiftEntity extends Entity {
       }
    }
 
+   @Override
    protected void readAdditionalSaveData(ValueInput input) {
       this.ownerId = parseUuid(input.getStringOr("Owner", ""));
       this.entityData.set(DATA_CLOSING, input.getBooleanOr("Closing", false));
@@ -105,6 +132,7 @@ public final class MiniRiftEntity extends Entity {
       });
    }
 
+   @Override
    protected void addAdditionalSaveData(ValueOutput output) {
       if (this.ownerId != null) {
          output.putString("Owner", this.ownerId.toString());
@@ -126,38 +154,47 @@ public final class MiniRiftEntity extends Entity {
       }
    }
 
+   @Override
    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
       return false;
    }
 
+   @Override
    public boolean hurtClient(DamageSource source) {
       return false;
    }
 
+   @Override
    public boolean isAttackable() {
       return false;
    }
 
+   @Override
    public boolean isPickable() {
       return false;
    }
 
+   @Override
    public boolean canBeHitByProjectile() {
       return false;
    }
 
+   @Override
    public boolean isPushable() {
       return false;
    }
 
+   @Override
    public boolean canCollideWith(Entity other) {
       return false;
    }
 
+   @Override
    public boolean canBeCollidedWith(Entity other) {
       return false;
    }
 
+   @Override
    public boolean skipAttackInteraction(Entity attacker) {
       return true;
    }

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:add",
+  "left": 0.085,
+  "right": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:mul",
+      "left": 0.05,
+      "right": "the_sift:strata_land_weight"
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": 0.025,
+      "right": {
+        "type": "minecraft:noise",
+        "noise": "the_sift:strata_thickness",
+        "xz_scale": 0.8,
+        "y_scale": 0
+      }
+    }
+  }
+}

@@ -2,5 +2,14 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "the_sift:block/dry_healthy_sculk_sprouts"
+  },
+  "display": {
+    "gui": {
+      "translation": [
+        0,
+        6,
+        0
+      ]
+    }
   }
 }

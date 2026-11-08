@@ -1,93 +1,117 @@
 {
   "type": "minecraft:interpolated",
+  "cell_size_xz": 4,
+  "cell_size_y": 4,
   "input": {
-    "type": "minecraft:add",
-    "left": {
-      "type": "minecraft:gradient",
-      "from_value": 1.02,
-      "to_value": -1.78,
-      "axis": "y",
-      "tiling": "clamp_to_edge",
-      "from_coordinate": 0,
-      "to_coordinate": 256
-    },
-    "right": {
-      "type": "minecraft:add",
+    "type": "minecraft:blend_density",
+    "input": {
+      "type": "minecraft:mul",
       "left": {
         "type": "minecraft:add",
         "left": {
-          "type": "minecraft:add",
-          "left": "the_sift:regional_offset",
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:blend_alpha"
+          },
           "right": {
-            "type": "minecraft:add",
+            "type": "minecraft:min",
             "left": {
-              "type": "minecraft:mul",
-              "left": "the_sift:terrain_intensity",
+              "type": "minecraft:max",
+              "left": {
+                "type": "minecraft:max",
+                "left": {
+                  "type": "minecraft:max",
+                  "left": {
+                    "type": "minecraft:max",
+                    "left": {
+                      "type": "minecraft:max",
+                      "left": {
+                        "type": "minecraft:max",
+                        "left": {
+                          "type": "minecraft:max",
+                          "left": {
+                            "type": "minecraft:max",
+                            "left": {
+                              "type": "minecraft:max",
+                              "left": {
+                                "type": "minecraft:min",
+                                "left": "the_sift:strata_mainland",
+                                "right": "the_sift:strata_surface"
+                              },
+                              "right": "the_sift:strata_floor"
+                            },
+                            "right": "the_sift:strata_main_deck"
+                          },
+                          "right": "the_sift:strata_lower_deck"
+                        },
+                        "right": "the_sift:strata_upper_deck"
+                      },
+                      "right": "the_sift:strata_crown_deck"
+                    },
+                    "right": "the_sift:strata_pillars"
+                  },
+                  "right": "the_sift:mountain_deck"
+                },
+                "right": "the_sift:mountain_pillars"
+              },
               "right": {
-                "type": "minecraft:add",
-                "left": "the_sift:plateau_offset",
-                "right": "the_sift:canyon_offset"
+                "type": "minecraft:gradient",
+                "from_value": 1,
+                "to_value": -1,
+                "from_coordinate": 0,
+                "to_coordinate": 8,
+                "axis": "y",
+                "tiling": "clamp_to_edge"
               }
             },
             "right": {
-              "type": "minecraft:add",
-              "left": {
-                "type": "minecraft:mul",
-                "left": 0.041,
-                "right": {
-                  "type": "minecraft:noise",
-                  "noise": "the_sift:terrain_detail",
-                  "xz_scale": 0.96,
-                  "y_scale": 0.0
-                }
-              },
-              "right": {
-                "type": "minecraft:add",
-                "left": {
-                  "type": "minecraft:mul",
-                  "left": "the_sift:terrain_intensity",
-                  "right": {
-                    "type": "minecraft:mul",
-                    "left": 0.05,
-                    "right": {
-                      "type": "minecraft:noise",
-                      "noise": "the_sift:escarpment_detail",
-                      "xz_scale": 0.58,
-                      "y_scale": 0.46
-                    }
-                  }
-                },
-                "right": {
-                  "type": "minecraft:mul",
-                  "left": "the_sift:terrain_intensity",
-                  "right": {
-                    "type": "minecraft:mul",
-                    "left": 0.04,
-                    "right": {
-                      "type": "minecraft:noise",
-                      "noise": "the_sift:cliff_roughness",
-                      "xz_scale": 1.12,
-                      "y_scale": 0.76
-                    }
-                  }
-                }
-              }
+              "type": "minecraft:gradient",
+              "from_value": 1,
+              "to_value": -1,
+              "from_coordinate": 238,
+              "to_coordinate": 255,
+              "axis": "y",
+              "tiling": "clamp_to_edge"
             }
           }
         },
         "right": {
-          "type": "minecraft:add",
-          "left": "the_sift:healthy_path_valley_offset",
-          "right": {
+          "type": "minecraft:mul",
+          "left": {
             "type": "minecraft:add",
-            "left": "the_sift:giant_cliff_offset",
-            "right": "the_sift:layered_shelf_offset"
+            "left": 1.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": -1.0,
+              "right": {
+                "type": "minecraft:blend_alpha"
+              }
+            }
+          },
+          "right": {
+            "type": "minecraft:mul",
+            "left": 8.0,
+            "right": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:blend_offset"
+              },
+              "right": {
+                "type": "minecraft:gradient",
+                "axis": "y",
+                "from_coordinate": 0,
+                "to_coordinate": 256,
+                "from_value": 1.0,
+                "to_value": -1.0,
+                "tiling": "clamp_to_edge"
+              }
+            }
           }
         }
       },
-      "right": "the_sift:mountain_offset"
+      "right": {
+        "type": "minecraft:blend_alpha"
+      }
     }
-  },
-  "cell_size_xz": 4,
-  "cell_size_y": 8
+  }
 }

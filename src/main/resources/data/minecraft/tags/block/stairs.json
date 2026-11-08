@@ -1,6 +1,9 @@
 {
   "values": [
     "the_sift:cobbled_siftslate_stairs",
-    "the_sift:siftslate_brick_stairs"
+    "the_sift:siftslate_brick_stairs",
+    "the_sift:soulshale_stairs",
+    "the_sift:polished_soulshale_stairs",
+    "the_sift:soulshale_brick_stairs"
   ]
 }

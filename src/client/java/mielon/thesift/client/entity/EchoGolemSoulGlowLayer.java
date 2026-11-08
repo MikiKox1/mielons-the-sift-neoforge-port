@@ -12,22 +12,23 @@ import net.minecraft.resources.Identifier;
 
 public final class EchoGolemSoulGlowLayer extends CustomBoneTextureGeoLayer<EchoGolemEntity, Void, EntityRenderState> {
    public EchoGolemSoulGlowLayer(GeoRenderer<EchoGolemEntity, Void, EntityRenderState> renderer) {
-      super(renderer, "soul_block", Identifier.fromNamespaceAndPath("the_sift", "textures/entity/echo_golem.png"));
+      super(renderer, "soul_block", Identifier.fromNamespaceAndPath("the_sift", "textures/entity/echo_golem/echo_golem.png"));
    }
 
    public boolean shouldRenderBone(EntityRenderState state) {
-      EchoGolemEntity golem = (EchoGolemEntity)state.getGeckolibData(EchoGolemRenderer.ECHO_GOLEM_ENTITY);
+      EchoGolemEntity golem = state.getGeckolibData(EchoGolemRenderer.ECHO_GOLEM_ENTITY);
       return golem != null && golem.hasSoulBlock() && !state.isInvisible;
    }
 
+   @Override
    protected void renderBone(RenderPassInfo<EntityRenderState> pass, GeoBone bone, SubmitNodeCollector tasks) {
       int light = pass.packedLight();
-      ((EntityRenderState)pass.renderState()).addGeckolibData(DataTickets.PACKED_LIGHT, 15728880);
+      pass.renderState().addGeckolibData(DataTickets.PACKED_LIGHT, 15728880);
 
       try {
          super.renderBone(pass, bone, tasks);
       } finally {
-         ((EntityRenderState)pass.renderState()).addGeckolibData(DataTickets.PACKED_LIGHT, light);
+         pass.renderState().addGeckolibData(DataTickets.PACKED_LIGHT, light);
       }
    }
 }

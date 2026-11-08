@@ -5,13 +5,13 @@ import net.minecraft.world.level.ChunkPos;
 
 public final class SiftLandmarkPlacement {
    public static final int ABANDONED_PORTAL_CELL_CHUNKS = 20;
-   public static final int ABANDONED_PORTAL_CANDIDATES = 1;
-   public static final int SNIFFER_CAVE_OVERGROWN_CELL_CHUNKS = 16;
-   public static final int SNIFFER_CAVE_WASTES_CELL_CHUNKS = 28;
-   public static final int SNIFFER_CAVE_OVERGROWN_CANDIDATES = 4;
-   public static final int SNIFFER_CAVE_WASTES_CANDIDATES = 3;
-   public static final int SOUL_CANYON_CANDIDATES = 1;
-   public static final int SOUL_CANYON_CELL_CHUNKS = 12;
+   public static final int ABANDONED_PORTAL_CANDIDATES = 2;
+   public static final int SNIFFER_CAVE_OVERGROWN_CELL_CHUNKS = 12;
+   public static final int SNIFFER_CAVE_WASTES_CELL_CHUNKS = 20;
+   public static final int SNIFFER_CAVE_OVERGROWN_CANDIDATES = 8;
+   public static final int SNIFFER_CAVE_WASTES_CANDIDATES = 5;
+   public static final int SOUL_CANYON_CANDIDATES = 3;
+   public static final int SOUL_CANYON_CELL_CHUNKS = 10;
    public static final long ABANDONED_PORTAL_SALT = 4702392765337521733L;
    public static final long SNIFFER_CAVE_OVERGROWN_SALT = 6002815919507592773L;
    public static final long SNIFFER_CAVE_WASTES_SALT = 6002815919508111699L;
@@ -41,7 +41,7 @@ public final class SiftLandmarkPlacement {
       long indexedSalt = salt ^ candidateIndex * -2960836687051489901L;
       long first = mix(worldSeed, cellX, cellZ, indexedSalt);
       long second = mix(worldSeed, cellZ, cellX, indexedSalt ^ -7046029254386353131L);
-      int inset = salt != 4702392765337521733L && salt != 6003110614342389337L ? 0 : cellChunks / 3;
+      int inset = salt == 7670146607783890456L ? (cellChunks - 2) / 2 : (salt != 4702392765337521733L && salt != 6003110614342389337L ? 0 : cellChunks / 3);
       int spread = cellChunks - inset * 2;
       int offsetX = inset + (int)Long.remainderUnsigned(first, spread);
       int offsetZ = inset + (int)Long.remainderUnsigned(second, spread);

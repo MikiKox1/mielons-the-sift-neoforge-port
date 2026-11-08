@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/blub",
+  "display": {
+    "icon": {
+      "id": "the_sift:blub_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.the_sift.now_thats_a_stack.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.now_thats_a_stack.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

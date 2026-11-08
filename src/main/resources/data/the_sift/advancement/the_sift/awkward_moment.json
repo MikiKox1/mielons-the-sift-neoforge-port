@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:slabber_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.the_sift.awkward_moment.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.awkward_moment.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

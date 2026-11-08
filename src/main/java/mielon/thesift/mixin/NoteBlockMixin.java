@@ -42,7 +42,7 @@ public abstract class NoteBlockMixin {
             SonorousAutoplay.interrupt(serverLevel, pos);
             int current = SonorousNoteBlocks.getIndex(state);
             int nextStored = (current + 1) % 8;
-            BlockState newState = (BlockState)state.setValue(NoteBlock.NOTE, nextStored);
+            BlockState newState = state.setValue(NoteBlock.NOTE, nextStored);
             level.setBlock(pos, newState, 3);
             level.blockEvent(pos, newState.getBlock(), 0, 0);
             player.awardStat(Stats.TUNE_NOTEBLOCK);

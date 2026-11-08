@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:min",
+  "left": {
+    "type": "minecraft:min",
+    "left": "the_sift:strata_upper_region",
+    "right": {
+      "type": "minecraft:max",
+      "left": {
+        "type": "minecraft:add",
+        "left": "the_sift:strata_nodes",
+        "right": 0.1
+      },
+      "right": {
+        "type": "minecraft:add",
+        "left": 0.16,
+        "right": {
+          "type": "minecraft:mul",
+          "left": -1,
+          "right": "the_sift:strata_bridge_a"
+        }
+      }
+    }
+  },
+  "right": {
+    "type": "minecraft:min",
+    "left": "the_sift:strata_upper_surface",
+    "right": {
+      "type": "minecraft:add",
+      "left": "the_sift:strata_upper_thickness",
+      "right": {
+        "type": "minecraft:mul",
+        "left": -1,
+        "right": "the_sift:strata_upper_surface"
+      }
+    }
+  }
+}

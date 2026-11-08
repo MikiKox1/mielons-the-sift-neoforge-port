@@ -2,10 +2,13 @@ package mielon.thesift.worldgen;
 
 import com.mojang.serialization.MapCodec;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
@@ -26,30 +29,52 @@ public final class SiftDrySpikeFeature implements Feature {
       }
 
       BlockPos center = new BlockPos(centerX, centerY, centerZ);
-      if (!SiftFeaturePlacementGuard.intersectsPortal(center, 18) && SiftMonolithFeature.isDrySupportedSurface(level, centerX, centerY, centerZ, 6)) {
-         int mainRadius = 3 + random.nextInt(2);
-         if (hasStableFootprint(level, center, mainRadius + 2)
-            && SiftFeaturePlacementGuard.tryReserveSolid(centerX - 18, centerZ - 18, centerX + 18, centerZ + 18)) {
-            int placed = placeSpike(level, random, center, mainRadius, 19 + random.nextInt(13));
-            int satellites = 2 + random.nextInt(3);
+      if (TheSiftDimension.isCoralBiome(level.getBiome(center.below()))) {
+         return false;
+      }
 
-            for (int i = 0; i < satellites; i++) {
-               double angle = random.nextDouble() * Math.PI * 2.0;
-               int distance = 4 + random.nextInt(6);
-               int x = centerX + (int)Math.round(Math.cos(angle) * distance);
-               int z = centerZ + (int)Math.round(Math.sin(angle) * distance);
-               int y = SiftMonolithFeature.findTerrainSurface(level, x, z);
-               if (y >= 0) {
-                  placed += placeSpike(level, random, new BlockPos(x, y, z), 2 + random.nextInt(2), 10 + random.nextInt(13));
-               }
+      if (SiftFeaturePlacementGuard.intersectsPortal(center, 18) || !SiftMonolithFeature.isDrySupportedSurface(level, centerX, centerY, centerZ, 6)) {
+         return false;
+      }
+
+      if (SiftCampProtection.near(level, centerX, centerZ, 20)) {
+         return false;
+      }
+
+      int mainRadius = 3 + random.nextInt(2);
+      if (hasStableFootprint(level, center, mainRadius + 2)
+         && SiftFeaturePlacementGuard.tryReserveSolid(centerX - 18, centerZ - 18, centerX + 18, centerZ + 18)) {
+         int placed = placeSpike(level, random, center, mainRadius, 19 + random.nextInt(13));
+         int satellites = 2 + random.nextInt(3);
+
+         for (int i = 0; i < satellites; i++) {
+            double angle = random.nextDouble() * Math.PI * 2.0;
+            int distance = 4 + random.nextInt(6);
+            int x = centerX + (int)Math.round(Math.cos(angle) * distance);
+            int z = centerZ + (int)Math.round(Math.sin(angle) * distance);
+            int y = SiftMonolithFeature.findTerrainSurface(level, x, z);
+            if (y >= 0) {
+               placed += placeSpike(level, random, new BlockPos(x, y, z), 2 + random.nextInt(2), 10 + random.nextInt(13));
             }
-
-            return placed > 0;
-         } else {
-            return false;
          }
+
+         return placed > 0;
       } else {
          return false;
+      }
+   }
+
+   private static void placeDryBlock(WorldGenLevel level, BlockPos pos) {
+      SiftTerrainFeatureMemory.protectTerrain(pos.getX(), pos.getZ(), pos.getY(), pos.getY());
+      BlockPos below = pos.below();
+      BlockState state = level.getBlockState(below);
+      if ((state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE) || state.is(ModBlocks.HEALTHY_SCULK_PORES)) && level.ensureCanWrite(below)) {
+         level.setBlock(below, ModBlocks.SOULSHALE.defaultBlockState(), 2);
+      }
+
+      level.setBlock(pos, ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState(), 2);
+      if (level.getBlockState(pos.above()).is(ModBlocks.HEALTHY_SCULK_CARTILAGE_SPROUT) && level.ensureCanWrite(pos.above())) {
+         level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), 2);
       }
    }
 
@@ -82,8 +107,10 @@ public final class SiftDrySpikeFeature implements Feature {
                double edgeRadius = radius + edge * 0.45;
                if (!(dx * dx + dz * dz > edgeRadius * edgeRadius)) {
                   cursor.set(centerX + dx, origin.getY() + dy, centerZ + dz);
-                  if (level.ensureCanWrite(cursor) && SiftMonolithFeature.canReplace(level.getBlockState(cursor))) {
-                     level.setBlock(cursor, ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState(), 2);
+                  if (level.ensureCanWrite(cursor)
+                     && !TheSiftDimension.isCoralBiome(level.getBiome(cursor))
+                     && SiftMonolithFeature.canReplace(level.getBlockState(cursor))) {
+                     placeDryBlock(level, cursor);
                      placed++;
                   }
                }
@@ -115,8 +142,10 @@ public final class SiftDrySpikeFeature implements Feature {
                   if (localSurface <= targetTop + 1) {
                      for (int y = localSurface - 2; y <= targetTop; y++) {
                         cursor.set(x, y, z);
-                        if (level.ensureCanWrite(cursor) && SiftMonolithFeature.canReplace(level.getBlockState(cursor))) {
-                           level.setBlock(cursor, ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState(), 2);
+                        if (level.ensureCanWrite(cursor)
+                           && !TheSiftDimension.isCoralBiome(level.getBiome(cursor))
+                           && SiftMonolithFeature.canReplace(level.getBlockState(cursor))) {
+                           placeDryBlock(level, cursor);
                            placed++;
                         }
                      }
@@ -161,6 +190,6 @@ public final class SiftDrySpikeFeature implements Feature {
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 }

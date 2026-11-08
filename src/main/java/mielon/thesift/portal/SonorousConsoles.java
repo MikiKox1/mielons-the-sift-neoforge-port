@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.block.SonorousDeepslateBlock;
+import mielon.thesift.world.LoadedBlockSearch;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -25,6 +25,7 @@ public final class SonorousConsoles {
    public static final int[] TARGET_SEQUENCE = new int[]{1, 3, 7, 6, 5, 2, 4, 8};
    public static final int[] CLOSING_SEQUENCE = reverse(TARGET_SEQUENCE);
    private static final Map<SonorousConsoles.ConsoleKey, Deque<SonorousConsoles.PlayedNote>> BUFFERS = new HashMap<>();
+   public static final int MAX_GROUP_SIZE = 256;
 
    private SonorousConsoles() {
    }
@@ -40,6 +41,10 @@ public final class SonorousConsoles {
       }
 
       SonorousConsoles.ConsoleKey key = new SonorousConsoles.ConsoleKey(level.dimension(), anchor(group));
+      if (BUFFERS.size() >= 1024 && !BUFFERS.containsKey(key)) {
+         BUFFERS.clear();
+      }
+
       Deque<SonorousConsoles.PlayedNote> buffer = BUFFERS.computeIfAbsent(key, k -> new ArrayDeque<>(TARGET_SEQUENCE.length + 1));
       buffer.addLast(new SonorousConsoles.PlayedNote(noteBlockPos.immutable(), soundIndex1to8));
 
@@ -47,17 +52,23 @@ public final class SonorousConsoles {
          buffer.removeFirst();
       }
 
-      if (matches(buffer, TARGET_SEQUENCE)) {
-         List<SonorousConsoles.PlayedNote> winning = List.copyOf(buffer);
-         BUFFERS.remove(key);
-         return Optional.of(new SonorousConsoles.MatchedSequence(winning, SonorousConsoles.SequenceType.OPENING));
-      } else if (matches(buffer, CLOSING_SEQUENCE)) {
-         List<SonorousConsoles.PlayedNote> winning = List.copyOf(buffer);
-         BUFFERS.remove(key);
-         return Optional.of(new SonorousConsoles.MatchedSequence(winning, SonorousConsoles.SequenceType.CLOSING));
-      } else {
-         return Optional.empty();
+      if (buffer.size() == TARGET_SEQUENCE.length) {
+         int first = buffer.getFirst().soundIndex1to8();
+         SonorousConsoles.SequenceType type = first == TARGET_SEQUENCE[0]
+            ? SonorousConsoles.SequenceType.OPENING
+            : (first == CLOSING_SEQUENCE[0] ? SonorousConsoles.SequenceType.CLOSING : null);
+         if (type != null) {
+            List<SonorousConsoles.PlayedNote> attempt = List.copyOf(buffer);
+            int[] expected = type == SonorousConsoles.SequenceType.OPENING ? TARGET_SEQUENCE : CLOSING_SEQUENCE;
+            if (matches(attempt, expected)) {
+               BUFFERS.remove(key);
+            }
+
+            return Optional.of(new SonorousConsoles.MatchedSequence(attempt, type));
+         }
       }
+
+      return Optional.empty();
    }
 
    public static void reset(ServerLevel level, BlockPos anyPosNearGroup) {
@@ -72,19 +83,11 @@ public final class SonorousConsoles {
       return group.isEmpty() ? null : anchor(group);
    }
 
-   private static boolean matches(Deque<SonorousConsoles.PlayedNote> buffer, int[] target) {
-      if (buffer.size() != target.length) {
-         return false;
-      }
-
-      int i = 0;
-
-      for (SonorousConsoles.PlayedNote played : buffer) {
-         if (played.soundIndex1to8() != target[i]) {
+   private static boolean matches(List<SonorousConsoles.PlayedNote> notes, int[] sequence) {
+      for (int index = 0; index < sequence.length; index++) {
+         if (notes.get(index).soundIndex1to8() != sequence[index]) {
             return false;
          }
-
-         i++;
       }
 
       return true;
@@ -106,26 +109,44 @@ public final class SonorousConsoles {
          return List.of();
       }
 
+      Optional<List<BlockPos>> candidates = LoadedBlockSearch.find(
+         level, seed, 32, state -> state.is(ModBlocks.SONOROUS_DEEPSLATE) && state.getValue(SonorousDeepslateBlock.MODE) == SonorousDeepslateBlock.Mode.NOTE
+      );
+      return candidates.isEmpty() ? List.of() : boundedGroup(seed, candidates.get());
+   }
+
+   public static List<BlockPos> boundedGroup(BlockPos seed, List<BlockPos> candidates) {
       Set<BlockPos> found = new HashSet<>();
       Deque<BlockPos> queue = new ArrayDeque<>();
       found.add(seed);
       queue.add(seed);
-      MutableBlockPos cursor = new MutableBlockPos();
+      int minX = seed.getX();
+      int maxX = minX;
+      int minY = seed.getY();
+      int maxY = minY;
+      int minZ = seed.getZ();
+      int maxZ = minZ;
 
       while (!queue.isEmpty()) {
-         BlockPos current = queue.poll();
+         BlockPos current = queue.removeFirst();
 
-         for (int dx = -16; dx <= 16; dx++) {
-            for (int dy = -16; dy <= 16; dy++) {
-               for (int dz = -16; dz <= 16; dz++) {
-                  cursor.set(current.getX() + dx, current.getY() + dy, current.getZ() + dz);
-                  if (isNoteState(level, cursor)) {
-                     BlockPos immutable = cursor.immutable();
-                     if (found.add(immutable)) {
-                        queue.add(immutable);
-                     }
-                  }
+         for (BlockPos candidate : candidates) {
+            if (!found.contains(candidate)
+               && Math.abs(candidate.getX() - current.getX()) <= 16
+               && Math.abs(candidate.getY() - current.getY()) <= 16
+               && Math.abs(candidate.getZ() - current.getZ()) <= 16) {
+               found.add(candidate);
+               minX = Math.min(minX, candidate.getX());
+               maxX = Math.max(maxX, candidate.getX());
+               minY = Math.min(minY, candidate.getY());
+               maxY = Math.max(maxY, candidate.getY());
+               minZ = Math.min(minZ, candidate.getZ());
+               maxZ = Math.max(maxZ, candidate.getZ());
+               if (found.size() > 256 || maxX - minX > 16 || maxY - minY > 16 || maxZ - minZ > 16) {
+                  return List.of();
                }
+
+               queue.addLast(candidate);
             }
          }
       }
@@ -144,6 +165,10 @@ public final class SonorousConsoles {
    }
 
    private static boolean isNoteState(ServerLevel level, BlockPos pos) {
+      if (!level.hasChunkAt(pos)) {
+         return false;
+      }
+
       BlockState state = level.getBlockState(pos);
       return !state.is(ModBlocks.SONOROUS_DEEPSLATE) ? false : state.getValue(SonorousDeepslateBlock.MODE) == SonorousDeepslateBlock.Mode.NOTE;
    }

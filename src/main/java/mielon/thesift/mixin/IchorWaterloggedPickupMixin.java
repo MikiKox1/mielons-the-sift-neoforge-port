@@ -23,10 +23,15 @@ public abstract class IchorWaterloggedPickupMixin {
       )
    )
    private ItemStack theSift$pickupIchor(BucketPickup pickup, LivingEntity user, LevelAccessor level, BlockPos pos, BlockState state) {
-      if (!IchorWaterlogging.isIchorlogged(state)) {
+      if (!IchorWaterlogging.isIchorlogged(state) && !IchorWaterlogging.remove(level, pos)) {
          return pickup.pickupBlock(user, level, pos, state);
       }
 
-      return IchorWaterlogging.drain(level, pos, state) ? new ItemStack(ModFluids.ICHOR_BUCKET) : ItemStack.EMPTY;
+      level.setBlock(pos, IchorWaterlogging.setFluidlogged(state, false), 3);
+      if (!state.canSurvive(level, pos)) {
+         level.destroyBlock(pos, true);
+      }
+
+      return new ItemStack(ModFluids.ICHOR_BUCKET);
    }
 }

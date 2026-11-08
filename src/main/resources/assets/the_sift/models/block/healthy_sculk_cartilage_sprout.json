@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "the_sift:block/healthy_sculk_cartilage_sprout"
+  },
+  "render_type": "minecraft:cutout"
+}

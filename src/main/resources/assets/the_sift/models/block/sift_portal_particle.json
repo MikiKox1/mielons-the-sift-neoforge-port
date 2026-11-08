@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "the_sift:block/sift_portal_mist"
+    "particle": "the_sift:block/sift_portal_item"
   }
 }

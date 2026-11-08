@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import mielon.thesift.entity.MiniRiftEntity;
 import mielon.thesift.entity.ModEntities;
+import mielon.thesift.entity.SiftiteReturnEntity;
 import mielon.thesift.item.ModItems;
 import mielon.thesift.platform.NeoEvents.ServerPlayerEvents;
 import mielon.thesift.platform.NeoEvents.ServerPlayerEvents.AfterRespawn;
@@ -24,6 +25,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,14 +54,18 @@ public final class SiftiteRecoveryManager {
       }
    }
 
+   public static boolean canRecover(ItemStack stack) {
+      return !stack.isEmpty() && stack.is(ModItems.SIFTITE_ITEMS) && !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP);
+   }
+
    public static void captureOnDeath(ServerPlayer player) {
-      if (!(Boolean)player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
+      if (!player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
          List<ItemStack> protectedStacks = new ArrayList<>();
          List<Integer> protectedSlots = new ArrayList<>();
 
          for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
-            if (!stack.isEmpty() && stack.is(ModItems.SIFTITE_ITEMS)) {
+            if (canRecover(stack)) {
                protectedStacks.add(stack.copy());
                protectedSlots.add(slot);
             }
@@ -141,7 +148,7 @@ public final class SiftiteRecoveryManager {
       for (Tag raw : stored.getListOrEmpty("Items")) {
          if (raw instanceof CompoundTag entry) {
             entry.read("Stack", ItemStack.CODEC, ops).ifPresent(stack -> {
-               if (!stack.isEmpty()) {
+               if (canRecover(stack)) {
                   result.add(stack.copy());
                }
             });
@@ -177,6 +184,7 @@ public final class SiftiteRecoveryManager {
    }
 
    public static void clearTransientState() {
+      SiftiteReturnEntity.clearDeliveryIndex();
       PENDING.clear();
       DUE_AT.clear();
    }

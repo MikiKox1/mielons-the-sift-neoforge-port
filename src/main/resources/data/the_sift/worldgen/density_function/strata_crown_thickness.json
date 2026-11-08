@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:add",
+  "left": 0.11,
+  "right": {
+    "type": "minecraft:mul",
+    "left": 0.025,
+    "right": {
+      "type": "minecraft:noise",
+      "noise": "the_sift:strata_thickness",
+      "xz_scale": 0.7,
+      "y_scale": 0
+    }
+  }
+}

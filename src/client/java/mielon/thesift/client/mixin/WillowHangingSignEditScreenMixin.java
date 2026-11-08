@@ -25,5 +25,9 @@ public abstract class WillowHangingSignEditScreenMixin {
       if (sign.getBlockState().is(ModBlocks.OVERGROWN_WILLOW_HANGING_SIGN) || sign.getBlockState().is(ModBlocks.OVERGROWN_WILLOW_WALL_HANGING_SIGN)) {
          this.texture = Identifier.fromNamespaceAndPath("the_sift", "textures/gui/hanging_signs/overgrown_willow.png");
       }
+
+      if (sign.getBlockState().is(ModBlocks.ASH_WILLOW_HANGING_SIGN) || sign.getBlockState().is(ModBlocks.ASH_WILLOW_WALL_HANGING_SIGN)) {
+         this.texture = Identifier.fromNamespaceAndPath("the_sift", "textures/gui/hanging_signs/ash_willow.png");
+      }
    }
 }

@@ -43,7 +43,9 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -57,13 +59,13 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 public class SingerEntity extends PathfinderMob implements GeoEntity {
-   private static final RawAnimation SEQUENCE = RawAnimation.begin().thenPlay("appear").thenPlay("sing").thenPlay("disappear");
    private static final String CONTROLLER = "singer_sequence";
    private static final EntityDataAccessor<Boolean> DATA_SEQUENCE_STARTED = SynchedEntityData.defineId(SingerEntity.class, EntityDataSerializers.BOOLEAN);
    private static final EntityDataAccessor<Integer> DATA_SEQUENCE_TICK = SynchedEntityData.defineId(SingerEntity.class, EntityDataSerializers.INT);
    private static final EntityDataAccessor<Boolean> DATA_SOUL_EVENT = SynchedEntityData.defineId(SingerEntity.class, EntityDataSerializers.BOOLEAN);
    private static final EntityDataAccessor<Integer> DATA_SOUL_EVENT_PHASE = SynchedEntityData.defineId(SingerEntity.class, EntityDataSerializers.INT);
    private static final EntityDataAccessor<Integer> DATA_SOUL_EVENT_TICK = SynchedEntityData.defineId(SingerEntity.class, EntityDataSerializers.INT);
+   private static final RawAnimation EVENT_SING = RawAnimation.begin().thenPlay("sing");
    private static final RawAnimation EVENT_APPEAR = RawAnimation.begin().thenPlay("appear");
    private static final RawAnimation EVENT_WALK = RawAnimation.begin().thenLoop("walk");
    private static final RawAnimation EVENT_IDLE = RawAnimation.begin().thenLoop("idle");
@@ -91,6 +93,8 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       secondsToTicks(5.833333333333333)
    };
    private final AnimatableInstanceCache animatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+   private int sequenceSyncClientTick;
+   private int soulSyncClientTick;
    private SingerAnimationTimings timings;
    private int sequenceTick;
    private boolean started;
@@ -104,6 +108,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
    private UUID soulEventGolem;
    private int soulEventTick;
    private int roamMoveCooldown;
+   private boolean soulRoamWalking;
    private int canyonAwarenessCooldown;
    private BlockPos avoidedSoulCanyon;
    private boolean permanentSoulEvent;
@@ -113,6 +118,10 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
 
    public SingerEntity(EntityType<? extends SingerEntity> type, Level level) {
       super(type, level);
+      if (this.getNavigation() instanceof GroundPathNavigation groundNavigation) {
+         groundNavigation.setCanPathToTargetsBelowSurface(true);
+      }
+
       this.noPhysics = true;
       this.setNoGravity(true);
       this.setNoAi(true);
@@ -120,6 +129,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       this.timings = SingerAnimationTimings.load();
    }
 
+   @Override
    protected void defineSynchedData(Builder builder) {
       super.defineSynchedData(builder);
       builder.define(DATA_SEQUENCE_STARTED, false);
@@ -132,9 +142,9 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
 
    public static net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder createAttributes() {
       return PathfinderMob.createMobAttributes()
-         .add(Attributes.MAX_HEALTH, 20.0)
+         .add(Attributes.MAX_HEALTH, 40.0)
          .add(Attributes.MOVEMENT_SPEED, 0.27)
-         .add(Attributes.KNOCKBACK_RESISTANCE, 0.0)
+         .add(Attributes.KNOCKBACK_RESISTANCE, 0.4)
          .add(Attributes.SCALE, 1.2);
    }
 
@@ -185,6 +195,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       this.setPersistenceRequired();
    }
 
+   @Override
    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, SpawnGroupData spawnData) {
       SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, spawnData);
       if ((reason == EntitySpawnReason.SPAWN_ITEM_USE || reason == EntitySpawnReason.COMMAND) && !this.isSoulEvent() && this.portalCenter == null) {
@@ -195,11 +206,11 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
    }
 
    public boolean isSoulEvent() {
-      return (Boolean)this.entityData.get(DATA_SOUL_EVENT);
+      return this.entityData.get(DATA_SOUL_EVENT);
    }
 
    public boolean isHoldingSoulBlock() {
-      return (Boolean)this.entityData.get(DATA_HOLDING_SOUL);
+      return this.entityData.get(DATA_HOLDING_SOUL);
    }
 
    public boolean canBarter() {
@@ -295,11 +306,13 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       }
    }
 
+   @Override
    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
       InteractionResult result = SingerBarter.interact(this, player, hand);
       return result == InteractionResult.PASS ? super.mobInteract(player, hand) : result;
    }
 
+   @Override
    public void tick() {
       super.tick();
       if (this.level().isClientSide()) {
@@ -350,7 +363,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
             this.sequenceTick++;
             this.entityData.set(DATA_SEQUENCE_TICK, this.sequenceTick);
             int total = this.timings.appearTicks() + this.timings.singTicks() + this.timings.disappearTicks();
-            if (this.sequenceTick >= total - 1) {
+            if (this.sequenceTick >= total) {
                this.discard();
             }
          }
@@ -487,12 +500,16 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
                   }
                }
 
-               if (--this.roamMoveCooldown <= 0 || this.getNavigation().isDone()) {
-                  this.roamMoveCooldown = 60 + this.random.nextInt(61);
-                  Vec3 destination = this.chooseSoulRoamDestination(level);
-                  if (destination != null) {
-                     this.getNavigation().moveTo(destination.x, destination.y, destination.z, 0.78);
+               if (this.soulRoamWalking) {
+                  if (this.getNavigation().isDone() || --this.roamMoveCooldown <= 0) {
+                     this.getNavigation().stop();
+                     this.soulRoamWalking = false;
+                     this.roamMoveCooldown = 40 + this.random.nextInt(81);
                   }
+               } else if (--this.roamMoveCooldown <= 0) {
+                  Vec3 destination = this.chooseSoulRoamDestination(level);
+                  this.soulRoamWalking = destination != null && this.getNavigation().moveTo(destination.x, destination.y, destination.z, 0.78);
+                  this.roamMoveCooldown = this.soulRoamWalking ? 200 : 40 + this.random.nextInt(81);
                }
 
                if (!this.permanentSoulEvent && !this.hasCustomName() && this.soulEventTick >= 600) {
@@ -572,7 +589,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
    }
 
    private SingerEntity.SoulEventPhase soulEventPhase() {
-      int index = Mth.clamp((Integer)this.entityData.get(DATA_SOUL_EVENT_PHASE), 0, SingerEntity.SoulEventPhase.values().length - 1);
+      int index = Mth.clamp(this.entityData.get(DATA_SOUL_EVENT_PHASE), 0, SingerEntity.SoulEventPhase.values().length - 1);
       return SingerEntity.SoulEventPhase.values()[index];
    }
 
@@ -581,6 +598,12 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
    }
 
    private void setSoulEventPhase(SingerEntity.SoulEventPhase phase) {
+      if (phase == SingerEntity.SoulEventPhase.ROAMING) {
+         this.getNavigation().stop();
+         this.soulRoamWalking = false;
+         this.roamMoveCooldown = 40 + this.random.nextInt(81);
+      }
+
       if (phase != SingerEntity.SoulEventPhase.EXCHANGE && phase != SingerEntity.SoulEventPhase.BARTER) {
          this.entityData.set(DATA_HOLDING_SOUL, false);
       }
@@ -639,7 +662,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
                         cursor.set(originX + dx, originY + dy, originZ + dz);
                         BlockState state = serverLevel.getBlockState(cursor);
                         if (state.is(ModBlocks.SONOROUS_DEEPSLATE)) {
-                           SonorousDeepslateBlock.Mode mode = (SonorousDeepslateBlock.Mode)state.getValue(SonorousDeepslateBlock.MODE);
+                           SonorousDeepslateBlock.Mode mode = state.getValue(SonorousDeepslateBlock.MODE);
                            if (mode == SonorousDeepslateBlock.Mode.HORN || includeNoteModeForMigration && mode == SonorousDeepslateBlock.Mode.NOTE) {
                               candidates.add(cursor.immutable());
                            }
@@ -741,7 +764,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       BlockState hornState = level.getBlockState(pos);
       if (hornState.is(ModBlocks.SONOROUS_DEEPSLATE)) {
          if (hornState.getValue(SonorousDeepslateBlock.MODE) == SonorousDeepslateBlock.Mode.HORN) {
-            level.setBlock(pos, (BlockState)hornState.setValue(SonorousDeepslateBlock.MODE, SonorousDeepslateBlock.Mode.NOTE), 3);
+            level.setBlock(pos, hornState.setValue(SonorousDeepslateBlock.MODE, SonorousDeepslateBlock.Mode.NOTE), 3);
             level.levelEvent(2001, pos, Block.getId(hornState));
          }
       }
@@ -752,16 +775,39 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       if (this.portalCenter == null) {
          this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.THE_SIFT_PORTAL_OPEN, SoundSource.BLOCKS, volume, 1.0F);
       }
-
-      this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.SINGER_EMERGE, SoundSource.HOSTILE, volume, 1.0F);
    }
 
    private void playDisappearEffects() {
       float volume = this.portalCenter == null ? 1.0F : 4.0F;
-      this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.SINGER_DIG, SoundSource.HOSTILE, volume, 1.0F);
       if (this.portalCenter == null) {
          this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.THE_SIFT_PORTAL_CLOSE, SoundSource.BLOCKS, volume, 1.0F);
       }
+   }
+
+   public int transitionSoundPhase() {
+      if (this.isSoulEvent()) {
+         return switch (this.soulEventPhase()) {
+            case APPEAR -> 1;
+            case DISAPPEAR -> 2;
+            default -> 0;
+         };
+      } else {
+         if (!this.entityData.get(DATA_SEQUENCE_STARTED)) {
+            return 0;
+         }
+
+         int tick = this.entityData.get(DATA_SEQUENCE_TICK);
+         if (tick < this.timings.appearTicks()) {
+            return 1;
+         }
+
+         int disappearStart = this.timings.appearTicks() + this.timings.singTicks();
+         return tick >= disappearStart && tick < disappearStart + this.timings.disappearTicks() ? 2 : 0;
+      }
+   }
+
+   public float transitionSoundVolume() {
+      return this.isSoulEvent() ? 1.0F : 4.0F;
    }
 
    private void tickClientDiggingParticles() {
@@ -792,17 +838,17 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
    }
 
    private boolean isClientAppearOrDisappearPhase() {
-      if ((Boolean)this.entityData.get(DATA_SOUL_EVENT)) {
+      if (this.entityData.get(DATA_SOUL_EVENT)) {
          SingerEntity.SoulEventPhase phase = this.soulEventPhase();
-         int phaseTick = (Integer)this.entityData.get(DATA_SOUL_EVENT_TICK);
+         int phaseTick = this.entityData.get(DATA_SOUL_EVENT_TICK);
          return (phase == SingerEntity.SoulEventPhase.APPEAR || phase == SingerEntity.SoulEventPhase.DISAPPEAR) && phaseTick < 90;
       }
 
-      if (!(Boolean)this.entityData.get(DATA_SEQUENCE_STARTED)) {
+      if (!this.entityData.get(DATA_SEQUENCE_STARTED)) {
          return false;
       }
 
-      int tick = (Integer)this.entityData.get(DATA_SEQUENCE_TICK);
+      int tick = this.entityData.get(DATA_SEQUENCE_TICK);
       int disappearStart = this.timings.appearTicks() + this.timings.singTicks();
       int total = disappearStart + this.timings.disappearTicks();
       boolean emerging = tick < this.timings.appearTicks() && tick < 90;
@@ -810,6 +856,7 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       return emerging || digging;
    }
 
+   @Override
    protected void addAdditionalSaveData(ValueOutput output) {
       super.addAdditionalSaveData(output);
       output.putBoolean("sequence_started", this.started);
@@ -855,8 +902,14 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       }
    }
 
+   @Override
    protected void readAdditionalSaveData(ValueInput input) {
       super.readAdditionalSaveData(input);
+      AttributeInstance resistance = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+      if (resistance != null && resistance.getBaseValue() == 0.0) {
+         resistance.setBaseValue(0.4);
+      }
+
       this.started = input.getBooleanOr("sequence_started", false);
       this.sequenceTick = input.getIntOr("sequence_tick", 0);
       this.entityData.set(DATA_SEQUENCE_STARTED, this.started);
@@ -938,25 +991,31 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       this.timings = SingerAnimationTimings.load();
    }
 
+   @Override
    protected void registerGoals() {
    }
 
+   @Override
    public boolean isPickable() {
       return this.isSoulEvent();
    }
 
+   @Override
    public boolean isPushable() {
       return this.isSoulEvent();
    }
 
+   @Override
    public boolean canBeCollidedWith(Entity entity) {
       return this.isSoulEvent() && super.canBeCollidedWith(entity);
    }
 
+   @Override
    public boolean isInvulnerableTo(ServerLevel level, DamageSource source) {
       return this.isSoulEvent() ? super.isInvulnerableTo(level, source) : !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
    }
 
+   @Override
    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
       if (this.isSoulEvent()) {
          return super.hurtServer(level, source, amount);
@@ -965,26 +1024,65 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
       }
    }
 
+   @Override
    protected int getBaseExperienceReward(ServerLevel level) {
       return this.isSoulEvent() ? 8 + this.random.nextInt(5) : 0;
    }
 
+   @Override
    protected SoundEvent getAmbientSound() {
-      return this.portalCenter != null ? null : ModSounds.SINGER_IDLE;
+      return this.portalCenter == null && this.transitionSoundPhase() == 0 ? ModSounds.SINGER_IDLE : null;
    }
 
+   @Override
    protected SoundEvent getHurtSound(DamageSource source) {
       return this.portalCenter != null ? null : ModSounds.SINGER_HURT;
    }
 
+   @Override
    protected SoundEvent getDeathSound() {
       return this.portalCenter != null ? null : ModSounds.SINGER_DEATH;
    }
 
+   @Override
+   public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+      super.onSyncedDataUpdated(key);
+      if (DATA_SEQUENCE_TICK.equals(key)) {
+         this.sequenceSyncClientTick = this.tickCount;
+      }
+
+      if (DATA_SOUL_EVENT_TICK.equals(key) || DATA_SOUL_EVENT_PHASE.equals(key)) {
+         this.soulSyncClientTick = this.tickCount;
+      }
+   }
+
+   private int sequencePhaseStart() {
+      int tick = this.entityData.get(DATA_SEQUENCE_TICK);
+      int disappearStart = this.timings.appearTicks() + this.timings.singTicks();
+      return tick >= disappearStart ? disappearStart : (tick >= this.timings.appearTicks() ? this.timings.appearTicks() : 0);
+   }
+
+   private double sequenceAnimationTick() {
+      if (this.isSoulEvent()) {
+         return switch (this.soulEventPhase()) {
+            case APPEAR, EXCHANGE, DISAPPEAR -> this.entityData.get(DATA_SOUL_EVENT_TICK)
+               + (this.level().isClientSide() ? Math.max(0, this.tickCount - this.soulSyncClientTick) : 0);
+            default -> -1.0;
+         };
+      } else {
+         return !this.entityData.get(DATA_SEQUENCE_STARTED)
+            ? -1.0
+            : this.entityData.get(DATA_SEQUENCE_TICK)
+               - this.sequencePhaseStart()
+               + (this.level().isClientSide() ? Math.max(0, this.tickCount - this.sequenceSyncClientTick) : 0);
+      }
+   }
+
+   @Override
    public void registerControllers(ControllerRegistrar controllers) {
-      controllers.add(new AnimationController("singer_sequence", 0, state -> {
+      controllers.add(new SingerAnimationController("singer_sequence", this::sequenceAnimationTick, state -> {
          SingerEntity singer = (SingerEntity)state.animatable();
-         if ((Boolean)singer.entityData.get(DATA_SOUL_EVENT)) {
+         if (singer.entityData.get(DATA_SOUL_EVENT)) {
             SingerEntity.SoulEventPhase phase = singer.soulEventPhase();
 
             RawAnimation eventAnimation = switch (phase) {
@@ -998,23 +1096,19 @@ public class SingerEntity extends PathfinderMob implements GeoEntity {
             state.controller().setAnimation(eventAnimation);
             return PlayState.CONTINUE;
          } else {
-            if (!(Boolean)singer.entityData.get(DATA_SEQUENCE_STARTED)) {
+            if (!singer.entityData.get(DATA_SEQUENCE_STARTED)) {
                return PlayState.STOP;
             }
 
             AnimationController<GeoAnimatable> controller = state.controller();
-            controller.setAnimation(SEQUENCE);
-            double targetTime = ((Integer)singer.entityData.get(DATA_SEQUENCE_TICK)).intValue() / 20.0;
-            double currentTime = controller.getCurrentTimelineTime();
-            if (currentTime < 0.0 || Math.abs(currentTime - targetTime) > 0.2) {
-               controller.setTimelineTime(targetTime);
-            }
-
+            int phaseStart = singer.sequencePhaseStart();
+            controller.setAnimation(phaseStart == 0 ? EVENT_APPEAR : (phaseStart == singer.timings.appearTicks() ? EVENT_SING : EVENT_DISAPPEAR));
             return PlayState.CONTINUE;
          }
       }));
    }
 
+   @Override
    public AnimatableInstanceCache getAnimatableInstanceCache() {
       return this.animatableInstanceCache;
    }

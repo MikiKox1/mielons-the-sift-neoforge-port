@@ -25,7 +25,7 @@ public final class SiftSoulCanyonParticles {
       if (level != null) {
          if (--refreshCooldown <= 0) {
             refreshCooldown = 400;
-            clusters = SiftLandmarkTracker.snapshot(SiftLandmarkTracker.Kind.SOUL_CANYON_CLUSTER);
+            clusters = SiftLandmarkTracker.nearPlayers(SiftLandmarkTracker.Kind.SOUL_CANYON_CLUSTER, level, 256);
             if (cursor >= clusters.size()) {
                cursor = 0;
             }
@@ -76,7 +76,7 @@ public final class SiftSoulCanyonParticles {
 
          for (int offset = 0; offset < maximum; offset++) {
             BlockPos candidate = indexed.get((start + offset) % indexed.size());
-            if (hasFiftyOpenBlocks(level, candidate)) {
+            if (hasSixteenOpenBlocks(level, candidate)) {
                SOURCE_CACHE.put(center.asLong(), new SiftSoulCanyonParticles.CachedSource(candidate, now + 6L));
                return candidate;
             }
@@ -97,7 +97,7 @@ public final class SiftSoulCanyonParticles {
             int dz = level.getRandom().nextInt(17) - 8;
             int dy = level.getRandom().nextInt(11) - 5;
             cursor.set(center.getX() + dx, center.getY() + dy, center.getZ() + dz);
-            if (level.getBlockState(cursor).is(ModBlocks.SOUL_BLOCK) && hasFiftyOpenBlocks(level, cursor)) {
+            if (level.getBlockState(cursor).is(ModBlocks.SOUL_BLOCK) && hasSixteenOpenBlocks(level, cursor)) {
                BlockPos source = cursor.immutable();
                SOURCE_CACHE.put(center.asLong(), new SiftSoulCanyonParticles.CachedSource(source, now + 40L));
                return source;
@@ -109,8 +109,8 @@ public final class SiftSoulCanyonParticles {
       }
    }
 
-   private static boolean hasFiftyOpenBlocks(ServerLevel level, BlockPos source) {
-      for (int above = 1; above <= 50; above++) {
+   private static boolean hasSixteenOpenBlocks(ServerLevel level, BlockPos source) {
+      for (int above = 1; above <= 16; above++) {
          if (!level.getBlockState(source.above(above)).isAir()) {
             return false;
          }

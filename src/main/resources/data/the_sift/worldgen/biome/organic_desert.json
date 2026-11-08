@@ -1,0 +1,177 @@
+{
+  "attributes": {
+    "minecraft:visual/sky_color": "#ffffff",
+    "minecraft:visual/ambient_particles": {
+      "argument": [
+        {
+          "particle": {
+            "type": "the_sift:sift_note"
+          },
+          "probability": 0.0003
+        }
+      ],
+      "modifier": "append"
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "spawn_costs": {
+        "the_sift:stalker": {
+          "charge": 0.7,
+          "energy_budget": 0.15
+        },
+        "the_sift:scavenger": {
+          "charge": 0.7,
+          "energy_budget": 0.15
+        }
+      },
+      "spawns_by_category": {
+        "ambient": [],
+        "axolotls": [],
+        "creature": [
+          {
+            "type": "the_sift:seedling",
+            "weight": 100,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 2,
+              "max_inclusive": 4
+            }
+          },
+          {
+            "type": "the_sift:nester",
+            "weight": 100,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 2,
+              "max_inclusive": 4
+            }
+          },
+          {
+            "type": "the_sift:pollinator",
+            "weight": 90,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 2,
+              "max_inclusive": 4
+            }
+          },
+          {
+            "type": "the_sift:blub",
+            "weight": 28,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 2,
+              "max_inclusive": 4
+            }
+          }
+        ],
+        "misc": [],
+        "monster": [
+          {
+            "type": "the_sift:stalker",
+            "weight": 3,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 1,
+              "max_inclusive": 2
+            }
+          },
+          {
+            "type": "the_sift:scavenger",
+            "weight": 3,
+            "count": {
+              "type": "minecraft:uniform",
+              "min_inclusive": 1,
+              "max_inclusive": 2
+            }
+          }
+        ],
+        "underground_water_creature": [],
+        "water_ambient": [],
+        "water_creature": []
+      }
+    },
+    "minecraft:gameplay/creature_world_gen_spawn_probability": 0.1,
+    "minecraft:audio/background_music": {
+      "default": {
+        "sound": "the_sift:music.biome.organic_desert",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "creative": {
+        "sound": "the_sift:music.biome.organic_desert",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "underwater": {
+        "sound": "the_sift:music.biome.organic_desert",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      }
+    }
+  },
+  "carvers": [
+    "the_sift:cave_extra_underground"
+  ],
+  "downfall": 0.05,
+  "effects": {
+    "water_color": "#4adce8"
+  },
+  "features": [
+    [
+      "the_sift:strata_supports",
+      "the_sift:organic_desert_surface",
+      "the_sift:cave_geology_base"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "the_sift:siftslate_coal_ore",
+      "the_sift:siftslate_coal_ore_surface",
+      "the_sift:siftslate_diamond_ore",
+      "the_sift:siftslate_emerald_ore",
+      "the_sift:siftslate_charoite_ore",
+      "the_sift:siftslate_siftite_ore",
+      "the_sift:cobbled_siftslate_blob",
+      "the_sift:sift_rubble_blob",
+      "the_sift:healthy_sculk_underground_blob",
+      "the_sift:dry_healthy_sculk_underground_blob",
+      "the_sift:sift_fossil"
+    ],
+    [
+      "the_sift:cave_entrance",
+      "the_sift:siftslate_hanging_roots_cave",
+      "the_sift:siftslate_stalks_cave",
+      "the_sift:healthy_sculk_sprouts_cave",
+      "the_sift:dry_healthy_sculk_sprouts_cave",
+      "the_sift:siftslate_stalks_on_healthy_cave",
+      "the_sift:siftslate_stalks_on_dry_cave"
+    ],
+    [],
+    [
+      "the_sift:abandoned_main_portal",
+      "the_sift:strata_undergrowth",
+      "the_sift:organic_desert_channels",
+      "the_sift:organic_rib_fossils",
+      "the_sift:dry_sculk_spikes_organic"
+    ],
+    [
+      "the_sift:lava_floor",
+      "the_sift:cave_geology_finish",
+      "the_sift:cave_ichor_lake",
+      "the_sift:cave_willow",
+      "the_sift:cave_vegetation",
+      "the_sift:strata_rims",
+      "the_sift:covered_growth_cleanup",
+      "the_sift:organic_desert_finish",
+      "the_sift:soulshale_tower"
+    ]
+  ],
+  "has_precipitation": false,
+  "temperature": 1.05
+}

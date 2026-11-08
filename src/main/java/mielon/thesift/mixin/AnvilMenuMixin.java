@@ -17,7 +17,7 @@ public abstract class AnvilMenuMixin {
    @Final
    private DataSlot cost;
 
-   @Inject(method = "createResult", at = @At("TAIL"))
+   @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
    private void theSift$blockCharoiteCombination(CallbackInfo ci) {
       AnvilMenu menu = (AnvilMenu)(Object)this;
       ItemStack base = menu.getSlot(0).getItem();
@@ -25,6 +25,7 @@ public abstract class AnvilMenuMixin {
       if (CharoiteEnchanting.blocksAnvil(base, addition)) {
          menu.getSlot(2).set(ItemStack.EMPTY);
          this.cost.set(1);
+         ci.cancel();
       }
    }
 }

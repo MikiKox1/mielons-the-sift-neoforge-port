@@ -4,6 +4,11 @@
     "the_sift:siftslate_diamond_ore",
     "the_sift:siftslate_emerald_ore",
     "the_sift:siftslate_charoite_ore",
-    "the_sift:siftslate_siftite_ore"
+    "the_sift:siftslate_siftite_ore",
+    "the_sift:soulshale_coal_ore",
+    "the_sift:soulshale_diamond_ore",
+    "the_sift:soulshale_emerald_ore",
+    "the_sift:soulshale_charoite_ore",
+    "the_sift:soulshale_siftite_ore"
   ]
 }

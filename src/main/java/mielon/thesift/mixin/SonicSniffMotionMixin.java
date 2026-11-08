@@ -23,10 +23,9 @@ public abstract class SonicSniffMotionMixin implements SonicSniffMotionAccess {
 
    @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
    private void theSift$saveSonicSniffMotion(ValueOutput output, CallbackInfo ci) {
-      boolean marked = this.theSift$sonicSniffMotion != null
-         && this.theSift$sonicSniffMotion.equals(((Player)(Object)this).getDeltaMovement());
-      output.putBoolean("TheSiftSonicSniffMotion", marked);
-      if (!marked) {
+      boolean hasSonicSniffMotion = this.theSift$sonicSniffMotion != null && this.theSift$sonicSniffMotion.equals(((Player)(Object)this).getDeltaMovement());
+      output.putBoolean("TheSiftSonicSniffMotion", hasSonicSniffMotion);
+      if (!hasSonicSniffMotion) {
          this.theSift$sonicSniffMotion = null;
       }
    }
@@ -36,6 +35,7 @@ public abstract class SonicSniffMotionMixin implements SonicSniffMotionAccess {
       if (input.getBooleanOr("TheSiftSonicSniffMotion", false)) {
          ((Player)(Object)this).setDeltaMovement(Vec3.ZERO);
       }
+
       this.theSift$sonicSniffMotion = null;
    }
 }

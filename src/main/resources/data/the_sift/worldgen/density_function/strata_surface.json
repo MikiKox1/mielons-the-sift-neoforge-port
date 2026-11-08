@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:gradient",
+    "from_value": 1.1375,
+    "to_value": -1.6625,
+    "from_coordinate": 0,
+    "to_coordinate": 256,
+    "axis": "y",
+    "tiling": "clamp_to_edge"
+  },
+  "right": {
+    "type": "minecraft:add",
+    "left": "the_sift:strata_regional_relief",
+    "right": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:add",
+          "left": 0.075,
+          "right": {
+            "type": "minecraft:mul",
+            "left": 0.08,
+            "right": "the_sift:strata_land_weight"
+          }
+        },
+        "right": "the_sift:strata_hill_relief"
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": 0.035,
+        "right": "the_sift:strata_local_relief"
+      }
+    }
+  }
+}

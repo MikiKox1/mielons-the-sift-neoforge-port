@@ -16,10 +16,21 @@
       "conditions": {
         "recipes": "the_sift:siftite_spear_smithing"
       }
+    },
+    "has_upgrade_material": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "the_sift:siftite_ingot"
+          }
+        ]
+      }
     }
   },
   "requirements": [
     [
+      "has_upgrade_material",
       "has_key_item",
       "has_the_recipe"
     ]

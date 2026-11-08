@@ -1,0 +1,38 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:sifter_cap"
+    },
+    "title": {
+      "translate": "advancement.the_sift.lookalike.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.lookalike.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "wearing_cap": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:equipment": {
+              "head": {
+                "items": "the_sift:sifter_cap"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "wearing_cap"
+    ]
+  ]
+}

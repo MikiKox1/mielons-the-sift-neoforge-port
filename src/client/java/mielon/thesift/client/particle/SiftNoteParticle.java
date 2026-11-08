@@ -63,6 +63,7 @@ public final class SiftNoteParticle extends SingleQuadParticle {
       this.swaySpeed = 0.035 + this.random.nextDouble() * 0.035;
    }
 
+   @Override
    public void tick() {
       this.xo = this.x;
       this.yo = this.y;
@@ -80,10 +81,12 @@ public final class SiftNoteParticle extends SingleQuadParticle {
       }
    }
 
+   @Override
    public int getLightCoords(float partialTickTime) {
       return 15728880;
    }
 
+   @Override
    protected Layer getLayer() {
       return Layer.TRANSLUCENT;
    }

@@ -31,10 +31,20 @@ public final class SiftIchorSnowFeature implements Feature {
 
       for (int x = minX; x < minX + 16; x++) {
          for (int z = minZ; z < minZ + 16; z++) {
-            int groundY = level.getHeight(Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+            int groundY = SiftCaveHabitat.rockTop(level, x, z);
             if (groundY >= level.getMinY() && groundY < level.getMaxY() - 2) {
                BlockPos groundPos = new BlockPos(x, groundY, z);
-               if (level.getBiome(groundPos).is(TheSiftDimension.ICHOR_SNOWY_PEAKS)) {
+               if (SiftCaveHabitat.surfaceBiome(level, x, z).is(TheSiftDimension.ICHOR_SNOWY_PEAKS) && !SiftCaveHabitat.underground(level, groundPos)) {
+                  int boundary = SiftCaveHabitat.surfaceRockBottom(level, x, z);
+
+                  for (int y = Math.max(boundary, groundY - 8); y <= groundY; y++) {
+                     BlockPos cap = new BlockPos(x, y, z);
+                     if (level.getBlockState(cap).is(Blocks.SCULK) && level.ensureCanWrite(cap)) {
+                        level.setBlock(cap, ModBlocks.SIFTSLATE.defaultBlockState(), 2);
+                        changed = true;
+                     }
+                  }
+
                   BlockState ground = level.getBlockState(groundPos);
                   if (isNaturalMountainSurface(ground) && ground.getFluidState().isEmpty()) {
                      changed |= placeSnowLayer(level, groundPos, seed, x, z, 5279142693729160783L, true);
@@ -62,7 +72,7 @@ public final class SiftIchorSnowFeature implements Feature {
          double field = valueNoise(seed ^ salt, x, z, 26);
          double detail = valueNoise(seed ^ 6002822589557593153L ^ salt, x, z, 9);
          int layers = field + detail * 0.35 > 0.88 ? 2 : 1;
-         BlockState snow = (BlockState)ModBlocks.ICHOR_SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, layers);
+         BlockState snow = ModBlocks.ICHOR_SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, layers);
          if (!snow.canSurvive(level, snowPos)) {
             return false;
          }
@@ -70,8 +80,8 @@ public final class SiftIchorSnowFeature implements Feature {
          clearUpperSnifferHalf(level, snowPos, above);
          level.setBlock(snowPos, snow, 2);
          BlockState support = level.getBlockState(supportPos);
-         if (support.is(ModBlocks.SIFTSLATE_GROWTH) && !(Boolean)support.getValue(SiftslateGrowthBlock.SNOWY)) {
-            level.setBlock(supportPos, (BlockState)support.setValue(SiftslateGrowthBlock.SNOWY, true), 2);
+         if (support.is(ModBlocks.SIFTSLATE_GROWTH) && !support.getValue(SiftslateGrowthBlock.SNOWY)) {
+            level.setBlock(supportPos, support.setValue(SiftslateGrowthBlock.SNOWY, true), 2);
          }
 
          return true;
@@ -81,12 +91,7 @@ public final class SiftIchorSnowFeature implements Feature {
    }
 
    private static boolean isNaturalMountainSurface(BlockState state) {
-      return state.is(ModBlocks.SIFTSLATE)
-         || state.is(ModBlocks.SIFTSLATE_GROWTH)
-         || state.is(ModBlocks.HEALTHY_SCULK)
-         || state.is(ModBlocks.DRY_HEALTHY_SCULK)
-         || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-         || state.is(Blocks.SCULK);
+      return SiftLandmarkTerrain.isGround(state);
    }
 
    private static boolean isWillowSnowSupport(BlockState state) {
@@ -94,13 +99,17 @@ public final class SiftIchorSnowFeature implements Feature {
    }
 
    private static boolean isReplaceablePeakVegetation(BlockState state) {
-      return state.is(ModBlocks.HEALTHY_SCULK_SPROUTS)
+      return state.is(Blocks.SCULK_SENSOR)
+         || state.is(Blocks.SCULK_SHRIEKER)
+         || state.is(Blocks.SCULK_CATALYST)
+         || state.is(ModBlocks.HEALTHY_SCULK_SPROUTS)
          || state.is(ModBlocks.DRY_HEALTHY_SCULK_SPROUTS)
          || state.is(ModBlocks.SIFTSLATE_STALKS)
          || state.is(ModBlocks.OVERGROWN_FRONDS)
          || state.is(ModBlocks.OVERGROWN_CHARD)
          || state.is(ModBlocks.OVERGROWN_STALKS)
-         || state.is(ModBlocks.OVERGROWN_LOTUS)
+         || state.is(ModBlocks.BLUE_SAUCER_BLOOM)
+         || state.is(ModBlocks.GREEN_SAUCER_BLOOM)
          || state.is(ModBlocks.SUNBURST_PLANT)
          || state.is(ModBlocks.WHISPERBLOOM)
          || state.is(Blocks.SCULK_VEIN)
@@ -142,7 +151,7 @@ public final class SiftIchorSnowFeature implements Feature {
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 
    private static double lerp(double delta, double start, double end) {

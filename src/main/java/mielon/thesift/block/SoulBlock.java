@@ -16,6 +16,7 @@ public final class SoulBlock extends Block {
       super(properties);
    }
 
+   @Override
    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
       super.onPlace(state, level, pos, oldState, movedByPiston);
       if (!level.isClientSide() && !oldState.is(this)) {
@@ -23,11 +24,13 @@ public final class SoulBlock extends Block {
       }
    }
 
+   @Override
    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
       super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
       SiftLandmarkTracker.forget(SiftLandmarkTracker.Kind.SOUL_CANYON_SOUL_BLOCK, pos);
    }
 
+   @Override
    protected void spawnAfterBreak(BlockState state, ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience) {
       super.spawnAfterBreak(state, level, pos, tool, dropExperience);
       RandomSource random = level.getRandom();

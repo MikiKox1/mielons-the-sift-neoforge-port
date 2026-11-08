@@ -1,0 +1,54 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "the_sift:block/bright_coral_growth"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_1"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_2"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_3"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_4"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_5"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_6"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_7"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_8"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_9"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_10"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_11"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_12"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_13"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_14"
+      },
+      {
+        "model": "the_sift:block/bright_coral_growth_15"
+      }
+    ]
+  }
+}

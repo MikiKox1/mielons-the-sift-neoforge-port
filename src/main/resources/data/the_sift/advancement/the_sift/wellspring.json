@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/pitch_perfect",
+  "display": {
+    "icon": {
+      "id": "the_sift:music_disc_wellspring"
+    },
+    "title": {
+      "translate": "advancement.the_sift.wellspring.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.wellspring.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

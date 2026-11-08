@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * preview recalculation path.
  *
  * <p>The target is optional and named as a string on purpose. The Sift therefore
- * keeps loading when Easy Magic is absent, while the exact 26.3 menu can still
+ * keeps loading when Easy Magic is absent, while the verified 26.3 menu can still
  * share the vanilla Charoite enchant application and advancement hooks.</p>
  */
 @Pseudo

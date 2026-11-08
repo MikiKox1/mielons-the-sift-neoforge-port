@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:gradient",
+    "from_value": 0.6125,
+    "to_value": -2.1875,
+    "from_coordinate": 0,
+    "to_coordinate": 256,
+    "axis": "y",
+    "tiling": "clamp_to_edge"
+  },
+  "right": "the_sift:strata_floor_relief"
+}

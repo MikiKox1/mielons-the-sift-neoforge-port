@@ -18,8 +18,8 @@ public abstract class GoatHornMixin {
    @Inject(method = "play", at = @At("HEAD"))
    private static void theSift$onInstrumentFinished(Level level, Player player, Instrument instrument, CallbackInfo ci) {
       if (level instanceof ServerLevel serverLevel) {
-         SingerSummoner.onGoatHornFinished(serverLevel, player);
-         if (player instanceof ServerPlayer serverPlayer && SingerSummoner.isNearAncientCityCenter(serverLevel, player.position())) {
+         boolean nearFrame = SingerSummoner.onGoatHornFinished(serverLevel, player);
+         if (player instanceof ServerPlayer serverPlayer && nearFrame) {
             ModAdvancements.award(serverPlayer, "story/song_of_the_past");
          }
       }

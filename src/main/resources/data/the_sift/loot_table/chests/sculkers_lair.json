@@ -1,0 +1,481 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.58,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:siftite_nugget",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 5
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.5,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 6
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.65,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 10
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.55,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sculk",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 12
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.65,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:soulshale",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 16
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.45,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:grim_bush",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 6
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.62,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:charoite",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 12
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.45,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:sifter_hide",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.6,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 24
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.6,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:ichor_shard",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 12
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.45,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:ichor_glass",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.4,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:whisperbloom",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 6
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.2,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:monarch_upgrade_smithing_template",
+          "modifier": []
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.4,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_hoe",
+          "modifier": [
+            {
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 15,
+                "max": 30
+              },
+              "condition": {
+                "chance": 0.7,
+                "type": "minecraft:random_chance"
+              },
+              "type": "minecraft:enchant_with_levels"
+            },
+            {
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.15,
+                "max": 0.65
+              },
+              "type": "minecraft:set_damage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.4,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_pickaxe",
+          "modifier": [
+            {
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 15,
+                "max": 30
+              },
+              "condition": {
+                "chance": 0.7,
+                "type": "minecraft:random_chance"
+              },
+              "type": "minecraft:enchant_with_levels"
+            },
+            {
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.15,
+                "max": 0.65
+              },
+              "type": "minecraft:set_damage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.48,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "modifier": [
+            {
+              "enchantments": {
+                "minecraft:power": {
+                  "type": "minecraft:uniform",
+                  "min": 1,
+                  "max": 4
+                }
+              },
+              "condition": {
+                "chance": 0.75,
+                "type": "minecraft:random_chance"
+              },
+              "type": "minecraft:set_enchantments"
+            },
+            {
+              "damage": {
+                "type": "minecraft:uniform",
+                "min": 0.15,
+                "max": 0.65
+              },
+              "type": "minecraft:set_damage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "chance": 0.08,
+        "type": "minecraft:random_chance"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:siftite_ingot"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:raw_sifter_meat",
+          "weight": 1,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "chance": 0.55,
+        "type": "minecraft:random_chance"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": [
+            {
+              "options": "#the_sift:structure_random_loot",
+              "type": "minecraft:enchant_randomly"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "chance": 0.3,
+        "type": "minecraft:random_chance"
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": [
+            {
+              "options": [
+                "the_sift:soul_absorption"
+              ],
+              "type": "minecraft:enchant_randomly"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "chance": 0.2,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ]
+}

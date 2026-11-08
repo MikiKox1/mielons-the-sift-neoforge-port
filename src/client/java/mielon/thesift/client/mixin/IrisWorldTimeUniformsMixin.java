@@ -1,5 +1,6 @@
 package mielon.thesift.client.mixin;
 
+import mielon.thesift.world.SiftTides;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -28,28 +29,12 @@ public abstract class IrisWorldTimeUniformsMixin {
    private static void theSift$mapWorldDay(CallbackInfoReturnable<Integer> cir) {
       ClientLevel level = Minecraft.getInstance().level;
       if (level != null && level.dimension().equals(TheSiftDimension.LEVEL_KEY)) {
-         cir.setReturnValue((int)Math.floorDiv(level.getDefaultClockTime(), 24120L));
+         cir.setReturnValue((int)Math.floorDiv(level.getDefaultClockTime(), 25200L));
       }
    }
 
    private static int theSift$shaderTime(long totalTicks) {
-      long tick = Math.floorMod(totalTicks, 24120L);
-      if (tick < 12000L) {
-         return 3000;
-      }
-
-      if (tick < 12060L) {
-         float t = theSift$smooth((float)(tick - 12000L) / 60.0F);
-         return Math.round(3000.0F + 15000.0F * t);
-      }
-
-      if (tick < 24060L) {
-         return 18000;
-      }
-
-      float t = theSift$smooth((float)(tick - 24060L) / 60.0F);
-      int unwrapped = Math.round(18000.0F + 9000.0F * t);
-      return Math.floorMod(unwrapped, 24000);
+      return SiftTides.shaderTime(totalTicks);
    }
 
    private static float theSift$smooth(float value) {

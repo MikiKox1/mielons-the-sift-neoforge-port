@@ -1,0 +1,65 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:blubby_berries"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "the_sift:blubby_berries_bush",
+        "state": {
+          "half": "lower"
+        }
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:blubby_berries",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:blubby_berries",
+          "weight": 6,
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 2
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:blubby_berries",
+          "weight": 3,
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 3
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "the_sift:blubby_berries",
+          "weight": 1,
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 4
+          }
+        }
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "the_sift:blubby_berries_bush",
+        "state": {
+          "grown": "true"
+        }
+      }
+    }
+  ]
+}

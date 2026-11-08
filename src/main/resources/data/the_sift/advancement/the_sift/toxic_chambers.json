@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:buried_sculkers_lair_map"
+    },
+    "title": {
+      "translate": "advancement.the_sift.toxic_chambers.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.toxic_chambers.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

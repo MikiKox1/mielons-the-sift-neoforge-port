@@ -1,13 +1,26 @@
 {
   "replace": false,
   "values": [
-    "the_sift:overgrown_chard",
-    "the_sift:overgrown_stalks",
-    "the_sift:overgrown_fronds",
-    "the_sift:sunburst_plant",
-    "the_sift:whisperbloom",
-    "the_sift:siftslate_stalks",
     "the_sift:healthy_sculk_sprouts",
-    "the_sift:dry_healthy_sculk_sprouts"
+    "the_sift:dry_healthy_sculk_sprouts",
+    "the_sift:healthy_sculk_cartilage_sprout",
+    "the_sift:overgrown_fronds",
+    "the_sift:overgrown_stalks",
+    "the_sift:overgrown_chard",
+    "the_sift:siftslate_stalks",
+    "the_sift:grim_bush",
+    "the_sift:whisperbloom",
+    "the_sift:sculkflower",
+    "the_sift:sculkflower_crop",
+    "the_sift:coral_bush",
+    "the_sift:bright_coral_bush",
+    "the_sift:overgrown_willow_sapling",
+    "the_sift:overgrown_willow_vines",
+    "the_sift:overgrown_willow_vines_plant",
+    "the_sift:siftslate_hanging_roots",
+    "the_sift:ash_willow_vines",
+    "the_sift:ash_willow_vines_plant",
+    "the_sift:overgrown_hanging_roots",
+    "the_sift:ash_willow_sapling"
   ]
 }

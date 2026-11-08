@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import mielon.thesift.block.SonorousNoteBlocks;
 import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents;
-import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents.ServerStopped;
 import mielon.thesift.platform.NeoEvents.ServerTickEvents;
+import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents.ServerStopped;
 import mielon.thesift.platform.NeoEvents.ServerTickEvents.EndTick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -86,7 +86,9 @@ public final class SonorousIgnition {
 
       private boolean isStillIntact() {
          for (SonorousConsoles.PlayedNote note : this.matched.notes()) {
-            if (!this.level.getBlockState(note.notePos()).is(Blocks.NOTE_BLOCK) || !SonorousNoteBlocks.isSonorous(this.level, note.notePos())) {
+            if (!this.level.hasChunkAt(note.notePos())
+               || !this.level.getBlockState(note.notePos()).is(Blocks.NOTE_BLOCK)
+               || !SonorousNoteBlocks.isSonorous(this.level, note.notePos())) {
                return false;
             }
          }

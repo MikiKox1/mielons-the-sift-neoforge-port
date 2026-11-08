@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/toxic_chambers",
+  "display": {
+    "icon": {
+      "id": "the_sift:soulshale_totem"
+    },
+    "title": {
+      "translate": "advancement.the_sift.thats_the_guy_from_the_painting.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.thats_the_guy_from_the_painting.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

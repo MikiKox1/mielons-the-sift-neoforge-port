@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "the_sift:singer",
+    "the_sift:echo_golem",
+    "the_sift:dark_sniffer",
+    "the_sift:blub",
+    "the_sift:seedling",
+    "the_sift:nester",
+    "the_sift:pollinator",
+    "minecraft:sniffer",
+    "minecraft:warden",
+    "the_sift:slabber",
+    "the_sift:stalker",
+    "the_sift:scavenger",
+    "the_sift:nuzzle",
+    "the_sift:monarch",
+    "the_sift:monarch_echo",
+    "minecraft:allay"
+  ]
+}

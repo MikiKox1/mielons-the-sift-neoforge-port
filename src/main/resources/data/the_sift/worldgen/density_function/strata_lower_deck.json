@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:min",
+  "left": {
+    "type": "minecraft:add",
+    "left": "the_sift:strata_nodes",
+    "right": 0.14
+  },
+  "right": {
+    "type": "minecraft:min",
+    "left": "the_sift:strata_lower_surface",
+    "right": {
+      "type": "minecraft:add",
+      "left": "the_sift:strata_lower_thickness",
+      "right": {
+        "type": "minecraft:mul",
+        "left": -1,
+        "right": "the_sift:strata_lower_surface"
+      }
+    }
+  }
+}

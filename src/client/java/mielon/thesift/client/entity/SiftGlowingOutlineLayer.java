@@ -15,10 +15,11 @@ public final class SiftGlowingOutlineLayer<T extends Entity & GeoAnimatable> ext
       super(renderer);
    }
 
+   @Override
    public void submitRenderTask(RenderPassInfo<EntityRenderState> renderPassInfo, SubmitNodeCollector renderTasks) {
-      EntityRenderState state = (EntityRenderState)renderPassInfo.renderState();
+      EntityRenderState state = renderPassInfo.renderState();
       if (renderPassInfo.willRender() && state.appearsGlowing()) {
-         int previousColor = (Integer)renderPassInfo.getOrDefaultGeckolibData(DataTickets.RENDER_COLOR, -1);
+         int previousColor = renderPassInfo.getOrDefaultGeckolibData(DataTickets.RENDER_COLOR, -1);
          int outlineColor = state.outlineColor == 0 ? -1 : state.outlineColor;
          state.addGeckolibData(DataTickets.RENDER_COLOR, outlineColor);
 

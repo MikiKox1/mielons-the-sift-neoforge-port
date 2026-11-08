@@ -3,24 +3,33 @@ package mielon.thesift.client.loading;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline.Builder;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline.Snippet;
+import mielon.thesift.client.render.RiftRenderTypes;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 public final class SiftLoadingBackgroundRenderer {
-   private static final RenderPipeline PORTAL_PIPELINE = createPipeline(false);
    private static final RenderPipeline RIFT_PIPELINE = createPipeline(true);
 
    private SiftLoadingBackgroundRenderer() {
    }
 
+   public static void registerPipelines(RegisterRenderPipelinesEvent event) {
+      event.registerPipeline(RIFT_PIPELINE);
+   }
+
    public static void draw(GuiGraphicsExtractor graphics, int width, int height) {
-      int clock = (int)(System.nanoTime() / 16666667L) & 16777215;
-      boolean targetSift = !TheSiftDimension.LEVEL_KEY.equals(SiftLoadingScreenState.sourceDimension());
-      Identifier texture = id("textures/entity/rift/" + (targetSift ? "sift" : "overworld") + ".png");
-      RenderPipeline pipeline = SiftLoadingScreenState.isRift() ? RIFT_PIPELINE : PORTAL_PIPELINE;
-      graphics.blit(pipeline, texture, 0, 0, 0.0F, 0.0F, width, height, 320, 320, 320, 320, 0xFF000000 | clock);
+      if (!SiftLoadingScreenState.isRift()) {
+         SiftPixelLoadingBackground.draw(graphics, width, height);
+      } else {
+         int clock = (int)(System.nanoTime() / 16666667L) & 16777215;
+         boolean targetSift = !TheSiftDimension.LEVEL_KEY.equals(SiftLoadingScreenState.sourceDimension());
+         Identifier texture = RiftRenderTypes.texture(targetSift, 0);
+         RenderPipeline pipeline = RIFT_PIPELINE;
+         graphics.blit(pipeline, texture, 0, 0, 0.0F, 0.0F, width, height, 320, 320, 320, 320, 0xFF000000 | clock);
+      }
    }
 
    private static RenderPipeline createPipeline(boolean rift) {

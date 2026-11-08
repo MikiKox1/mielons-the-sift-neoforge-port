@@ -28,6 +28,14 @@ public final class SonorousBeams {
       }
    }
 
+   public static void failGroup(ServerLevel level, BlockPos anyBlockInGroup) {
+      for (BlockPos pos : SonorousConsoles.findGroup(level, anyBlockInGroup)) {
+         if (level.getBlockEntity(pos) instanceof SonorousDeepslateBlockEntity beam) {
+            beam.failBeam();
+         }
+      }
+   }
+
    public static void scheduleRetract(ServerLevel level, BlockPos anyBlockInGroup) {
       for (BlockPos deepslatePos : SonorousConsoles.findGroup(level, anyBlockInGroup)) {
          if (level.getBlockEntity(deepslatePos) instanceof SonorousDeepslateBlockEntity beam) {

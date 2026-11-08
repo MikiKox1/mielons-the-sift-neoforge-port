@@ -10,7 +10,7 @@
     "max_exclusive": 1.4,
     "min_inclusive": 0.7
   },
-  "probability": 0.07,
+  "probability": 0.055,
   "vertical_radius_multiplier": {
     "type": "minecraft:uniform",
     "max_exclusive": 1.3,
@@ -18,11 +18,11 @@
   },
   "y": {
     "type": "minecraft:uniform",
-    "max_inclusive": {
-      "absolute": 47
-    },
     "min_inclusive": {
-      "above_bottom": 8
+      "absolute": 12
+    },
+    "max_inclusive": {
+      "absolute": 20
     }
   },
   "room_vertical_radius_multiplier": {

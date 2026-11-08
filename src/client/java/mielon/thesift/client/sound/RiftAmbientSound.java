@@ -19,14 +19,17 @@ public final class RiftAmbientSound extends AbstractTickableSoundInstance {
       this.updatePositionAndVolume();
    }
 
+   @Override
    public boolean canStartSilent() {
       return true;
    }
 
+   @Override
    public boolean canPlaySound() {
       return !this.rift.isRemoved() && !this.rift.isSilent();
    }
 
+   @Override
    public void tick() {
       Minecraft client = Minecraft.getInstance();
       Entity camera = client.getCameraEntity();

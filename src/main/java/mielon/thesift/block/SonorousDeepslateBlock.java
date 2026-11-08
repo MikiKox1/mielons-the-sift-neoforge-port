@@ -18,37 +18,36 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 
 public class SonorousDeepslateBlock extends BaseEntityBlock {
    public static final EnumProperty<SonorousDeepslateBlock.Mode> MODE = EnumProperty.create("mode", SonorousDeepslateBlock.Mode.class);
 
    public SonorousDeepslateBlock(Properties properties) {
       super(properties);
-      this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(MODE, SonorousDeepslateBlock.Mode.HORN));
+      this.registerDefaultState(this.stateDefinition.any().setValue(MODE, SonorousDeepslateBlock.Mode.HORN));
    }
 
    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
-      builder.add(new Property[]{MODE});
+      builder.add(MODE);
    }
 
+   @Override
    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
       ItemStack stack = super.getCloneItemStack(level, pos, state, includeData);
       if (stack.isEmpty()) {
          stack = new ItemStack(ModBlocks.SONOROUS_DEEPSLATE_ITEM);
       }
 
-      stack.set(
-         DataComponents.BLOCK_STATE,
-         new BlockItemStateProperties(Map.of(MODE.getName(), ((SonorousDeepslateBlock.Mode)state.getValue(MODE)).getSerializedName()))
-      );
+      stack.set(DataComponents.BLOCK_STATE, new BlockItemStateProperties(Map.of(MODE.getName(), state.getValue(MODE).getSerializedName())));
       return stack;
    }
 
+   @Override
    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
       return new SonorousDeepslateBlockEntity(pos, state);
    }
 
+   @Override
    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
       return createTickerHelper(type, ModBlocks.SONOROUS_DEEPSLATE_BLOCK_ENTITY, SonorousDeepslateBlockEntity::tick);
    }
@@ -63,6 +62,7 @@ public class SonorousDeepslateBlock extends BaseEntityBlock {
          this.name = name;
       }
 
+      @Override
       public String getSerializedName() {
          return this.name;
       }
