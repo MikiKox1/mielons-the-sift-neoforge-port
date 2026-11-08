@@ -6,12 +6,14 @@ import mielon.thesift.entity.SingerEntity;
 import net.minecraft.resources.Identifier;
 
 public class SingerModel extends GeoModel<SingerEntity> {
+   @Override
    public Identifier getModelResource(GeoRenderState state) {
       return Identifier.fromNamespaceAndPath("the_sift", "entity/singer");
    }
 
+   @Override
    public Identifier getTextureResource(GeoRenderState state) {
-      return Identifier.fromNamespaceAndPath("the_sift", "textures/entity/singer.png");
+      return Identifier.fromNamespaceAndPath("the_sift", "textures/entity/singer/singer.png");
    }
 
    public Identifier getAnimationResource(SingerEntity animatable) {

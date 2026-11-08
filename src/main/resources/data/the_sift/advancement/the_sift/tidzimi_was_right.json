@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/root",
+  "display": {
+    "icon": {
+      "id": "the_sift:ichor_glass"
+    },
+    "title": {
+      "translate": "advancement.the_sift.tidzimi_was_right.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.tidzimi_was_right.description"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

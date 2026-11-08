@@ -16,7 +16,10 @@ public final class OvergrownWillowFoliageBlock extends TintedParticleLeavesBlock
       super(leafParticleChance, properties);
    }
 
+   @Override
    protected void spawnFallingLeavesParticle(Level level, BlockPos pos, RandomSource random) {
-      ParticleUtils.spawnParticleBelow(level, pos, random, ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, 4063205));
+      ParticleUtils.spawnParticleBelow(
+         level, pos, random, ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, this == ModBlocks.ASH_WILLOW_FOLIAGE ? 9741222 : 4063205)
+      );
    }
 }

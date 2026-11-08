@@ -2,19 +2,25 @@ package mielon.thesift.world;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import mielon.thesift.TheSiftMod;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.block.SiftPortalBlock;
+import mielon.thesift.portal.PortalFrameScanner;
 import mielon.thesift.network.RiftLoadingPayload;
 import mielon.thesift.sound.ModSounds;
 import mielon.thesift.worldgen.SiftAllaySpawner;
+import mielon.thesift.worldgen.SiftCreatureSpawner;
 import mielon.thesift.worldgen.SiftDeferredSnifferSpawner;
 import mielon.thesift.worldgen.SiftEchoGolemSpawner;
 import mielon.thesift.worldgen.SiftLandmarkTracker;
-import mielon.thesift.worldgen.SiftSifterSpawner;
+import mielon.thesift.worldgen.SiftPortalVegetation;
 import mielon.thesift.worldgen.SiftSoulCanyonParticles;
+import mielon.thesift.worldgen.SiftSpawnBudget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,6 +32,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
@@ -43,13 +53,14 @@ public final class SiftTeleportManager {
 
    public static void tick(MinecraftServer server) {
       SiftLandmarkTracker.tick(server);
+      SiftPortalVegetation.tick(server);
       SiftSoulCanyonParticles.tick(server);
       ServerLevel sift = server.getLevel(TheSiftDimension.LEVEL_KEY);
-      if (sift != null && (Boolean)sift.getGameRules().get(GameRules.SPAWN_MOBS)) {
+      if (sift != null && sift.getGameRules().get(GameRules.SPAWN_MOBS)) {
          SiftDeferredSnifferSpawner.tick(server);
          SiftEchoGolemSpawner.tick(server);
          SiftAllaySpawner.tick(server);
-         SiftSifterSpawner.tick(server);
+         SiftCreatureSpawner.tick(server);
       }
 
       ServerLevel overworld = server.getLevel(Level.OVERWORLD);
@@ -88,47 +99,19 @@ public final class SiftTeleportManager {
       PORTAL_CONTACTS.clear();
       cleanupCooldown = 0;
       SiftDeferredSnifferSpawner.clear();
+      SiftSpawnBudget.clear();
       SiftLandmarkTracker.clearTransientState();
       SiftSoulCanyonParticles.clear();
       SiftEchoGolemSpawner.clear();
       SiftAllaySpawner.clear();
-      SiftSifterSpawner.clear();
+      SiftCreatureSpawner.clear();
    }
 
    public static void suppressUntilExit(Entity entity) {
-      entity.getSelfAndPassengers().forEach(passenger -> {
-         WAITING_FOR_EXIT.add(passenger.getUUID());
-         PORTAL_GUARD_CHECKED.add(passenger.getUUID());
-         SiftWorldStorage.markPortalExitRequired(passenger);
-      });
+      WAITING_FOR_EXIT.add(entity.getUUID());
+      PORTAL_GUARD_CHECKED.add(entity.getUUID());
+      SiftWorldStorage.markPortalExitRequired(entity);
       PortalTransitGuard.block(entity);
-   }
-
-   public static boolean isPortalExitBlocked(MinecraftServer server, Entity entity) {
-      boolean blocked = false;
-      for (Entity passenger : entity.getSelfAndPassengers().toList()) {
-         blocked |= isPortalExitBlocked(server, passenger.getUUID(), passenger);
-      }
-
-      return blocked;
-   }
-
-   private static boolean isPortalExitBlocked(MinecraftServer server, UUID id, Entity entity) {
-      if (PORTAL_GUARD_CHECKED.add(id) && SiftWorldStorage.requiresPortalExit(server, id)) {
-         WAITING_FOR_EXIT.add(id);
-      }
-
-      if (!WAITING_FOR_EXIT.contains(id)) {
-         return false;
-      }
-
-      if (!isTouchingPortal(entity) && !RiftManager.isTouchingRift(entity)) {
-         WAITING_FOR_EXIT.remove(id);
-         SiftWorldStorage.clearPortalExitRequired(server, id);
-         return false;
-      }
-
-      return true;
    }
 
    private static void processPlayer(MinecraftServer server, ServerPlayer player) {
@@ -187,12 +170,18 @@ public final class SiftTeleportManager {
    }
 
    private static void processTouchState(MinecraftServer server, Entity entity, boolean touchingPortal) {
-      if (!PortalTransitGuard.isBlocked(entity)) {
-         if (isPortalExitBlocked(server, entity)) {
-            return;
-         }
+      UUID id = entity.getUUID();
+      if (PORTAL_GUARD_CHECKED.add(id) && SiftWorldStorage.requiresPortalExit(server, id)) {
+         WAITING_FOR_EXIT.add(id);
+      }
 
-         if (touchingPortal) {
+      if (!PortalTransitGuard.isBlocked(entity)) {
+         if (WAITING_FOR_EXIT.contains(id)) {
+            if (!touchingPortal) {
+               WAITING_FOR_EXIT.remove(id);
+               SiftWorldStorage.clearPortalExitRequired(server, id);
+            }
+         } else if (touchingPortal) {
             SiftTeleportManager.ResourceKeyMatch dimension = classifyDimension(entity.level());
             if (dimension == SiftTeleportManager.ResourceKeyMatch.OVERWORLD || dimension == SiftTeleportManager.ResourceKeyMatch.THE_SIFT) {
                ServerPlayer player = entity instanceof ServerPlayer serverPlayer ? serverPlayer : null;
@@ -207,7 +196,7 @@ public final class SiftTeleportManager {
                      ? teleportIntoSift(server, entity)
                      : teleportBackToOverworld(server, entity);
                } finally {
-                  if (!transferring && player != null) {
+                  if (player != null && (!transferring || classifyDimension(player.level()) != dimension)) {
                      RiftLoadingPayload.send(player, false, false);
                   }
                }
@@ -227,11 +216,28 @@ public final class SiftTeleportManager {
          return false;
       }
 
-      SiftWorldStorage.saveReturnPoint(entity);
       BlockPos anchor = anchorOptional.get();
       Vec3 destination = new Vec3(anchor.getX() + 0.5, anchor.getY(), anchor.getZ() + 0.5);
-      Entity teleported = teleport(entity, sift, destination, entity.getYRot(), entity.getXRot());
+      Optional<Vec3> safe = SafePortalArrival.find(sift, entity, destination);
+      if (safe.isEmpty()) {
+         return false;
+      }
+
+      // Capture source positions before teleport, but commit them only after
+      // the destination accepted the actual traveler and its passengers.
+      Map<UUID, SiftWorldStorage.ReturnPoint> entranceTickets = new LinkedHashMap<>();
+      entity.getSelfAndPassengers().forEach(traveler ->
+         entranceTickets.put(traveler.getUUID(), SiftWorldStorage.captureReturnPoint(traveler))
+      );
+      Entity teleported = teleport(entity, sift, safe.get(), entity.getYRot(), entity.getXRot());
       if (teleported != null) {
+         Set<UUID> movedIds = new HashSet<>();
+         teleported.getSelfAndPassengers().forEach(passenger -> movedIds.add(passenger.getUUID()));
+         entranceTickets.forEach((id, point) -> {
+            if (movedIds.contains(id)) {
+               SiftWorldStorage.saveReturnPoint(server, id, point);
+            }
+         });
          suppressUntilExit(teleported);
       }
 
@@ -244,78 +250,132 @@ public final class SiftTeleportManager {
          return false;
       }
 
-      // Prefer the active one-shot return ticket. If Rift entry cleared it,
-      // use the last real main-portal entrance, not a nearby temporary Rift.
       UUID entityId = entity.getUUID();
-      Optional<SiftWorldStorage.ReturnPoint> oneShot = SiftWorldStorage.getReturnPoint(server, entityId);
-      Optional<SiftWorldStorage.ReturnPoint> durable = oneShot.isPresent()
-         ? Optional.empty()
-         : SiftWorldStorage.getMainPortalEntrance(server, entityId);
-      Optional<SiftWorldStorage.ReturnPoint> stored = oneShot.isPresent() ? oneShot : durable;
-      String routeSource = oneShot.isPresent() ? "one_shot" : durable.isPresent() ? "durable" : "no_data";
+      UUID ticketOwner = entityId;
+      Optional<SiftWorldStorage.ReturnPoint> immediate = Optional.empty();
+      Optional<SiftWorldStorage.ReturnPoint> durable = Optional.empty();
+      // A vehicle can touch the portal while its player/passenger does not.
+      // Prefer the root's existing route, otherwise use the first rider's
+      // valid portal entrance rather than sending everyone to world spawn.
+      for (Entity traveler : entity.getSelfAndPassengers().toList()) {
+         immediate = SiftWorldStorage.getReturnPoint(server, traveler.getUUID());
+         durable = immediate.isPresent()
+            ? Optional.empty() : SiftWorldStorage.getMainPortalEntrance(server, traveler.getUUID());
+         if (immediate.isPresent() || durable.isPresent()) {
+            ticketOwner = traveler.getUUID();
+            break;
+         }
+      }
+      Optional<SiftWorldStorage.ReturnPoint> stored = immediate.isPresent() ? immediate : durable;
       if (stored.isPresent()) {
          SiftWorldStorage.ReturnPoint point = stored.get();
          BlockPos entrance = point.portalBlock();
          overworld.getChunk(entrance);
-         boolean portalStillOpen = overworld.getBlockState(entrance).is(ModBlocks.SIFT_PORTAL);
-         TheSiftMod.LOGGER.info(
-            "Sift MAIN exit entity={} source={} targetPortal={} active={}", entityId, routeSource, entrance, portalStillOpen
-         );
-         Vec3 destination;
-         if (portalStillOpen) {
-            destination = new Vec3(point.x(), point.y(), point.z());
-         } else {
-            // The main portal may have been deliberately closed while the traveler
-            // was in The Sift. Its remembered Ancient City position is still the
-            // authoritative route target; only adjust the exact landing block for
-            // collision/safety instead of silently converting a MAIN exit to a Rift.
-            BlockPos safe = entity.adjustSpawnLocation(overworld, entrance);
-            destination = new Vec3(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5);
+         Optional<BlockPos> activeEntrance = findActiveEntranceNearby(overworld, entrance);
+         Vec3 target = activeEntrance.isPresent() && !activeEntrance.get().equals(entrance)
+            ? Vec3.atBottomCenterOf(activeEntrance.get())
+            : new Vec3(point.x(), point.y(), point.z());
+         Optional<Vec3> safe = SafePortalArrival.findNearRecordedPortal(overworld, entity, target);
+         if (safe.isEmpty()) {
+            // An obstructed *underground* entrance must never silently turn
+            // into a surface spawn. Keep the traveler in Sift and let them
+            // step out of the portal to retry after the blockage is removed.
+            TheSiftMod.LOGGER.warn(
+               "Sift MAIN return: no safe landing within saved portal level entity={} originalPortal={} active={}",
+               entityId, entrance, activeEntrance.isPresent()
+            );
+            PortalTransitGuard.block(entity);
+            return false;
          }
 
-         float yaw = point.yaw();
-         float pitch = point.pitch();
-         Entity teleported = teleport(entity, overworld, destination, yaw, pitch);
          TheSiftMod.LOGGER.info(
-            "Sift MAIN exit result entity={} source={} success={} destination={}", entityId, routeSource, teleported != null, destination
+            "Sift MAIN return entity={} ticketOwner={} source={} savedPortal={} activePortal={} selectedDestination={}",
+            entityId, ticketOwner, immediate.isPresent() ? "one_shot" : "durable", entrance, activeEntrance.orElse(null), safe.get()
          );
+         Entity teleported = teleport(entity, overworld, safe.get(), point.yaw(), point.pitch());
          if (teleported != null) {
-            if (portalStillOpen) {
+            if (activeEntrance.isPresent()) {
                suppressUntilExit(teleported);
             } else {
                PortalTransitGuard.block(teleported);
             }
-
-            SiftWorldStorage.clearReturnPoint(server, entity.getUUID());
+            // A vehicle and each actually transported passenger can have a
+            // separate one-shot ticket. Keep their durable main entrances.
+            teleported.getSelfAndPassengers().forEach(
+               passenger -> SiftWorldStorage.clearReturnPoint(server, passenger.getUUID())
+            );
+            if (!teleported.getUUID().equals(entityId)) {
+               SiftWorldStorage.clearReturnPoint(server, entityId);
+            }
          }
 
          return teleported != null;
       } else {
-         // A MAIN portal must never change route families merely because an old
-         // world has already lost its historical return ticket. Once those
-         // coordinates are gone they cannot be reconstructed exactly; return to
-         // a safe Overworld spawn instead of manufacturing an unrelated Rift.
-         BlockPos anchor = RiftManager.overworldAnchor(server, entity);
-         overworld.getChunk(anchor);
-         BlockPos safe = entity.adjustSpawnLocation(overworld, anchor);
-         TheSiftMod.LOGGER.warn(
-            "Sift MAIN exit entity={} source=no_data; using direct Overworld spawn fallback at {}", entityId, safe
-         );
-         Entity teleported = teleport(
-            entity, overworld, new Vec3(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5), entity.getYRot(), entity.getXRot()
-         );
-         TheSiftMod.LOGGER.info(
-            "Sift MAIN exit result entity={} source=no_data success={} destination={}",
-            entityId,
-            teleported != null,
-            new Vec3(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5)
-         );
-         if (teleported != null) {
-            PortalTransitGuard.block(teleported);
+         // No historical main-portal entrance can be reconstructed; do not
+         // fabricate an unrelated Rift route or overwrite a player's Rift pair.
+         BlockPos spawn = RiftManager.overworldAnchor(server, entity);
+         overworld.getChunk(spawn);
+         Optional<Vec3> safe = SafePortalArrival.find(overworld, entity, Vec3.atBottomCenterOf(entity.adjustSpawnLocation(overworld, spawn)));
+         if (safe.isEmpty()) {
+            TheSiftMod.LOGGER.error("Sift MAIN return: no saved entrance and no safe Overworld spawn for entity={}", entityId);
+            return false;
          }
-
-         return teleported != null;
+         TheSiftMod.LOGGER.warn("Sift MAIN return entity={} source=no_data; direct Overworld spawn={}", entityId, safe.get());
+         Entity moved = teleport(entity, overworld, safe.get(), entity.getYRot(), entity.getXRot());
+         if (moved != null) {
+            PortalTransitGuard.block(moved);
+         }
+         return moved != null;
       }
+   }
+
+   private static Optional<BlockPos> findActiveEntranceNearby(ServerLevel level, BlockPos saved) {
+      if (SiftPortalBlock.isActivePortal(level.getBlockState(saved))) {
+         return Optional.of(saved);
+      }
+      // Only recover an adjacent interior cell of the same opening. A broad
+      // nearest-portal scan could redirect a player to a different nearby frame.
+      for (int chunkX = (saved.getX() - 1) >> 4; chunkX <= (saved.getX() + 1) >> 4; chunkX++) {
+         for (int chunkZ = (saved.getZ() - 1) >> 4; chunkZ <= (saved.getZ() + 1) >> 4; chunkZ++) {
+            level.getChunk(chunkX, chunkZ);
+         }
+      }
+      BlockPos nearest = null;
+      double nearestDistance = Double.POSITIVE_INFINITY;
+      for (BlockPos candidate : BlockPos.betweenClosed(saved.offset(-1, -1, -1), saved.offset(1, 1, 1))) {
+         if (candidate.getY() < level.getMinY() || candidate.getY() >= level.getMaxY() || !level.getWorldBorder().isWithinBounds(candidate)) {
+            continue;
+         }
+         int manhattan = Math.abs(candidate.getX() - saved.getX())
+            + Math.abs(candidate.getY() - saved.getY()) + Math.abs(candidate.getZ() - saved.getZ());
+         if (manhattan == 1 && SiftPortalBlock.isActivePortal(level.getBlockState(candidate))
+            && belongsToOriginalFrame(level, saved, candidate)) {
+            double distance = candidate.distSqr(saved);
+            if (distance < nearestDistance) {
+               nearest = candidate.immutable();
+               nearestDistance = distance;
+            }
+         }
+      }
+      return Optional.ofNullable(nearest);
+   }
+
+   private static boolean belongsToOriginalFrame(ServerLevel level, BlockPos saved, BlockPos active) {
+      BlockState portal = level.getBlockState(active);
+      for (int dy = 1; dy <= 23 && active.getY() - dy >= level.getMinY(); dy++) {
+         BlockPos below = active.below(dy);
+         BlockState state = level.getBlockState(below);
+         if (state.is(Blocks.REINFORCED_DEEPSLATE)) {
+            return PortalFrameScanner.scanForClosing(level, below)
+               .filter(frame -> frame.axis() == portal.getValue(SiftPortalBlock.AXIS))
+               .filter(frame -> frame.interior().contains(saved) && frame.interior().contains(active))
+               .isPresent();
+         }
+         if (!state.is(ModBlocks.SIFT_PORTAL) && !PortalFrameScanner.isAirLikeInterior(level, below)) {
+            break;
+         }
+      }
+      return false;
    }
 
    private static Entity teleport(Entity entity, ServerLevel destinationLevel, Vec3 destination, float yaw, float pitch) {
@@ -338,11 +398,17 @@ public final class SiftTeleportManager {
       MutableBlockPos pos = new MutableBlockPos();
 
       for (int x = minX; x <= maxX; x++) {
-         for (int y = minY; y <= maxY; y++) {
-            for (int z = minZ; z <= maxZ; z++) {
-               pos.set(x, y, z);
-               if (level.getBlockState(pos).is(ModBlocks.SIFT_PORTAL)) {
-                  return true;
+         for (int z = minZ; z <= maxZ; z++) {
+            ChunkAccess chunk = level instanceof ServerLevel serverLevel
+               ? serverLevel.getChunkSource().getChunkNow(x >> 4, z >> 4)
+               : level.getChunkSource().getChunk(x >> 4, z >> 4, ChunkStatus.FULL, false);
+            if (chunk != null) {
+               for (int y = minY; y <= maxY; y++) {
+                  pos.set(x, y, z);
+                  BlockState state = chunk.getBlockState(pos);
+                  if (state.is(ModBlocks.SIFT_PORTAL) && SiftPortalBlock.intersectsPortal(entity, pos, state)) {
+                     return true;
+                  }
                }
             }
          }

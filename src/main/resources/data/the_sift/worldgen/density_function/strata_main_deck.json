@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:min",
+  "argument1": {
+    "type": "minecraft:max",
+    "argument1": "the_sift:strata_plateau",
+    "argument2": {
+      "type": "minecraft:max",
+      "argument1": {
+        "type": "minecraft:add",
+        "argument1": 0.19,
+        "argument2": {
+          "type": "minecraft:mul",
+          "argument1": -1,
+          "argument2": "the_sift:strata_bridge_a"
+        }
+      },
+      "argument2": {
+        "type": "minecraft:max",
+        "argument1": {
+          "type": "minecraft:add",
+          "argument1": 0.155,
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": -1,
+            "argument2": "the_sift:strata_bridge_b"
+          }
+        },
+        "argument2": "the_sift:strata_mainland"
+      }
+    }
+  },
+  "argument2": {
+    "type": "minecraft:min",
+    "argument1": "the_sift:strata_surface",
+    "argument2": {
+      "type": "minecraft:add",
+      "argument1": "the_sift:strata_main_thickness",
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": -1,
+        "argument2": "the_sift:strata_surface"
+      }
+    }
+  }
+}

@@ -24,7 +24,7 @@ public final class SonorousNoteBlocks {
    }
 
    public static int getIndex(BlockState noteBlockState) {
-      return (Integer)noteBlockState.getValue(NoteBlock.NOTE) % 8;
+      return noteBlockState.getValue(NoteBlock.NOTE) % 8;
    }
 
    public static void playSound(Level level, BlockPos pos, int index) {

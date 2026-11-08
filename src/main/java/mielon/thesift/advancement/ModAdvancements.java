@@ -1,31 +1,42 @@
 package mielon.thesift.advancement;
 
+import java.util.Optional;
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.entity.BlubEntity;
 import mielon.thesift.entity.DarkSnifferEntity;
 import mielon.thesift.entity.RiftEntity;
 import mielon.thesift.item.ModItems;
-import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents;
-import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents.After;
+import mielon.thesift.world.RiftDirectory;
+import mielon.thesift.world.SiftWorldStorage;
+import mielon.thesift.world.TheSiftDimension;
+import mielon.thesift.worldgen.SiftLandmarkTracker;
 import mielon.thesift.platform.NeoEvents.ServerLivingEntityEvents;
 import mielon.thesift.platform.NeoEvents.ServerLivingEntityEvents.AfterDeath;
+import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents;
+import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents.After;
 import mielon.thesift.platform.NeoEvents.UseBlockCallback;
-import mielon.thesift.world.RiftDirectory;
-import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.PitcherCropBlock;
+import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -45,6 +56,22 @@ public final class ModAdvancements {
    public static final String RIFTER = "the_sift/rifter";
    public static final String RIFT_RESONANCE = "the_sift/rift_resonance";
    public static final String KEEP_INVENTORY = "the_sift/keep_inventory";
+   public static final String AWKWARD_MOMENT = "the_sift/awkward_moment";
+   public static final String GRIM_VIBES = "the_sift/grim_vibes";
+   public static final String STRONGER_THAN_GODS = "the_sift/stronger_than_gods";
+   public static final String SOUL_ABSORPTION = "the_sift/soul_absorption";
+   public static final String SIFTERS_DIET = "the_sift/sifters_diet";
+   public static final String SIFT_SLAYER = "the_sift/sift_slayer";
+   public static final String CHOIR_CONDUCTOR = "the_sift/choir_conductor";
+   public static final String NOW_THATS_A_STACK = "the_sift/now_thats_a_stack";
+   public static final String TIDZIMI_WAS_RIGHT = "the_sift/tidzimi_was_right";
+   public static final String TOXIC_CHAMBERS = "the_sift/toxic_chambers";
+   public static final String THATS_THE_GUY_FROM_THE_PAINTING = "the_sift/thats_the_guy_from_the_painting";
+   public static final String REGICIDE = "the_sift/regicide";
+   public static final String SKYS_NO_LONGER_A_LIMIT = "the_sift/skys_no_longer_a_limit";
+   public static final String LIVING_SOIL = "the_sift/living_soil";
+   public static final String LOOKALIKE = "the_sift/lookalike";
+   public static final String WELLSPRING = "the_sift/wellspring";
    private static boolean registered;
 
    private ModAdvancements() {
@@ -110,6 +137,85 @@ public final class ModAdvancements {
                   }
                }
             );
+      }
+   }
+
+   public static void tick(MinecraftServer server) {
+      if (server.getTickCount() % 20 == 0) {
+         ServerLevel level = server.getLevel(TheSiftDimension.LEVEL_KEY);
+         if (level != null) {
+            Structure lair = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(Identifier.fromNamespaceAndPath("the_sift", "sculkers_lair"));
+
+            for (ServerPlayer player : level.players()) {
+               if (player.isAlive() && !player.isSpectator()) {
+                  if (!isDone(player, "the_sift/grim_vibes")) {
+                     Optional<BlockPos> entrance = SiftLandmarkTracker.nearestOther(
+                        SiftLandmarkTracker.Kind.SOULSHALE_SHELTER, player.blockPosition(), 12.0, null
+                     );
+                     if (entrance.isPresent() && Math.abs(entrance.get().getY() - player.getY()) <= 3.0) {
+                        award(player, "the_sift/grim_vibes");
+                     }
+                  }
+
+                  if (!isDone(player, "the_sift/tidzimi_was_right")) {
+                     for (String family : new String[]{"coral", "overgrown", "organic_desert"}) {
+                        Structure dome = level.registryAccess()
+                           .lookupOrThrow(Registries.STRUCTURE)
+                           .getValue(Identifier.fromNamespaceAndPath("the_sift", "ichor_dome_" + family));
+                        if (dome != null) {
+                           StructureStart start = level.structureManager().getStructureAt(player.blockPosition(), dome);
+                           if (start.isValid() && start.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(player.blockPosition()))) {
+                              award(player, "the_sift/tidzimi_was_right");
+                              break;
+                           }
+                        }
+                     }
+                  }
+
+                  if (!isDone(player, "the_sift/toxic_chambers") && lair != null) {
+                     StructureStart start = level.structureManager().getStructureAt(player.blockPosition(), lair);
+                     if (start.isValid() && start.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(player.blockPosition()))) {
+                        award(player, "the_sift/toxic_chambers");
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   private static boolean isDone(ServerPlayer player, String path) {
+      AdvancementHolder advancement = player.level().getServer().getAdvancements().get(Identifier.fromNamespaceAndPath("the_sift", path));
+      return advancement != null && player.getAdvancements().getOrStartProgress(advancement).isDone();
+   }
+
+   public static void onSeedsPlanted(ServerPlayer player, BlockPos pos) {
+      ServerLevel level = player.level();
+      BlockState soil = level.getBlockState(pos.below());
+      if (soil.is(ModBlocks.HEALTHY_SCULK)
+         || soil.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
+         || soil.is(ModBlocks.HEALTHY_SCULK_PORES)
+         || soil.is(ModBlocks.DRY_HEALTHY_SCULK)) {
+         BlockState crop = level.getBlockState(pos);
+         if (crop.is(BlockTags.CROPS)
+            || crop.getBlock() instanceof CropBlock
+            || crop.getBlock() instanceof StemBlock
+            || crop.getBlock() instanceof PitcherCropBlock) {
+            award(player, "the_sift/living_soil");
+         }
+      }
+   }
+
+   public static void onJukeboxTick(Level world, BlockPos pos, JukeboxBlockEntity jukebox) {
+      if (world instanceof ServerLevel level
+         && level.getServer().getTickCount() % 20 == 0
+         && level.dimension().equals(TheSiftDimension.LEVEL_KEY)
+         && jukebox.getSongPlayer().isPlaying()
+         && jukebox.getTheItem().is(ModItems.MUSIC_DISC_WELLSPRING)) {
+         Optional<BlockPos> anchor = SiftWorldStorage.getPortalAnchor(level.getServer());
+         if (anchor.isPresent() && anchor.get().distSqr(pos) <= 256.0) {
+            awardNearby(level, Vec3.atCenterOf(pos), 16.0, "the_sift/wellspring");
+         }
       }
    }
 

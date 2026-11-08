@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "the_sift:raw_slabber_meat",
+    "the_sift:cooked_slabber_meat",
+    "the_sift:raw_sifter_meat",
+    "the_sift:cooked_sifter_meat",
+    "the_sift:raw_nuzzle_meat",
+    "the_sift:cooked_nuzzle_meat"
+  ]
+}

@@ -1764,57 +1764,97 @@
     },
     "idle": {
       "loop": true,
-      "animation_length": 2.8,
+      "animation_length": 9.6,
       "bones": {
+        "root": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
         "body": {
-          "position": {
-            "0.0": [
-              0,
-              0,
-              0
-            ],
-            "1.4": {
-              "vector": [
-                0,
-                0.25,
-                0
-              ],
-              "easing": "easeInOutSine"
-            },
-            "2.8": {
-              "vector": [
-                0,
-                0,
-                0
-              ],
-              "easing": "easeInOutSine"
-            }
-          }
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        "left_leg": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        "right_leg": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        "torso": {
+          "scale": [
+            "1 + 0.008 * math.sin(query.anim_time * 75)",
+            1,
+            "1 + 0.012 * math.sin(query.anim_time * 75)"
+          ]
         },
         "head": {
-          "rotation": {
-            "0.0": [
-              0,
-              -3,
-              0
-            ],
-            "1.4": {
-              "vector": [
-                0,
-                3,
-                0
-              ],
-              "easing": "easeInOutSine"
-            },
-            "2.8": {
-              "vector": [
-                0,
-                -3,
-                0
-              ],
-              "easing": "easeInOutSine"
-            }
-          }
+          "rotation": [
+            "0.6 * math.sin(query.anim_time * 75)",
+            "1.6 * math.sin(query.anim_time * 37.5) + 0.35 * math.sin(query.anim_time * 112.5)",
+            "0.3 * math.sin(query.anim_time * 37.5)"
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            "0.45 * math.sin(query.anim_time * 75)",
+            0,
+            "-1.5 - 0.3 * math.sin(query.anim_time * 75)"
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-0.35 * math.sin(query.anim_time * 75)",
+            0,
+            "1.5 + 0.3 * math.sin(query.anim_time * 75)"
+          ]
+        },
+        "left_hand": {
+          "rotation": [
+            0,
+            0,
+            "-0.4 * math.sin(query.anim_time * 75)"
+          ]
+        },
+        "right_hand": {
+          "rotation": [
+            0,
+            0,
+            "0.4 * math.sin(query.anim_time * 75)"
+          ]
         }
       }
     },
@@ -1823,39 +1863,11 @@
       "animation_length": 1.0,
       "bones": {
         "body": {
-          "position": {
-            "0.0": [
-              0,
-              0,
-              0
-            ],
-            "0.25": {
-              "vector": [
-                0,
-                0.42,
-                0
-              ],
-              "easing": "easeOutSine"
-            },
-            "0.5": [
-              0,
-              0,
-              0
-            ],
-            "0.75": {
-              "vector": [
-                0,
-                0.42,
-                0
-              ],
-              "easing": "easeOutSine"
-            },
-            "1.0": [
-              0,
-              0,
-              0
-            ]
-          }
+          "position": [
+            0,
+            0,
+            0
+          ]
         },
         "left_leg": {
           "rotation": {

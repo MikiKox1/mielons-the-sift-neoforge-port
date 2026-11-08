@@ -1,0 +1,251 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.scavenger",
+        "texture_width": 32,
+        "texture_height": 32,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 3,
+        "visible_bounds_offset": [
+          0,
+          0.75,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "Root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Body",
+          "parent": "Root",
+          "pivot": [
+            0.0,
+            4,
+            0.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                0.0,
+                -4.0
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ],
+              "uv": [
+                0,
+                0
+              ],
+              "pivot": [
+                0.0,
+                4.0,
+                0.0
+              ],
+              "rotation": [
+                0,
+                -45,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Head",
+          "parent": "Body",
+          "pivot": [
+            0.0,
+            8,
+            0.0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -2.25,
+                8.0,
+                -2.25
+              ],
+              "size": [
+                4.5,
+                4,
+                4.5
+              ],
+              "uv": [
+                0,
+                16
+              ],
+              "pivot": [
+                0.0,
+                10.0,
+                0.0
+              ],
+              "rotation": [
+                0,
+                -45,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RightFin",
+          "parent": "Body",
+          "pivot": [
+            5.303301,
+            7,
+            -0.353553
+          ],
+          "cubes": [
+            {
+              "origin": [
+                4.333631,
+                2.0,
+                -1.633883
+              ],
+              "size": [
+                3,
+                6,
+                1.5
+              ],
+              "uv": [
+                16,
+                16
+              ],
+              "pivot": [
+                5.833631,
+                5.0,
+                -0.883883
+              ],
+              "rotation": [
+                0,
+                -45,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "LeftFin",
+          "parent": "Body",
+          "pivot": [
+            -4.596194,
+            7,
+            0.353553
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -6.096194,
+                2,
+                -2.146447
+              ],
+              "size": [
+                3,
+                6,
+                1.5
+              ],
+              "pivot": [
+                -4.596194,
+                7,
+                0.353553
+              ],
+              "rotation": [
+                0,
+                45,
+                0
+              ],
+              "uv": [
+                16,
+                23
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RightHorn",
+          "parent": "Head",
+          "pivot": [
+            3.181981,
+            9.5,
+            1.414214
+          ],
+          "cubes": [
+            {
+              "origin": [
+                2.931981,
+                10.5,
+                0.414214
+              ],
+              "size": [
+                1.25,
+                1,
+                1.5
+              ],
+              "pivot": [
+                3.181981,
+                9.5,
+                1.414214
+              ],
+              "rotation": [
+                0,
+                45,
+                0
+              ],
+              "uv": [
+                0,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "LeftHorn",
+          "parent": "Head",
+          "pivot": [
+            -2.828427,
+            10.5,
+            0.707107
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -3.895369,
+                10.5,
+                0.222272
+              ],
+              "size": [
+                1.25,
+                1,
+                1.5
+              ],
+              "uv": [
+                4,
+                24
+              ],
+              "pivot": [
+                -3.270369,
+                11.0,
+                0.972272
+              ],
+              "rotation": [
+                0,
+                -45,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

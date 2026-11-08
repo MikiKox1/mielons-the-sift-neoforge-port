@@ -3,7 +3,11 @@ package mielon.thesift.client.mixin;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem.AutoStorageIndexBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import mielon.thesift.client.compat.SiftShaderCompat;
 import mielon.thesift.client.render.SiftProceduralSkyRenderer;
+import mielon.thesift.client.render.SiftShaderSkyRenderer;
+import mielon.thesift.world.SiftTides;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -25,14 +29,35 @@ public abstract class SiftSkyRendererMixin {
    @Final
    private AutoStorageIndexBuffer quadIndices;
 
+   @Shadow
+   public abstract void renderSunriseAndSunset(PoseStack var1, float var2, int var3);
+
    @Inject(method = "renderSunMoonAndStars", at = @At("HEAD"), cancellable = true)
    private void theSift$renderProceduralSky(
       PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci
    ) {
       ClientLevel level = Minecraft.getInstance().level;
       if (level != null && level.dimension().equals(TheSiftDimension.LEVEL_KEY)) {
-         SiftProceduralSkyRenderer.render(poseStack, level, this.renderTarget, this.quadIndices);
-         ci.cancel();
+         if (SiftShaderSkyRenderer.renderSky(poseStack, level, this.renderTarget, this.quadIndices)) {
+            ci.cancel();
+            return;
+         }
+         if (!SiftShaderCompat.isShaderPackInUse()) {
+            SiftProceduralSkyRenderer.render(poseStack, level, this.renderTarget, this.quadIndices);
+            float thrive = SiftTides.thriveBlend(level.getDefaultClockTime());
+            if (thrive > 0.001F) {
+               int color = Math.round(95.0F * thrive * rainBrightness) << 24 | 15704883;
+
+               for (int direction = 0; direction < 4; direction++) {
+                  poseStack.pushPose();
+                  poseStack.mulPose(Axis.YP.rotationDegrees(direction * 90.0F));
+                  this.renderSunriseAndSunset(poseStack, 0.0F, color);
+                  poseStack.popPose();
+               }
+            }
+
+            ci.cancel();
+         }
       }
    }
 

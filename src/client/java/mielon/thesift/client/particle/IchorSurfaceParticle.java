@@ -31,6 +31,7 @@ public final class IchorSurfaceParticle extends SingleQuadParticle {
       this.setSpriteFromAge(sprites);
    }
 
+   @Override
    public void tick() {
       super.tick();
       if (!this.removed) {
@@ -40,15 +41,18 @@ public final class IchorSurfaceParticle extends SingleQuadParticle {
       }
    }
 
+   @Override
    public void extract(QuadParticleRenderState renderState, Camera camera, float partialTick) {
       Quaternionf rotation = new Quaternionf().rotationY(this.surfaceYaw).rotateX((float) (-Math.PI / 2));
       this.extractRotatedQuad(renderState, camera, rotation, partialTick);
    }
 
+   @Override
    public int getLightCoords(float partialTickTime) {
       return 15728880;
    }
 
+   @Override
    protected Layer getLayer() {
       return Layer.TRANSLUCENT;
    }

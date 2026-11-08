@@ -11,11 +11,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 public record RiftLoadingPayload(boolean start, boolean rift) implements CustomPacketPayload {
-   public static final Type<RiftLoadingPayload> TYPE = new Type(Identifier.fromNamespaceAndPath("the_sift", "rift_loading"));
+   public static final Type<RiftLoadingPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("the_sift", "rift_loading"));
    public static final StreamCodec<RegistryFriendlyByteBuf, RiftLoadingPayload> CODEC = StreamCodec.composite(
       ByteBufCodecs.BOOL, RiftLoadingPayload::start, ByteBufCodecs.BOOL, RiftLoadingPayload::rift, RiftLoadingPayload::new
    );
 
+   @Override
    public Type<RiftLoadingPayload> type() {
       return TYPE;
    }

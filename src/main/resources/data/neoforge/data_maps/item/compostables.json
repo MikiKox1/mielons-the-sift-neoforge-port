@@ -1,19 +1,25 @@
 {
+  "replace": false,
   "values": {
     "the_sift:overgrown_chard": {"chance": 0.3},
     "the_sift:overgrown_stalks": {"chance": 0.3},
     "the_sift:overgrown_fronds": {"chance": 0.3},
-    "the_sift:overgrown_lotus": {"chance": 0.65},
+    "the_sift:blue_saucer_bloom": {"chance": 0.65},
+    "the_sift:green_saucer_bloom": {"chance": 0.65},
     "the_sift:sunburst_plant": {"chance": 0.65},
     "the_sift:whisperbloom": {"chance": 0.65},
+    "the_sift:grim_bush": {"chance": 0.3},
     "the_sift:siftslate_stalks": {"chance": 0.3},
     "the_sift:healthy_sculk_sprouts": {"chance": 0.3},
+    "the_sift:healthy_sculk_cartilage_sprout": {"chance": 0.3},
     "the_sift:dry_healthy_sculk_sprouts": {"chance": 0.3},
     "the_sift:siftslate_hanging_roots": {"chance": 0.3},
     "the_sift:overgrown_hanging_roots": {"chance": 0.3},
     "the_sift:overgrown_willow_foliage": {"chance": 0.3},
     "the_sift:overgrown_willow_sapling": {"chance": 0.3},
     "the_sift:overgrown_willow_vines": {"chance": 0.5},
+    "the_sift:ash_willow_foliage": {"chance": 0.3},
+    "the_sift:ash_willow_vines": {"chance": 0.5},
     "the_sift:sculkflower_seeds": {"chance": 0.3},
     "the_sift:sculkflower": {"chance": 0.65}
   }

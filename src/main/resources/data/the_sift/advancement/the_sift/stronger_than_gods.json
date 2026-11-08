@@ -1,0 +1,25 @@
+{
+  "parent": "the_sift:the_sift/blood_of_the_gods",
+  "display": {
+    "icon": {
+      "id": "minecraft:totem_of_undying"
+    },
+    "title": {
+      "translate": "advancement.the_sift.stronger_than_gods.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.stronger_than_gods.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

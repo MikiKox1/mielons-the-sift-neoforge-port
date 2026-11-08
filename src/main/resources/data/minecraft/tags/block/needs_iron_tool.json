@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "the_sift:siftslate_diamond_ore",
-    "the_sift:siftslate_emerald_ore"
+    "the_sift:siftslate_emerald_ore",
+    "the_sift:soulshale_diamond_ore",
+    "the_sift:soulshale_emerald_ore"
   ]
 }

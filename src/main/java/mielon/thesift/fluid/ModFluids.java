@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -31,7 +32,6 @@ import net.neoforged.neoforge.transfer.fluid.BucketResourceHandler;
 
 public final class ModFluids {
    private static boolean neoForgeInteractionsRegistered;
-
    public static final FluidType ICHOR_TYPE = ModRegistration.register(
       NeoForgeRegistries.FLUID_TYPES,
       id("ichor"),
@@ -52,16 +52,18 @@ public final class ModFluids {
    );
    public static final ResourceKey<Fluid> ICHOR_KEY = ResourceKey.create(BuiltInRegistries.FLUID.key(), id("ichor"));
    public static final ResourceKey<Fluid> FLOWING_ICHOR_KEY = ResourceKey.create(BuiltInRegistries.FLUID.key(), id("flowing_ichor"));
-   public static final FlowingFluid ICHOR = (FlowingFluid)ModRegistration.register(BuiltInRegistries.FLUID, ICHOR_KEY, new IchorFluid.Source());
-   public static final FlowingFluid FLOWING_ICHOR = (FlowingFluid)ModRegistration.register(BuiltInRegistries.FLUID, FLOWING_ICHOR_KEY, new IchorFluid.Flowing());
+   public static final FlowingFluid ICHOR = ModRegistration.register(BuiltInRegistries.FLUID, ICHOR_KEY, new IchorFluid.Source());
+   public static final FlowingFluid FLOWING_ICHOR = ModRegistration.register(BuiltInRegistries.FLUID, FLOWING_ICHOR_KEY, new IchorFluid.Flowing());
    public static final ResourceKey<Block> ICHOR_BLOCK_KEY = ResourceKey.create(BuiltInRegistries.BLOCK.key(), id("ichor"));
-   public static final LiquidBlock ICHOR_BLOCK = (LiquidBlock)ModRegistration.register(
+   public static final LiquidBlock ICHOR_BLOCK = ModRegistration.register(
       BuiltInRegistries.BLOCK,
       ICHOR_BLOCK_KEY,
-      new LiquidBlock(FLOWING_ICHOR, Properties.ofFullCopy(Blocks.WATER).setId(ICHOR_BLOCK_KEY).lightLevel(state -> 12).noLootTable())
+      new LiquidBlock(
+         FLOWING_ICHOR, Properties.ofFullCopy(Blocks.WATER).mapColor(MapColor.DIAMOND).setId(ICHOR_BLOCK_KEY).lightLevel(state -> 12).noLootTable()
+      )
    );
    public static final ResourceKey<Item> ICHOR_BUCKET_KEY = ResourceKey.create(BuiltInRegistries.ITEM.key(), id("ichor_bucket"));
-   public static final Item ICHOR_BUCKET = (Item)ModRegistration.register(
+   public static final Item ICHOR_BUCKET = ModRegistration.register(
       BuiltInRegistries.ITEM,
       ICHOR_BUCKET_KEY,
       new IchorBucketItem(ICHOR, new net.minecraft.world.item.Item.Properties().setId(ICHOR_BUCKET_KEY).stacksTo(1).craftRemainder(Items.BUCKET))
@@ -78,7 +80,6 @@ public final class ModFluids {
       if (neoForgeInteractionsRegistered) {
          return;
       }
-
       neoForgeInteractionsRegistered = true;
       FluidInteractionRegistry.addInteraction(
          NeoForgeMod.LAVA_TYPE.value(),
@@ -87,16 +88,13 @@ public final class ModFluids {
                if (!IchorWaterlogging.isIchor(level.getFluidState(neighborPos).getType())) {
                   return false;
                }
-
-               // Fabric's LiquidBlock contact hook gives ordinary water priority
-               // over Ichor regardless of which adjacent direction is visited first.
+               // Ordinary water takes precedence over Ichor when both touch lava.
                for (Direction direction : LiquidBlock.POSSIBLE_FLOW_DIRECTIONS) {
                   FluidState neighbor = level.getFluidState(pos.relative(direction.getOpposite()));
                   if (neighbor.is(FluidTags.WATER) && !IchorWaterlogging.isIchor(neighbor.getType())) {
                      return false;
                   }
                }
-
                return true;
             },
             lava -> lava.isSource() ? Blocks.OBSIDIAN.defaultBlockState() : ModBlocks.COBBLED_SIFTSLATE.defaultBlockState()
@@ -109,8 +107,6 @@ public final class ModFluids {
    }
 
    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-      // NeoForge's fallback bucket provider deliberately covers exact BucketItem
-      // instances only; IchorBucketItem is a subclass and must opt in explicitly.
       event.registerItem(Capabilities.Fluid.ITEM, (stack, access) -> new BucketResourceHandler(access), ICHOR_BUCKET);
    }
 

@@ -1,0 +1,39 @@
+{
+  "parent": "the_sift:the_sift/thats_the_guy_from_the_painting",
+  "display": {
+    "icon": {
+      "id": "the_sift:monarch_membrane"
+    },
+    "title": {
+      "translate": "advancement.the_sift.regicide.title"
+    },
+    "description": {
+      "translate": "advancement.the_sift.regicide.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "the_sift:monarch": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "the_sift:monarch"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "the_sift:monarch"
+    ]
+  ],
+  "rewards": {
+    "experience": 200
+  }
+}

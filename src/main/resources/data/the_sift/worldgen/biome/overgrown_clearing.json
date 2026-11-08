@@ -6,22 +6,44 @@
         "particle": {
           "type": "the_sift:sift_note"
         },
-        "probability": 0.00030000
+        "probability": 0.0003
       }
-    ]
+    ],
+    "minecraft:audio/background_music": {
+      "default": {
+        "sound": "the_sift:music.biome.overgrown",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "creative": {
+        "sound": "the_sift:music.biome.overgrown",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      },
+      "underwater": {
+        "sound": "the_sift:music.biome.overgrown",
+        "min_delay": 12000,
+        "max_delay": 24000,
+        "replace_current_music": true
+      }
+    }
   },
   "carvers": [
-    "the_sift:cave",
-    "the_sift:cave_extra_underground",
-    "the_sift:canyon"
+    "the_sift:cave_extra_underground"
   ],
-  "creature_spawn_probability": 0.07,
+  "creature_spawn_probability": 0.1,
   "downfall": 0.65,
   "effects": {
     "water_color": "#4adce8"
   },
   "features": [
-    [],
+    [
+      "the_sift:strata_supports",
+      "the_sift:cave_geology_base",
+      "the_sift:soul_canyon"
+    ],
     [],
     [],
     [],
@@ -41,7 +63,7 @@
       "the_sift:sift_fossil"
     ],
     [
-      "the_sift:soul_canyon",
+      "the_sift:cave_entrance",
       "the_sift:sniffer_cave_overgrown",
       "the_sift:ichor_underground_lake",
       "the_sift:siftslate_hanging_roots_cave",
@@ -57,6 +79,7 @@
     ],
     [
       "the_sift:abandoned_main_portal",
+      "the_sift:strata_undergrowth",
       "the_sift:ichor_lake_clearing",
       "the_sift:lush_monolith_overgrown",
       "the_sift:bare_monolith_overgrown",
@@ -75,18 +98,34 @@
       "the_sift:overgrown_chard_dense",
       "the_sift:overgrown_stalks_dense",
       "the_sift:sift_flower_patch",
+      "the_sift:saucer_bloom_patch",
       "the_sift:siftslate_plant_patch",
       "the_sift:sniffer_plant_patch"
     ],
     [
-      "the_sift:covered_growth_cleanup",
       "the_sift:lava_floor",
-      "the_sift:surface_sculk_region"
+      "the_sift:ichor_ravine_finish",
+      "the_sift:surface_sculk_region",
+      "the_sift:cave_geology_finish",
+      "the_sift:cave_ichor_lake",
+      "the_sift:cave_willow",
+      "the_sift:cave_vegetation",
+      "the_sift:strata_rims",
+      "the_sift:covered_growth_cleanup",
+      "the_sift:soulshale_tower"
     ]
   ],
   "has_precipitation": true,
   "spawn_costs": {
     "minecraft:sniffer": {
+      "charge": 0.7,
+      "energy_budget": 0.15
+    },
+    "the_sift:stalker": {
+      "charge": 0.7,
+      "energy_budget": 0.15
+    },
+    "the_sift:scavenger": {
       "charge": 0.7,
       "energy_budget": 0.15
     }
@@ -103,8 +142,8 @@
       },
       {
         "type": "minecraft:sniffer",
-        "maxCount": 5,
-        "minCount": 2,
+        "maxCount": 2,
+        "minCount": 1,
         "weight": 6
       },
       {
@@ -112,10 +151,35 @@
         "maxCount": 4,
         "minCount": 2,
         "weight": 6
+      },
+      {
+        "type": "the_sift:slabber",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "the_sift:nuzzle",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
       }
     ],
     "misc": [],
-    "monster": [],
+    "monster": [
+      {
+        "type": "the_sift:stalker",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "the_sift:scavenger",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
     "underground_water_creature": [],
     "water_ambient": [],
     "water_creature": []

@@ -15,6 +15,7 @@ public final class SiftRiftItem extends Item {
       super(properties);
    }
 
+   @Override
    public InteractionResult useOn(UseOnContext context) {
       Player player = context.getPlayer();
       if (player != null && player.getAbilities().instabuild) {

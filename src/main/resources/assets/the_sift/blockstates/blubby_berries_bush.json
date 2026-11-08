@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "half=lower,grown=false": {
+      "model": "the_sift:block/blubby_berries_bush_bottom"
+    },
+    "half=lower,grown=true": {
+      "model": "the_sift:block/blubby_berries_bush_bottom_grown"
+    },
+    "half=upper,grown=false": {
+      "model": "the_sift:block/blubby_berries_bush_top"
+    },
+    "half=upper,grown=true": {
+      "model": "the_sift:block/blubby_berries_bush_top_grown"
+    }
+  }
+}

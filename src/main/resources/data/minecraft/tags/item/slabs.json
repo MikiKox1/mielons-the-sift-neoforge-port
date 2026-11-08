@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "the_sift:overgrown_willow_slab"
+    "the_sift:overgrown_willow_slab",
+    "the_sift:ash_willow_slab",
+    "the_sift:polished_soulshale_slab",
+    "the_sift:soulshale_brick_slab"
   ]
 }

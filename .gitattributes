@@ -1,0 +1,4 @@
+# Preserve the immutable upstream resource bytes on Windows checkouts.
+src/main/resources/assets/** -text
+src/main/resources/data/** -text
+tools/upstream-26.2.accesswidener -text

@@ -18,16 +18,18 @@ public final class IchorFluidRendering {
    public static void register(RegisterFluidModelsEvent event) {
       Material still = new Material(Identifier.fromNamespaceAndPath("the_sift", "block/ichor_still"), true);
       Material flowing = new Material(Identifier.fromNamespaceAndPath("the_sift", "block/ichor_flow"), true);
-      Material overlay = new Material(Identifier.withDefaultNamespace("block/water_overlay"), true);
+      Material overlay = flowing;
       Unbaked model = new Unbaked(still, flowing, overlay, new IchorFluidRendering.IchorTint());
       event.register(model, ModFluids.ICHOR, ModFluids.FLOWING_ICHOR);
    }
 
    private static final class IchorTint implements FluidTintSource {
+      @Override
       public int color(FluidState state) {
          return -1;
       }
 
+      @Override
       public int colorInWorld(FluidState fluidState, BlockState state, BlockAndTintGetter level, BlockPos pos) {
          return -1;
       }

@@ -28,7 +28,7 @@ public abstract class EmptyCauldronIchorMixin {
    @Inject(method = "receiveStalactiteDrip", at = @At("HEAD"), cancellable = true)
    private void theSift$receiveIchor(BlockState state, Level level, BlockPos pos, Fluid fluid, CallbackInfo ci) {
       if (fluid == ModFluids.ICHOR || fluid == ModFluids.FLOWING_ICHOR) {
-         BlockState next = (BlockState)ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 1);
+         BlockState next = ModBlocks.ICHOR_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 1);
          level.setBlockAndUpdate(pos, next);
          level.gameEvent(GameEvent.BLOCK_CHANGE, pos, Context.of(next));
          level.levelEvent(1047, pos, 0);

@@ -38,7 +38,7 @@
     "lava_level": {
       "absolute": 11
     },
-    "probability": 0.07,
+    "probability": 0.055,
     "replaceable": "#the_sift:sift_carver_replaceables",
     "vertical_radius_multiplier": {
       "type": "minecraft:uniform",
@@ -47,11 +47,11 @@
     },
     "y": {
       "type": "minecraft:uniform",
-      "max_inclusive": {
-        "absolute": 47
-      },
       "min_inclusive": {
-        "above_bottom": 8
+        "absolute": 12
+      },
+      "max_inclusive": {
+        "absolute": 20
       }
     },
     "yScale": {

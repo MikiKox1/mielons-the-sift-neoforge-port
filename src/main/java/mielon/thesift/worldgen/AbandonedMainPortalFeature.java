@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import mielon.thesift.block.ModBlocks;
+import mielon.thesift.world.SiftPortalVariants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.resources.Identifier;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -24,75 +25,102 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 
 public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfiguration> {
-   public AbandonedMainPortalFeature() {
-      super(NoneFeatureConfiguration.CODEC);
-   }
-
-   private static final String[] OVERGROWN_TEMPLATES = templateIds("abandoned_portal_overgrown_");
-   private static final String[] WASTES_TEMPLATES = templateIds("abandoned_portal_wastes_");
    private static final int MAX_RELIEF = 18;
    private static final int FOUNDATION_BLEND_RADIUS = 12;
    private static final int MAX_EARTHWORK = 8;
 
+   public AbandonedMainPortalFeature() {
+      super(NoneFeatureConfiguration.CODEC);
+   }
 
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
       BlockPos origin = context.origin();
-      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), origin, 20, 4702392765337521733L, 1)) {
+      if (!SiftLandmarkPlacement.isSelectedChunk(level.getSeed(), origin, 20, 4702392765337521733L, 2)) {
          return false;
       }
 
       SiftWorldgenBounds bounds = SiftWorldgenBounds.aroundWithNeighbourMargin(origin);
       int centerX = (origin.getX() & -16) + 8;
       int centerZ = (origin.getZ() & -16) + 8;
-      int surfaceY = SiftLandmarkTerrain.surfaceBlockY(level, centerX, centerZ);
+      int surfaceY = level.getHeight(Types.WORLD_SURFACE_WG, centerX, centerZ) - 1;
       BlockPos center = new BlockPos(centerX, surfaceY, centerZ);
       if (surfaceY > level.getMinY() + 4 && !SiftFeaturePlacementGuard.intersectsPortal(center, 28)) {
-         Identifier templateId = chooseTemplate(level, center, random);
-      Optional<StructureTemplate> optional = level.getLevel().getStructureManager().get(templateId);
-         if (optional.isEmpty()) {
-            return false;
-         }
-
-         StructureTemplate template = optional.get();
          Rotation[] rotations = Rotation.values();
          int firstRotation = random.nextInt(rotations.length);
          Mirror mirror = random.nextBoolean() ? Mirror.NONE : Mirror.LEFT_RIGHT;
          AbandonedMainPortalFeature.PortalPlan plan = null;
+         String selectedBiome = "sift_wastes";
+         int selectedCenterX = centerX;
+         int selectedCenterZ = centerZ;
 
-         for (int attempt = 0; attempt < rotations.length; attempt++) {
-            StructurePlaceSettings settings = new StructurePlaceSettings()
-               .setMirror(mirror)
-               .setRotation(rotations[(firstRotation + attempt) % rotations.length])
-               .setIgnoreEntities(true)
-               .setKnownShape(false)
-               .setRandom(random)
-               .addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-            AbandonedMainPortalFeature.PortalPlan candidate = planPlacement(level, bounds, template, settings, centerX, centerZ);
-            if (candidate != null && (plan == null || candidate.relief() < plan.relief())) {
-               plan = candidate;
+         for (int[] offset : new int[][]{{0, 0}, {4, 0}, {-4, 0}, {0, 4}, {0, -4}}) {
+            int candidateX = centerX + offset[0];
+            int candidateZ = centerZ + offset[1];
+            List<Integer> surfaces = SiftLandmarkTerrain.exposedSurfaces(level, candidateX, candidateZ);
+            int firstSurface = surfaces.isEmpty() ? 0 : random.nextInt(surfaces.size());
+
+            for (int surfaceIndex = 0; surfaceIndex < surfaces.size(); surfaceIndex++) {
+               int referenceY = surfaces.get((firstSurface + surfaceIndex) % surfaces.size());
+               Identifier templateId = chooseTemplate(level, new BlockPos(candidateX, referenceY, candidateZ), random);
+               Optional<StructureTemplate> optional = level.getLevel().getStructureManager().get(templateId);
+               if (!optional.isEmpty()) {
+                  StructureTemplate template = optional.get();
+
+                  for (int attempt = 0; attempt < rotations.length; attempt++) {
+                     StructurePlaceSettings settings = new StructurePlaceSettings()
+                        .setMirror(mirror)
+                        .setRotation(rotations[(firstRotation + attempt) % rotations.length])
+                        .setIgnoreEntities(true)
+                        .setKnownShape(false)
+                        .setRandom(random)
+                        .addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
+                     AbandonedMainPortalFeature.PortalPlan candidate = planPlacement(level, bounds, template, settings, candidateX, candidateZ, referenceY);
+                     if (candidate != null && (plan == null || candidate.relief() < plan.relief())) {
+                        plan = candidate;
+                        selectedBiome = SiftPortalVariants.abandonedTemplateBiome(templateId.getPath());
+                        selectedCenterX = candidateX;
+                        selectedCenterZ = candidateZ;
+                     }
+                  }
+
+                  if (plan != null) {
+                     break;
+                  }
+               }
+            }
+
+            if (plan != null) {
+               break;
             }
          }
 
-         if (plan != null && SiftFeaturePlacementGuard.tryReserveSolid(centerX - 23, centerZ - 23, centerX + 22, centerZ + 22)) {
+         if (SiftCampProtection.near(level, selectedCenterX, selectedCenterZ, 28)) {
+            return false;
+         }
+
+         if (SiftCampProtection.near(level, selectedCenterX, selectedCenterZ, 28)) {
+            return false;
+         }
+
+         if (plan != null && SiftFeaturePlacementGuard.tryReserveSolid(selectedCenterX - 23, selectedCenterZ - 23, selectedCenterX + 22, selectedCenterZ + 22)) {
             List<StructureBlockInfo> naturalBlocks = plan.naturalBlocks();
             int baseY = naturalBlocks.getFirst().pos().getY();
-            List<BlockPos> foundationSurfaces = applyFoundation(level, plan.terrain());
-            if (!template.placeInWorld(level, plan.origin(), plan.origin(), plan.settings(), random, 2)) {
+            List<BlockPos> vegetationFloors = applyFoundation(level, plan.terrain());
+            vegetationFloors.forEach(SiftPortalVegetation::register);
+            if (!plan.template().placeInWorld(level, plan.origin(), plan.origin(), plan.settings(), random, 2)) {
                return false;
             }
 
             for (StructureBlockInfo info : naturalBlocks) {
-               SiftSurfaceDecorator.decorateStructureSurface(level, random, info.pos(), 0.96F, 2);
+               SiftPortalVegetation.register(info.pos());
+               SiftTerrainFeatureMemory.protectTerrain(info.pos().getX(), info.pos().getZ(), info.pos().getY(), info.pos().getY());
             }
 
-            for (BlockPos surface : foundationSurfaces) {
-               SiftSurfaceDecorator.decorate(level, random, surface, 2.85F, 2);
-            }
-
-            SiftLandmarkTracker.record(SiftLandmarkTracker.Kind.ABANDONED_MAIN_PORTAL, new BlockPos(centerX, baseY, centerZ));
+            SiftLandmarkTracker.record(SiftLandmarkTracker.Kind.ABANDONED_MAIN_PORTAL, new BlockPos(selectedCenterX, baseY, selectedCenterZ));
+            SiftLandmarkTracker.record(SiftPortalVariants.abandonedKind(selectedBiome), new BlockPos(selectedCenterX, baseY, selectedCenterZ));
             return true;
          } else {
             return false;
@@ -102,25 +130,13 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
       }
    }
 
-   private static String[] templateIds(String prefix) {
-      String[] ids = new String[5];
-
-      for (int index = 0; index < ids.length; index++) {
-         ids[index] = prefix + (index + 1);
-      }
-
-      return ids;
-   }
-
    private static Identifier chooseTemplate(WorldGenLevel level, BlockPos center, RandomSource random) {
-      String biomePath = level.getBiome(center).unwrapKey().map(key -> key.identifier().getPath()).orElse("");
-      boolean overgrown = biomePath.startsWith("overgrown_") || "ichor_snowy_peaks".equals(biomePath);
-      String[] templates = overgrown ? OVERGROWN_TEMPLATES : WASTES_TEMPLATES;
-      return Identifier.fromNamespaceAndPath("the_sift", templates[random.nextInt(templates.length)]);
+      String biomePath = SiftCaveHabitat.biome(level, center).unwrapKey().map(key -> key.identifier().getPath()).orElse("sift_wastes");
+      return SiftPortalVariants.abandoned(biomePath, random.nextInt(SiftPortalVariants.abandonedCount(biomePath)));
    }
 
    private static AbandonedMainPortalFeature.PortalPlan planPlacement(
-      WorldGenLevel level, SiftWorldgenBounds bounds, StructureTemplate template, StructurePlaceSettings settings, int centerX, int centerZ
+      WorldGenLevel level, SiftWorldgenBounds bounds, StructureTemplate template, StructurePlaceSettings settings, int centerX, int centerZ, int referenceY
    ) {
       List<StructureBlockInfo> relative = naturalBlocks(template, BlockPos.ZERO, settings);
       if (relative.isEmpty()) {
@@ -142,7 +158,7 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
                return null;
             }
 
-            int height = SiftLandmarkTerrain.surfaceBlockY(level, x, z);
+            int height = SiftLandmarkTerrain.surfaceNearY(level, x, z, referenceY, 8);
             if (height <= level.getMinY() + 4) {
                return null;
             }
@@ -170,7 +186,7 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
       List<AbandonedMainPortalFeature.TerrainColumn> terrain = planFoundation(
          level, bounds, originX + minX, originX + maxX, originZ + minZ, originZ + maxZ, groundY - 1, level.getSeed() ^ origin.asLong()
       );
-      return terrain == null ? null : new AbandonedMainPortalFeature.PortalPlan(origin, settings, natural, terrain, relief);
+      return terrain == null ? null : new AbandonedMainPortalFeature.PortalPlan(template, origin, settings, natural, terrain, relief);
    }
 
    private static List<StructureBlockInfo> naturalBlocks(StructureTemplate template, BlockPos origin, StructurePlaceSettings settings) {
@@ -180,6 +196,15 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
       blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.HEALTHY_SCULK));
       blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.DRY_HEALTHY_SCULK));
       blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.DRY_HEALTHY_SCULK_GROWTH));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.SOULSHALE));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.SOULSHALE_GROWTH));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.HEALTHY_SCULK_CARTILAGE));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.HEALTHY_SCULK_PORES));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.CORAL_SOIL));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.CORAL_GROWTH));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.BRIGHT_CORAL_GROWTH));
+      blocks.addAll(template.filterBlocks(origin, settings, Blocks.SCULK));
+      blocks.addAll(template.filterBlocks(origin, settings, ModBlocks.ICHOR_SNOW_BLOCK));
       blocks.sort(Comparator.comparingInt(info -> info.pos().getY()));
       return blocks;
    }
@@ -209,13 +234,17 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
                double edge = 12.0 + blendNoise(x, z, noiseSalt) * 1.35;
                if (!(distance > edge)) {
                   boolean core = dx == 0 && dz == 0;
-                  int naturalTop = SiftLandmarkTerrain.surfaceBlockY(level, x, z);
+                  int naturalTop = SiftLandmarkTerrain.surfaceNearY(level, x, z, floorY, 8);
                   if (naturalTop == Integer.MIN_VALUE) {
                      if (core) {
                         return null;
                      }
                   } else {
-                     if (core && Math.abs(floorY - naturalTop) > 8) {
+                     if (core
+                        && (
+                           !SiftLandmarkTerrain.isGround(level.getBlockState(new BlockPos(x, Math.min(floorY, naturalTop) - 3, z)))
+                              || Math.abs(floorY - naturalTop) > 8
+                        )) {
                         return null;
                      }
 
@@ -263,7 +292,7 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
             cursor.set(column.x(), y, column.z());
             BlockState current = level.getBlockState(cursor);
             if (y > column.naturalTop() || !SiftLandmarkTerrain.isGround(current) || current.is(ModBlocks.SIFT_RUBBLE)) {
-               level.setBlock(cursor, ModBlocks.SIFTSLATE.defaultBlockState(), 2);
+               level.setBlock(cursor, SiftLandmarkTerrain.stoneForBiome(SiftCaveHabitat.biome(level, cursor)).defaultBlockState(), 2);
             }
          }
 
@@ -289,6 +318,7 @@ public final class AbandonedMainPortalFeature extends Feature<NoneFeatureConfigu
    }
 
    private record PortalPlan(
+      StructureTemplate template,
       BlockPos origin,
       StructurePlaceSettings settings,
       List<StructureBlockInfo> naturalBlocks,

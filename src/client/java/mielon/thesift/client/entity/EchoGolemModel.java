@@ -6,12 +6,14 @@ import mielon.thesift.entity.EchoGolemEntity;
 import net.minecraft.resources.Identifier;
 
 public final class EchoGolemModel extends GeoModel<EchoGolemEntity> {
+   @Override
    public Identifier getModelResource(GeoRenderState state) {
       return Identifier.fromNamespaceAndPath("the_sift", "entity/echo_golem");
    }
 
+   @Override
    public Identifier getTextureResource(GeoRenderState state) {
-      return Identifier.fromNamespaceAndPath("the_sift", "textures/entity/echo_golem.png");
+      return Identifier.fromNamespaceAndPath("the_sift", "textures/entity/echo_golem/echo_golem.png");
    }
 
    public Identifier getAnimationResource(EchoGolemEntity animatable) {

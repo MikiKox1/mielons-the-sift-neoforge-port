@@ -1,0 +1,15 @@
+{
+  "name": "the_sift:sculkers_lair/ending",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/first_corridor_ending_1",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

@@ -13,12 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/**
- * Minecraft 26.2 resolves rain/snow textures locally inside render, rather
- * than storing rainTexture and snowTexture as fields as in Minecraft 26.3.
- * Follow the exact original Fabric 1.1.2/26.2 injection point and keep
- * the existing dimension/biome checks.
- */
 @Mixin(WeatherEffectRenderer.class)
 public abstract class SiftWeatherTextureMixin {
    private static final Identifier VANILLA_RAIN = Identifier.withDefaultNamespace("textures/environment/rain.png");
@@ -39,9 +33,7 @@ public abstract class SiftWeatherTextureMixin {
    }
 
    @ModifyArg(
-      // NeoForge 26.2 adds a two-argument compatibility overload which only
-      // forwards to the three-argument renderer. Target the precise overload
-      // that actually calls TextureManager.getTexture twice.
+      // The two-argument NeoForge compatibility shim has no texture calls.
       method = "render(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/state/level/WeatherRenderState;Lnet/minecraft/client/renderer/state/level/LevelRenderState;)V",
       at = @At(
          value = "INVOKE",
@@ -55,10 +47,12 @@ public abstract class SiftWeatherTextureMixin {
          if (original.equals(VANILLA_RAIN)) {
             return ICHOR_RAIN;
          }
+
          if (original.equals(VANILLA_SNOW)) {
             return ICHOR_SNOW;
          }
       }
+
       return original;
    }
 }

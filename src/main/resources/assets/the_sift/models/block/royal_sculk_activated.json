@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "the_sift:block/royal_sculk_side_activated",
+    "top": "the_sift:block/royal_sculk_top",
+    "bottom": "the_sift:block/royal_sculk_bottom",
+    "particle": "the_sift:block/royal_sculk_top"
+  }
+}

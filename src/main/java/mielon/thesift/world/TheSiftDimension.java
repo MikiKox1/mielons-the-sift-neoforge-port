@@ -17,23 +17,35 @@ public final class TheSiftDimension {
    public static final ResourceKey<Biome> OVERGROWN_FOREST = ResourceKey.create(
       Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "overgrown_forest")
    );
-   public static final ResourceKey<Biome> OVERGROWN_FOREST_SLOPES = ResourceKey.create(
-      Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "overgrown_forest_slopes")
-   );
-   public static final ResourceKey<Biome> OVERGROWN_SLOPES = ResourceKey.create(
-      Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "overgrown_slopes")
-   );
-   public static final ResourceKey<Biome> OVERGROWN_PEAKS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "overgrown_peaks"));
    public static final ResourceKey<Biome> ICHOR_SNOWY_PEAKS = ResourceKey.create(
       Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "ichor_snowy_peaks")
    );
+   public static final ResourceKey<Biome> SIFTSLATE_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "siftslate_caves"));
+   public static final ResourceKey<Biome> SOULSHALE_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "soulshale_caves"));
+   public static final ResourceKey<Biome> OVERGROWN_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "overgrown_caves"));
+   public static final ResourceKey<Biome> CORAL_MEADOW = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "coral_meadow"));
+   public static final ResourceKey<Biome> CORAL_FOREST = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "coral_forest"));
+   public static final ResourceKey<Biome> ORGANIC_DESERT = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "organic_desert"));
+   public static final ResourceKey<Biome> CORRUPTED_SIFT = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("the_sift", "corrupted_sift"));
+
+   public static boolean isOrganicDesert(Holder<Biome> biome) {
+      return biome.is(ORGANIC_DESERT);
+   }
+
+   public static boolean isGrimSurfaceBiome(Holder<Biome> biome) {
+      return isCoralBiome(biome) || isOrganicDesert(biome);
+   }
+
+   public static boolean isCoralBiome(Holder<Biome> biome) {
+      return biome.is(CORAL_MEADOW) || biome.is(CORAL_FOREST);
+   }
 
    public static boolean isOvergrownBiome(Holder<Biome> biome) {
-      return biome.is(OVERGROWN_CLEARING)
-         || biome.is(OVERGROWN_FOREST)
-         || biome.is(OVERGROWN_FOREST_SLOPES)
-         || biome.is(OVERGROWN_SLOPES)
-         || biome.is(OVERGROWN_PEAKS);
+      return biome.is(OVERGROWN_CAVES) || biome.is(OVERGROWN_CLEARING) || biome.is(OVERGROWN_FOREST);
+   }
+
+   public static boolean isCaveBiome(Holder<Biome> biome) {
+      return biome.is(SIFTSLATE_CAVES) || biome.is(SOULSHALE_CAVES) || biome.is(OVERGROWN_CAVES) || biome.is(CORRUPTED_SIFT);
    }
 
    private TheSiftDimension() {

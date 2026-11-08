@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "the_sift:siftslate_siftite_ore"
+    "the_sift:siftslate_siftite_ore",
+    "the_sift:soulshale_siftite_ore",
+    "the_sift:siftite_block"
   ]
 }

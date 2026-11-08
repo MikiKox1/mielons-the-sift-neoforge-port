@@ -6,4 +6,5 @@ public final class RiftRenderState extends EntityRenderState {
    public float openScale;
    public boolean longAlongX;
    public boolean targetSift;
+   public int backgroundVariant;
 }

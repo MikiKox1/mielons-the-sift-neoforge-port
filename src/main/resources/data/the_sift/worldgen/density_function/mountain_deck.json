@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:min",
+  "argument1": "the_sift:mountain_side_shape",
+  "argument2": {
+    "type": "minecraft:min",
+    "argument1": "the_sift:mountain_surface",
+    "argument2": {
+      "type": "minecraft:add",
+      "argument1": "the_sift:mountain_thickness",
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": -1,
+        "argument2": "the_sift:mountain_surface"
+      }
+    }
+  }
+}

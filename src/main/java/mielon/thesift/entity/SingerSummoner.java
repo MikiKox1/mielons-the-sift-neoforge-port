@@ -1,23 +1,25 @@
 package mielon.thesift.entity;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import mielon.thesift.block.ModBlocks;
-import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents;
-import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents.ServerStopped;
-import mielon.thesift.platform.NeoEvents.ServerTickEvents;
-import mielon.thesift.platform.NeoEvents.ServerTickEvents.EndTick;
 import mielon.thesift.portal.PortalFrameScanner;
+import mielon.thesift.portal.PortalGrowth;
+import mielon.thesift.world.LoadedBlockSearch;
+import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents;
+import mielon.thesift.platform.NeoEvents.ServerTickEvents;
+import mielon.thesift.platform.NeoEvents.ServerLifecycleEvents.ServerStopped;
+import mielon.thesift.platform.NeoEvents.ServerTickEvents.EndTick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -37,8 +39,19 @@ public final class SingerSummoner {
       ServerLifecycleEvents.SERVER_STOPPED.register((ServerStopped)server -> PENDING.clear());
    }
 
-   public static void onGoatHornFinished(ServerLevel level, Player player) {
-      PENDING.add(new SingerSummoner.PendingSummon(level, player.position()));
+   public static boolean onGoatHornFinished(ServerLevel level, Player player) {
+      Optional<PortalFrameScanner.Frame> found = findNearestFrame(level, player.position());
+      if (found.isEmpty()) {
+         return false;
+      }
+
+      PortalFrameScanner.Frame frame = found.get();
+      PortalGrowth.startDormant(level, frame.interior(), frame.axis());
+      if (PENDING.stream().noneMatch(p -> p.level == level && p.frame.bottomCenter().equals(frame.bottomCenter()))) {
+         PENDING.add(new SingerSummoner.PendingSummon(level, frame));
+      }
+
+      return true;
    }
 
    public static boolean isNearAncientCityCenter(ServerLevel level, Vec3 position) {
@@ -56,26 +69,27 @@ public final class SingerSummoner {
       }
    }
 
-   private static void trySummon(ServerLevel level, Vec3 origin) {
-      Optional<PortalFrameScanner.Frame> frameOptional = findNearestFrame(level, origin);
-      if (!frameOptional.isEmpty()) {
-         PortalFrameScanner.Frame frame = frameOptional.get();
-         Vec3 spawnPos = frame.bottomCenter();
-         BlockPos portalCenter = BlockPos.containing(spawnPos);
-         if (!hasSingerForPortal(level, portalCenter, spawnPos)) {
-            BlockPos sonorous = findNearestSonorous(level, spawnPos);
-            Direction facing = getCardinalDirection(spawnPos, sonorous);
-            SingerEntity singer = new SingerEntity(ModEntities.SINGER, level);
-            singer.setPortalCenter(portalCenter);
-            singer.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-            float yaw = facing.toYRot();
-            singer.setYRot(yaw);
-            singer.setYBodyRot(yaw);
-            singer.yBodyRotO = yaw;
-            singer.setYHeadRot(yaw);
-            singer.yHeadRotO = yaw;
-            singer.beginSequence();
-            level.addFreshEntity(singer);
+   private static void trySummon(ServerLevel level, PortalFrameScanner.Frame frame) {
+      if (!frame.interior().isEmpty() && !frame.interior().stream().anyMatch(p -> !level.hasChunkAt(p))) {
+         Optional<PortalFrameScanner.Frame> checked = PortalFrameScanner.scan(level, frame.interior().get(0).below());
+         if (!checked.isEmpty() && checked.get().bottomCenter().equals(frame.bottomCenter())) {
+            Vec3 spawnPos = frame.bottomCenter();
+            BlockPos portalCenter = BlockPos.containing(spawnPos);
+            if (!hasSingerForPortal(level, portalCenter, spawnPos)) {
+               BlockPos sonorous = findNearestSonorous(level, spawnPos);
+               Direction facing = getCardinalDirection(spawnPos, sonorous);
+               SingerEntity singer = new SingerEntity(ModEntities.SINGER, level);
+               singer.setPortalCenter(portalCenter);
+               singer.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+               float yaw = facing.toYRot();
+               singer.setYRot(yaw);
+               singer.setYBodyRot(yaw);
+               singer.yBodyRotO = yaw;
+               singer.setYHeadRot(yaw);
+               singer.yHeadRotO = yaw;
+               singer.beginSequence();
+               level.addFreshEntity(singer);
+            }
          }
       }
    }
@@ -95,32 +109,29 @@ public final class SingerSummoner {
    }
 
    private static Optional<PortalFrameScanner.Frame> findNearestFrame(ServerLevel level, Vec3 origin) {
-      double bestDistance = Double.MAX_VALUE;
-      PortalFrameScanner.Frame best = null;
-      Set<Vec3> seenCenters = new HashSet<>();
-      MutableBlockPos cursor = new MutableBlockPos();
-      int originX = Mth.floor(origin.x);
-      int originY = Mth.floor(origin.y);
-      int originZ = Mth.floor(origin.z);
+      if (!level.dimension().equals(Level.OVERWORLD)) {
+         return Optional.empty();
+      }
 
-      for (int dx = -40; dx <= 40; dx++) {
-         for (int dy = -40; dy <= 40; dy++) {
-            for (int dz = -40; dz <= 40; dz++) {
-               double distanceSquared = (double)dx * dx + (double)dy * dy + (double)dz * dz;
-               if (!(distanceSquared > 1600.0)) {
-                  cursor.set(originX + dx, originY + dy, originZ + dz);
-                  if (level.getBlockState(cursor).is(Blocks.REINFORCED_DEEPSLATE)) {
-                     Optional<PortalFrameScanner.Frame> candidate = PortalFrameScanner.scan(level, cursor);
-                     if (!candidate.isEmpty()) {
-                        PortalFrameScanner.Frame frame = candidate.get();
-                        if (seenCenters.add(frame.bottomCenter())) {
-                           double distance = frame.bottomCenter().distanceToSqr(origin);
-                           if (distance <= 1600.0 && distance < bestDistance) {
-                              bestDistance = distance;
-                              best = frame;
-                           }
-                        }
-                     }
+      Optional<List<BlockPos>> positions = LoadedBlockSearch.find(level, BlockPos.containing(origin), 40, state -> state.is(Blocks.REINFORCED_DEEPSLATE));
+      if (positions.isEmpty()) {
+         return Optional.empty();
+      }
+
+      PortalFrameScanner.Frame best = null;
+      double bestDistance = 1600.0;
+      Set<Vec3> seenCenters = new HashSet<>();
+
+      for (BlockPos pos : positions.get()) {
+         if (!(Vec3.atCenterOf(pos).distanceToSqr(origin) > 1600.0)) {
+            Optional<PortalFrameScanner.Frame> candidate = PortalFrameScanner.scan(level, pos);
+            if (!candidate.isEmpty()) {
+               PortalFrameScanner.Frame frame = candidate.get();
+               if (seenCenters.add(frame.bottomCenter())) {
+                  double distance = frame.bottomCenter().distanceToSqr(origin);
+                  if (distance <= bestDistance) {
+                     bestDistance = distance;
+                     best = frame;
                   }
                }
             }
@@ -131,33 +142,12 @@ public final class SingerSummoner {
    }
 
    private static BlockPos findNearestSonorous(ServerLevel level, Vec3 origin) {
-      MutableBlockPos cursor = new MutableBlockPos();
-      BlockPos best = null;
-      double bestDistance = Double.MAX_VALUE;
-      int originX = Mth.floor(origin.x);
-      int originY = Mth.floor(origin.y);
-      int originZ = Mth.floor(origin.z);
-
-      for (int dx = -20; dx <= 20; dx++) {
-         for (int dy = -20; dy <= 20; dy++) {
-            for (int dz = -20; dz <= 20; dz++) {
-               double distanceSquared = (double)dx * dx + (double)dy * dy + (double)dz * dz;
-               if (!(distanceSquared > 400.0)) {
-                  cursor.set(originX + dx, originY + dy, originZ + dz);
-                  if (level.getBlockState(cursor).is(ModBlocks.SONOROUS_DEEPSLATE)) {
-                     Vec3 blockCenter = Vec3.atCenterOf(cursor);
-                     double distance = blockCenter.distanceToSqr(origin);
-                     if (distance < bestDistance) {
-                        bestDistance = distance;
-                        best = cursor.immutable();
-                     }
-                  }
-               }
-            }
-         }
-      }
-
-      return best;
+      return LoadedBlockSearch.find(level, BlockPos.containing(origin), 20, state -> state.is(ModBlocks.SONOROUS_DEEPSLATE))
+         .orElse(List.of())
+         .stream()
+         .filter(pos -> Vec3.atCenterOf(pos).distanceToSqr(origin) <= 400.0)
+         .min(Comparator.comparingDouble(pos -> Vec3.atCenterOf(pos).distanceToSqr(origin)))
+         .orElse(null);
    }
 
    private static Direction getCardinalDirection(Vec3 origin, BlockPos target) {
@@ -176,12 +166,12 @@ public final class SingerSummoner {
 
    private static final class PendingSummon {
       private final ServerLevel level;
-      private final Vec3 origin;
+      private final PortalFrameScanner.Frame frame;
       private int ticksLeft = 60;
 
-      PendingSummon(ServerLevel level, Vec3 origin) {
+      PendingSummon(ServerLevel level, PortalFrameScanner.Frame frame) {
          this.level = level;
-         this.origin = origin;
+         this.frame = frame;
       }
 
       boolean tick() {
@@ -189,7 +179,7 @@ public final class SingerSummoner {
             this.ticksLeft--;
             return false;
          } else {
-            SingerSummoner.trySummon(this.level, this.origin);
+            SingerSummoner.trySummon(this.level, this.frame);
             return true;
          }
       }

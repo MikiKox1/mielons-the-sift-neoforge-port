@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:add",
+  "argument1": 0.17,
+  "argument2": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:mul",
+      "argument1": 0.13,
+      "argument2": "the_sift:mountain_mask"
+    },
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": 0.35,
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": "the_sift:mountain_mask",
+        "argument2": "the_sift:mountain_ridge_shape"
+      }
+    }
+  }
+}

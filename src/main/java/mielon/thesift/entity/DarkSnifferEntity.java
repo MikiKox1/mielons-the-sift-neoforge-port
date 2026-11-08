@@ -6,11 +6,16 @@ import java.util.UUID;
 import mielon.thesift.mixin.SnifferStateAccess;
 import mielon.thesift.particle.ModParticles;
 import mielon.thesift.sound.ModSounds;
+import mielon.thesift.world.TheSiftDimension;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -23,6 +28,10 @@ import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -76,6 +85,26 @@ public final class DarkSnifferEntity extends Sniffer {
       }
    }
 
+   public static boolean checkDarkSnifferSpawnRules(
+      EntityType<DarkSnifferEntity> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random
+   ) {
+      return level.getDifficulty() != Difficulty.PEACEFUL
+         && level.getBiome(pos).is(TheSiftDimension.CORRUPTED_SIFT)
+         && (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || level.getBrightness(LightLayer.BLOCK, pos) == 0)
+         && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP)
+         && (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || SculkerPopulation.canSpawn(level, pos, false))
+         && level.getFluidState(pos).isEmpty();
+   }
+
+   @Override
+   public float getWalkTargetValue(BlockPos pos, LevelReader level) {
+      if (level.getBlockState(pos.below()).is(Blocks.SCULK)) {
+         return 10.0F;
+      } else {
+         return level.getBiome(pos).is(TheSiftDimension.CORRUPTED_SIFT) ? -level.getBrightness(LightLayer.BLOCK, pos) : super.getWalkTargetValue(pos, level);
+      }
+   }
+
    public static Builder createAttributes() {
       return Sniffer.createAttributes()
          .add(Attributes.MAX_HEALTH, 40.0)
@@ -87,26 +116,32 @@ public final class DarkSnifferEntity extends Sniffer {
          .add(Attributes.ATTACK_KNOCKBACK, 0.75);
    }
 
+   @Override
    protected boolean canBeABaby() {
       return false;
    }
 
+   @Override
    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
       return null;
    }
 
+   @Override
    public boolean canMate(Animal other) {
       return false;
    }
 
+   @Override
    public boolean isFood(ItemStack stack) {
       return false;
    }
 
+   @Override
    public boolean canSniff() {
       return this.wardenPettingTicks <= 0 && !this.hasCombatTarget() && super.canSniff();
    }
 
+   @Override
    public boolean canAttack(LivingEntity target) {
       if (this.level().getDifficulty() == Difficulty.PEACEFUL) {
          return false;
@@ -114,13 +149,22 @@ public final class DarkSnifferEntity extends Sniffer {
 
       boolean validPlayer = target instanceof Player player && !player.isCreative() && !player.isSpectator();
       boolean ordinarySniffer = target instanceof Sniffer && !(target instanceof DarkSnifferEntity);
-      return (validPlayer || ordinarySniffer) && super.canAttack(target);
+      return (validPlayer || ordinarySniffer || SifterFamily.isMember(target)) && super.canAttack(target);
    }
 
+   @Override
+   public void checkDespawn() {
+      if (!SculkerPopulation.despawnCrowded(this)) {
+         super.checkDespawn();
+      }
+   }
+
+   @Override
    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
-      return false;
+      return true;
    }
 
+   @Override
    public void tick() {
       super.tick();
       if (this.level() instanceof ServerLevel serverLevel) {
@@ -170,10 +214,10 @@ public final class DarkSnifferEntity extends Sniffer {
                      32.0,
                      entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator() && player.isAlive()
                   );
-               Sniffer nearestSniffer = this.findNearestOrdinarySniffer(serverLevel);
+               LivingEntity nearestPrey = this.findNearestPrey(serverLevel);
                target = nearestPlayer;
-               if (nearestSniffer != null && (target == null || this.distanceToSqr(nearestSniffer) < this.distanceToSqr(target))) {
-                  target = nearestSniffer;
+               if (nearestPrey != null && (target == null || this.distanceToSqr(nearestPrey) < this.distanceToSqr(target))) {
+                  target = nearestPrey;
                }
 
                this.setTarget(target);
@@ -184,13 +228,6 @@ public final class DarkSnifferEntity extends Sniffer {
                this.ticksWithoutMeleeContact = 0;
                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
                this.setAggressive(false);
-               if (this.distanceToSqr(this.homeX, this.homeY, this.homeZ) > 10000.0) {
-                  if (this.getNavigation().isDone()) {
-                     this.getNavigation().moveTo(this.homeX, this.homeY, this.homeZ, 0.1);
-                  }
-               } else if (this.getNavigation().isDone() && this.random.nextInt(30) == 0) {
-                  this.getNavigation().moveTo(this.getX() + this.random.nextInt(25) - 12.0, this.getY(), this.getZ() + this.random.nextInt(25) - 12.0, 0.1);
-               }
             } else {
                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.3);
                this.setAggressive(true);
@@ -212,7 +249,7 @@ public final class DarkSnifferEntity extends Sniffer {
                } else {
                   this.transitionTo(State.IDLING);
                   this.getLookControl().setLookAt(target, 30.0F, 30.0F);
-                  if (--this.pathRefreshCooldown <= 0 || this.getNavigation().isDone()) {
+                  if (--this.pathRefreshCooldown <= 0) {
                      this.pathRefreshCooldown = 6;
                      this.getNavigation().moveTo(target, 1.2);
                   }
@@ -233,6 +270,14 @@ public final class DarkSnifferEntity extends Sniffer {
       }
    }
 
+   private void pauseRunningForSonicSniff() {
+      this.getNavigation().stop();
+      this.setSpeed(0.0F);
+      this.setXxa(0.0F);
+      this.setZza(0.0F);
+      this.setJumping(false);
+   }
+
    private void beginSonicSniff(LivingEntity target) {
       this.sonicVictim = target;
       this.sonicWindupTicks = 10;
@@ -240,8 +285,7 @@ public final class DarkSnifferEntity extends Sniffer {
       this.sonicFlightAge = 0;
       this.sonicCooldown = 100;
       this.ticksWithoutMeleeContact = 0;
-      this.getNavigation().stop();
-      this.setDeltaMovement(Vec3.ZERO);
+      this.pauseRunningForSonicSniff();
       this.getLookControl().setLookAt(target, 30.0F, 30.0F);
       this.setSnifferState(State.SNIFFING);
    }
@@ -249,8 +293,7 @@ public final class DarkSnifferEntity extends Sniffer {
    private void tickSonicSniff(ServerLevel serverLevel) {
       LivingEntity victim = this.sonicVictim;
       if (victim != null && victim.isAlive() && this.canAttack(victim)) {
-         this.getNavigation().stop();
-         this.setDeltaMovement(Vec3.ZERO);
+         this.pauseRunningForSonicSniff();
          this.getLookControl().setLookAt(victim, 30.0F, 30.0F);
          if (this.sonicWindupTicks > 0) {
             this.sonicWindupTicks--;
@@ -335,11 +378,12 @@ public final class DarkSnifferEntity extends Sniffer {
    private void pullEntityOnce(LivingEntity victim) {
       if (victim != this && victim.isAlive() && this.sonicPulledEntityUuids.add(victim.getUUID())) {
          Vec3 pull = new Vec3(this.getX() - victim.getX(), this.getY() - victim.getY(), this.getZ() - victim.getZ()).scale(0.3);
-         victim.push(pull);
+         victim.setDeltaMovement(victim.getDeltaMovement().add(pull));
          if (victim instanceof Player) {
             ((SonicSniffMotionAccess)victim).theSift$markSonicSniffMotion();
          }
 
+         victim.hurtMarked = true;
          if (victim instanceof ServerPlayer player) {
             player.connection.send(new ClientboundSetEntityMotionPacket(victim));
          }
@@ -369,14 +413,16 @@ public final class DarkSnifferEntity extends Sniffer {
       return target != null && target.isAlive() && this.canAttack(target) && this.distanceToSqr(target) <= 1024.0;
    }
 
-   private Sniffer findNearestOrdinarySniffer(ServerLevel level) {
-      Sniffer nearest = null;
+   private LivingEntity findNearestPrey(ServerLevel level) {
+      LivingEntity nearest = null;
       double nearestDistance = 1024.0;
 
-      for (Sniffer candidate : level.getEntitiesOfClass(
-         Sniffer.class,
+      for (LivingEntity candidate : level.getEntitiesOfClass(
+         LivingEntity.class,
          this.getBoundingBox().inflate(32.0),
-         candidatex -> candidatex != this && !(candidatex instanceof DarkSnifferEntity) && candidatex.isAlive()
+         candidatex -> (candidatex instanceof Sniffer && !(candidatex instanceof DarkSnifferEntity) || SifterFamily.isMember(candidatex))
+            && candidatex.isAlive()
+            && this.canAttack(candidatex)
       )) {
          double distance = this.distanceToSqr(candidate);
          if (distance < nearestDistance) {
@@ -388,6 +434,7 @@ public final class DarkSnifferEntity extends Sniffer {
       return nearest;
    }
 
+   @Override
    protected void addAdditionalSaveData(ValueOutput output) {
       super.addAdditionalSaveData(output);
       output.putBoolean("TheSiftHomeSet", this.homeSet);
@@ -398,6 +445,7 @@ public final class DarkSnifferEntity extends Sniffer {
       }
    }
 
+   @Override
    protected void readAdditionalSaveData(ValueInput input) {
       super.readAdditionalSaveData(input);
       this.homeSet = input.getBooleanOr("TheSiftHomeSet", false);

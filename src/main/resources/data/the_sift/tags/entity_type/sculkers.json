@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:warden",
+    "the_sift:dark_sniffer",
+    "the_sift:stalker",
+    "the_sift:scavenger",
+    "the_sift:monarch",
+    "the_sift:monarch_echo"
+  ]
+}

@@ -1,30 +1,24 @@
 package mielon.thesift.worldgen;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public final class SiftLavaFloorFeature extends Feature<NoneFeatureConfiguration> {
+   private static final int LAVA_SURFACE_Y = 11;
+
    public SiftLavaFloorFeature() {
       super(NoneFeatureConfiguration.CODEC);
    }
 
-   private static final int LAVA_SURFACE_Y = 11;
-
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
-      RandomSource random = context.random();
-      BlockPos origin = context.origin();
-      int chunkMinX = origin.getX() & -16;
-      int chunkMinZ = origin.getZ() & -16;
+      int chunkMinX = context.origin().getX() & -16;
+      int chunkMinZ = context.origin().getZ() & -16;
       int maxY = Math.min(11, level.getMaxY() - 1);
       int placed = 0;
       MutableBlockPos cursor = new MutableBlockPos();

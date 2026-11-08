@@ -30,7 +30,7 @@ final class SiftSnifferPlantPlacement {
          level.setBlock(plantPos, torchflower, 2);
          return true;
       } else if (level.isEmptyBlock(plantPos.above()) && level.ensureCanWrite(plantPos.above())) {
-         BlockState bulb = (BlockState)Blocks.PITCHER_CROP.defaultBlockState().setValue(PitcherCropBlock.AGE, 3 + random.nextInt(2));
+         BlockState bulb = Blocks.PITCHER_CROP.defaultBlockState().setValue(PitcherCropBlock.AGE, 3 + random.nextInt(2));
          if (!bulb.canSurvive(level, plantPos)) {
             return false;
          }

@@ -31,7 +31,10 @@ public final class PortalAutoActivation {
                for (int dz = -10; dz <= 10; dz++) {
                   cursor.set(notePos.getX() + dx, notePos.getY() + dy, notePos.getZ() + dz);
                   BlockPos candidate = cursor.immutable();
-                  if (checked.add(candidate) && level.getBlockState(candidate).is(Blocks.REINFORCED_DEEPSLATE) && PortalIgnition.tryIgnite(level, candidate)) {
+                  if (checked.add(candidate)
+                     && level.hasChunkAt(candidate)
+                     && level.getBlockState(candidate).is(Blocks.REINFORCED_DEEPSLATE)
+                     && PortalIgnition.tryIgnite(level, candidate)) {
                      return true;
                   }
                }
@@ -58,7 +61,7 @@ public final class PortalAutoActivation {
                for (int dz = -10; dz <= 10; dz++) {
                   cursor.set(notePos.getX() + dx, notePos.getY() + dy, notePos.getZ() + dz);
                   BlockPos candidate = cursor.immutable();
-                  if (checked.add(candidate) && level.getBlockState(candidate).is(Blocks.REINFORCED_DEEPSLATE)) {
+                  if (checked.add(candidate) && level.hasChunkAt(candidate) && level.getBlockState(candidate).is(Blocks.REINFORCED_DEEPSLATE)) {
                      Optional<PortalFrameScanner.Frame> frame = PortalFrameScanner.scanForClosing(level, candidate);
                      if (!frame.isEmpty()) {
                         PortalGrowth.startClosing(level, frame.get().interior(), frame.get().axis());

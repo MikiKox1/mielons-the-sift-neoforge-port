@@ -1,0 +1,60 @@
+{
+  "name": "the_sift:sculkers_lair/mini_room",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_1",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_2",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_3",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_4",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_5",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "the_sift:sculkers_lair/parts/mini_room_6",
+        "processors": "the_sift:sculkers_lair",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

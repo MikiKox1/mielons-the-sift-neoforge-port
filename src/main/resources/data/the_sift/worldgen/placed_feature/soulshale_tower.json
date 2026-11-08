@@ -1,0 +1,9 @@
+{
+  "feature": "the_sift:soulshale_tower",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 32
+    }
+  ]
+}

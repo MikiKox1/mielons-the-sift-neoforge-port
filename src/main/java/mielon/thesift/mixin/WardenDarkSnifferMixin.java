@@ -3,6 +3,7 @@ package mielon.thesift.mixin;
 import java.util.Comparator;
 import mielon.thesift.entity.DarkSnifferEntity;
 import mielon.thesift.entity.ModAttachments;
+import mielon.thesift.entity.SculkerFamily;
 import mielon.thesift.entity.WardenPettingAccess;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -36,8 +37,8 @@ public abstract class WardenDarkSnifferMixin implements WardenPettingAccess {
    private int theSift$pettingSearchCooldown = -1;
 
    @Inject(method = "canTargetEntity", at = @At("HEAD"), cancellable = true)
-   private void theSift$neverTargetDarkSniffer(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-      if (entity instanceof DarkSnifferEntity) {
+   private void theSift$neverTargetSculkers(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+      if (SculkerFamily.contains(entity)) {
          cir.setReturnValue(false);
       }
    }
@@ -137,7 +138,6 @@ public abstract class WardenDarkSnifferMixin implements WardenPettingAccess {
       if (current == petting) {
          return;
       }
-
       if (petting) {
          warden.setData(ModAttachments.WARDEN_PETTING, true);
       } else {

@@ -12,6 +12,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.GrowingPlantBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -21,6 +24,8 @@ import net.minecraft.world.level.material.Fluid;
 public final class IchorWaterlogging {
    private static final Identifier STORAGE_ID = Identifier.fromNamespaceAndPath("the_sift", "ichorlogged_blocks");
    private static final Map<LevelAccessor, Set<Long>> POSITIONS = Collections.synchronizedMap(new WeakHashMap<>());
+   private static final Map<ServerLevel, Iterator<Long>> MIGRATION_CURSORS = new WeakHashMap<>();
+   private static final int MIGRATION_BUDGET = 128;
    private static boolean loaded;
    private static boolean dirty;
    private static int saveCooldown;
@@ -49,16 +54,16 @@ public final class IchorWaterlogging {
       return isIchorlogged(level.getBlockState(pos)) || positions != null && positions.contains(pos.asLong());
    }
 
+   public static boolean flowBreaksPlant(BlockState state) {
+      return state.getBlock() instanceof VegetationBlock || state.getBlock() instanceof VineBlock || state.getBlock() instanceof GrowingPlantBlock;
+   }
+
    public static boolean canIchorlog(BlockState state) {
       return state.hasProperty(IchorState.ICHORLOGGED) && waterloggedProperty(state) != null;
    }
 
    public static boolean isIchor(Fluid fluid) {
       return fluid instanceof IchorFluid;
-   }
-
-   public static boolean isIchorSource(Fluid fluid) {
-      return isIchor(fluid) && fluid.defaultFluidState().isSource();
    }
 
    public static boolean canContain(BlockState state) {
@@ -70,11 +75,11 @@ public final class IchorWaterlogging {
    }
 
    public static boolean isIchorlogged(BlockState state) {
-      return state.hasProperty(IchorState.ICHORLOGGED) && (Boolean)state.getValue(IchorState.ICHORLOGGED) && isFluidlogged(state);
+      return state.hasProperty(IchorState.ICHORLOGGED) && state.getValue(IchorState.ICHORLOGGED) && isFluidlogged(state);
    }
 
    public static BlockState fillState(BlockState state) {
-      return (BlockState)setFluidlogged(state, true).setValue(IchorState.ICHORLOGGED, true);
+      return setFluidlogged(state, true).setValue(IchorState.ICHORLOGGED, true);
    }
 
    public static boolean fill(LevelAccessor level, BlockPos pos, BlockState state) {
@@ -93,36 +98,14 @@ public final class IchorWaterlogging {
       return true;
    }
 
-   /**
-    * Clears a single Ichorlogged source before awarding a filled bucket.
-    * Both vanilla BucketItem pickup and SimpleWaterloggedBlock pickup must
-    * follow the same path. A stale legacy marker never creates a bucket.
-    */
-   public static boolean drain(LevelAccessor level, BlockPos pos, BlockState state) {
-      if (!isIchorlogged(state)) {
-         return false;
-      }
-
-      if (!level.setBlock(pos, setFluidlogged(state, false), 3) || isIchorlogged(level.getBlockState(pos))) {
-         return false;
-      }
-
-      remove(level, pos);
-      if (!state.canSurvive(level, pos)) {
-         level.destroyBlock(pos, true);
-      }
-
-      return true;
-   }
-
    public static boolean isFluidlogged(BlockState state) {
       BooleanProperty property = waterloggedProperty(state);
-      return property != null && (Boolean)state.getValue(property);
+      return property != null && state.getValue(property);
    }
 
    public static BlockState setFluidlogged(BlockState state, boolean value) {
       BooleanProperty property = waterloggedProperty(state);
-      BlockState result = property == null ? state : (BlockState)state.setValue(property, value);
+      BlockState result = property == null ? state : state.setValue(property, value);
       return value ? result : IchorState.dryDefault(result);
    }
 
@@ -144,9 +127,15 @@ public final class IchorWaterlogging {
       for (ServerLevel level : server.getAllLevels()) {
          Set<Long> positions = POSITIONS.get(level);
          if (positions != null && !positions.isEmpty()) {
-            Iterator<Long> iterator = positions.iterator();
+            Iterator<Long> iterator = MIGRATION_CURSORS.get(level);
+            if (iterator == null || !iterator.hasNext()) {
+               iterator = positions.iterator();
+               MIGRATION_CURSORS.put(level, iterator);
+            }
 
-            while (iterator.hasNext()) {
+            int budget = 128;
+
+            while (budget-- > 0 && iterator.hasNext()) {
                long packed = iterator.next();
                BlockPos pos = BlockPos.of(packed);
                if (level.isLoaded(pos)) {
@@ -171,6 +160,7 @@ public final class IchorWaterlogging {
 
    public static void clear() {
       POSITIONS.clear();
+      MIGRATION_CURSORS.clear();
       loaded = false;
       dirty = false;
       saveCooldown = 0;

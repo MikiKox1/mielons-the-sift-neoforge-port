@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:add",
+  "argument1": "the_sift:mountain_climate",
+  "argument2": -0.6
+}

@@ -18,30 +18,42 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
+   private static final int MAX_SAFE_EXTENT = 24;
+
    public IchorLakeFeature() {
       super(NoneFeatureConfiguration.CODEC);
    }
 
-   private static final int MAX_SAFE_EXTENT = 24;
-
-
+   @Override
    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
       WorldGenLevel level = context.level();
-      ChunkGenerator generator = context.chunkGenerator();
       RandomSource random = context.random();
-      BlockPos origin = context.origin();
-      BlockPos placementOrigin = origin;
+      BlockPos placementOrigin = context.origin();
+
+      for (int attempt = 0; attempt < 3; attempt++) {
+         if (placeLake(level, random, placementOrigin)) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private static boolean placeLake(WorldGenLevel level, RandomSource random, BlockPos placementOrigin) {
       SiftWorldgenBounds bounds = SiftWorldgenBounds.aroundWithNeighbourMargin(placementOrigin);
-      int centerX = (placementOrigin.getX() & -16) + 9;
-      int centerZ = (placementOrigin.getZ() & -16) + 9;
+      int centerX = (placementOrigin.getX() & -16) + 5 + random.nextInt(6);
+      int centerZ = (placementOrigin.getZ() & -16) + 5 + random.nextInt(6);
       int centerSurface = SiftMonolithFeature.findTerrainSurface(level, centerX, centerZ);
       if (centerSurface < 0) {
+         return false;
+      }
+
+      if (SiftCampProtection.near(level, centerX, centerZ, 32)) {
          return false;
       }
 
@@ -158,7 +170,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
    }
 
    private static IchorLakeFeature.LakeVariant chooseVariant(RandomSource random, int relief) {
-      if (relief <= 3) {
+      if (relief <= 3 && random.nextInt(3) == 0) {
          return IchorLakeFeature.LakeVariant.MEGA;
       } else {
          int roll = random.nextInt(100);
@@ -253,24 +265,32 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
    }
 
    private static IchorLakeFeature.LakePalette choosePalette(WorldGenLevel level, BlockPos center, RandomSource random) {
-      boolean overgrown = TheSiftDimension.isOvergrownBiome(level.getBiome(center));
-      int basinRoll = random.nextInt(100);
-      BlockState basin = basinRoll < 70
-         ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState()
-         : (basinRoll < 91 ? ModBlocks.HEALTHY_SCULK.defaultBlockState() : ModBlocks.SIFTSLATE.defaultBlockState());
-      int shoreRoll = random.nextInt(100);
-      BlockState shore;
-      if (overgrown && shoreRoll < 58) {
-         shore = ModBlocks.SIFTSLATE_GROWTH.defaultBlockState();
-      } else if (shoreRoll < (overgrown ? 79 : 72)) {
-         shore = ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState();
-      } else if (shoreRoll < 93) {
-         shore = ModBlocks.HEALTHY_SCULK.defaultBlockState();
-      } else {
-         shore = ModBlocks.SIFTSLATE.defaultBlockState();
-      }
+      if (!TheSiftDimension.isCoralBiome(SiftCaveHabitat.biome(level, center))
+         && (
+            !TheSiftDimension.isCoralBiome(SiftCaveHabitat.surfaceBiome(level, center.getX(), center.getZ()))
+               || center.getY() < SiftCaveHabitat.rockTop(level, center.getX(), center.getZ()) - 12
+         )) {
+         boolean overgrown = TheSiftDimension.isOvergrownBiome(SiftCaveHabitat.biome(level, center));
+         int basinRoll = random.nextInt(100);
+         BlockState basin = basinRoll < 70
+            ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState()
+            : (basinRoll < 91 ? ModBlocks.HEALTHY_SCULK.defaultBlockState() : ModBlocks.SIFTSLATE.defaultBlockState());
+         int shoreRoll = random.nextInt(100);
+         BlockState shore;
+         if (overgrown && shoreRoll < 58) {
+            shore = ModBlocks.SIFTSLATE_GROWTH.defaultBlockState();
+         } else if (shoreRoll < (overgrown ? 79 : 72)) {
+            shore = ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState();
+         } else if (shoreRoll < 93) {
+            shore = ModBlocks.HEALTHY_SCULK.defaultBlockState();
+         } else {
+            shore = ModBlocks.SIFTSLATE.defaultBlockState();
+         }
 
-      return new IchorLakeFeature.LakePalette(basin, shore);
+         return new IchorLakeFeature.LakePalette(basin, shore);
+      } else {
+         return new IchorLakeFeature.LakePalette(ModBlocks.SOULSHALE.defaultBlockState(), ModBlocks.BRIGHT_CORAL_GROWTH.defaultBlockState());
+      }
    }
 
    private static int shapeBeach(
@@ -295,7 +315,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
       for (int y = supportBottom; y < targetTop; y++) {
          cursor.set(column.x(), y, column.z());
          if (bounds.contains(cursor) && level.ensureCanWrite(cursor)) {
-            level.setBlock(cursor, y >= targetTop - 2 ? palette.basin() : ModBlocks.SIFTSLATE.defaultBlockState(), 2);
+            level.setBlock(cursor, y >= targetTop - 2 ? palette.basin() : foundation(palette), 2);
             placed++;
          }
       }
@@ -305,7 +325,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
       BlockState top = shorelineState(below, palette);
       cursor.set(column.x(), targetTop, column.z());
       if (bounds.contains(cursor) && level.ensureCanWrite(cursor)) {
-         level.setBlock(cursor, top, 2);
+         level.setBlock(cursor, SiftLandmarkTerrain.growthSurface(level, cursor, top), 2);
          placed++;
       }
 
@@ -507,7 +527,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
 
       boolean islandScale = water.size() > 400;
       IchorLakeFeature.LakeColumn lakeSample = candidates.get(0);
-      boolean overgrown = TheSiftDimension.isOvergrownBiome(level.getBiome(new BlockPos(lakeSample.x(), waterY, lakeSample.z())));
+      boolean overgrown = TheSiftDimension.isOvergrownBiome(SiftCaveHabitat.biome(level, new BlockPos(lakeSample.x(), waterY, lakeSample.z())));
       boolean willowVariant = islandScale && overgrown && random.nextFloat() < 0.27F;
       if (willowVariant) {
          IchorLakeFeature.LakeColumn islandCenter = findWillowIslandCenter(candidates, random);
@@ -565,10 +585,10 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
                      for (int y = bottom; y <= waterY + height; y++) {
                         BlockPos pos = new BlockPos(center.x() + dx, y, center.z() + dz);
                         if (bounds.contains(pos) && level.ensureCanWrite(pos)) {
-                           BlockState belowTop = y >= waterY - 1 ? palette.basin() : ModBlocks.SIFTSLATE.defaultBlockState();
+                           BlockState belowTop = y >= waterY - 1 ? palette.basin() : foundation(palette);
                            BlockState requestedTop = palette.shore();
                            BlockState rock = y == waterY + height ? islandSurfaceState(requestedTop, level.getBlockState(pos.below())) : belowTop;
-                           level.setBlock(pos, rock, 2);
+                           level.setBlock(pos, SiftLandmarkTerrain.growthSurface(level, pos, rock), 2);
                            placed++;
                         }
                      }
@@ -670,10 +690,10 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
                } else if (y >= waterY && patch < 0.38) {
                   state = patch < 0.13 ? ModBlocks.DRY_HEALTHY_SCULK.defaultBlockState() : ModBlocks.HEALTHY_SCULK.defaultBlockState();
                } else {
-                  state = y >= topY - 2 ? palette.basin() : ModBlocks.SIFTSLATE.defaultBlockState();
+                  state = y >= topY - 2 ? palette.basin() : foundation(palette);
                }
 
-               level.setBlock(cursor, state, 2);
+               level.setBlock(cursor, SiftLandmarkTerrain.growthSurface(level, cursor, state), 2);
                placed++;
             }
          }
@@ -977,7 +997,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
          for (int y = bottom; y <= targetTop; y++) {
             cursor.set(column.x(), y, column.z());
             if (bounds.contains(cursor) && level.ensureCanWrite(cursor)) {
-               BlockState state = y == targetTop ? palette.shore() : (y <= targetTop - 2 ? ModBlocks.SIFTSLATE.defaultBlockState() : palette.basin());
+               BlockState state = y == targetTop ? palette.shore() : (y <= targetTop - 2 ? foundation(palette) : palette.basin());
                level.setBlock(cursor, state, 2);
                placed++;
             }
@@ -1032,7 +1052,7 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
       int lipX = site.upperCenter().getX() + (int)Math.round(site.forwardX() * 7.0);
       int lipZ = site.upperCenter().getZ() + (int)Math.round(site.forwardZ() * 7.0);
       MutableBlockPos cursor = new MutableBlockPos();
-      BlockState fallingIchor = (BlockState)ModFluids.ICHOR_BLOCK.defaultBlockState().setValue(LiquidBlock.LEVEL, 8);
+      BlockState fallingIchor = ModFluids.ICHOR_BLOCK.defaultBlockState().setValue(LiquidBlock.LEVEL, 8);
 
       for (int step = 1; step <= 7; step++) {
          int centerX = site.upperCenter().getX() + (int)Math.round(site.forwardX() * step);
@@ -1141,11 +1161,15 @@ public final class IchorLakeFeature extends Feature<NoneFeatureConfiguration> {
       value ^= value >>> 27;
       value *= -7723592293110705685L;
       value ^= value >>> 31;
-      return (value >>> 11) * 0x1.0p-53;
+      return (value >>> 11) * 1.110223E-16F;
    }
 
    private static boolean isIchorSnow(BlockState state) {
       return state.is(ModBlocks.ICHOR_SNOW) || state.is(ModBlocks.ICHOR_SNOW_BLOCK);
+   }
+
+   private static BlockState foundation(IchorLakeFeature.LakePalette palette) {
+      return palette.basin().is(ModBlocks.SOULSHALE) ? palette.basin() : ModBlocks.SIFTSLATE.defaultBlockState();
    }
 
    private record CascadeSite(BlockPos upperCenter, BlockPos lowerCenter, double forwardX, double forwardZ) {

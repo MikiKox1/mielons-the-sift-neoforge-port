@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:add",
+  "argument1": {
+    "type": "minecraft:add",
+    "argument1": "the_sift:mountain_region",
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": 0.32,
+      "argument2": "the_sift:mountain_surface"
+    }
+  },
+  "argument2": {
+    "type": "minecraft:add",
+    "argument1": -0.06,
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": 0.045,
+      "argument2": {
+        "type": "minecraft:noise",
+        "noise": "the_sift:cliff_roughness",
+        "xz_scale": 1.3,
+        "y_scale": 1.6
+      }
+    }
+  }
+}

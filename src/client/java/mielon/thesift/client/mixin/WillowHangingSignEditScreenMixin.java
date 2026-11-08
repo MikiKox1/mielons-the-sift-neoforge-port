@@ -20,9 +20,13 @@ public abstract class WillowHangingSignEditScreenMixin {
    private Identifier texture;
 
    @Inject(method = "<init>", at = @At("RETURN"))
-   private void theSift$willowBoard(SignBlockEntity sign, boolean isFrontText, boolean filtered, CallbackInfo ci) {
+   private void theSift$willowBoard(SignBlockEntity sign, boolean front, boolean filtered, CallbackInfo ci) {
       if (sign.getBlockState().is(ModBlocks.OVERGROWN_WILLOW_HANGING_SIGN) || sign.getBlockState().is(ModBlocks.OVERGROWN_WILLOW_WALL_HANGING_SIGN)) {
          this.texture = Identifier.fromNamespaceAndPath("the_sift", "textures/gui/hanging_signs/overgrown_willow.png");
+      }
+
+      if (sign.getBlockState().is(ModBlocks.ASH_WILLOW_HANGING_SIGN) || sign.getBlockState().is(ModBlocks.ASH_WILLOW_WALL_HANGING_SIGN)) {
+         this.texture = Identifier.fromNamespaceAndPath("the_sift", "textures/gui/hanging_signs/ash_willow.png");
       }
    }
 }

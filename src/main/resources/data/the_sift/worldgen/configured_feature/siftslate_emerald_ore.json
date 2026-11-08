@@ -12,6 +12,15 @@
         "state": {
           "Name": "the_sift:siftslate_emerald_ore"
         }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "the_sift:soulshale_ore_replaceables"
+        },
+        "state": {
+          "Name": "the_sift:soulshale_emerald_ore"
+        }
       }
     ]
   }
