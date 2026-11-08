@@ -2,7 +2,7 @@
 
 Released versions are listed **newest first**.
 
-## Port 2.0.1 ALPHA4 — Minecraft 26.3
+## Port 2.0.1 — Minecraft 26.3
 
 A major content update for the unofficial NeoForge port of The Sift, bringing Mielon's 2.0.1 world, progression and creatures to Minecraft 26.3.
 
@@ -39,7 +39,7 @@ A major content update for the unofficial NeoForge port of The Sift, bringing Mi
 
 **Requirements:** Minecraft **26.3**; **Java 25**; **NeoForge 26.3.0.64-beta or newer** (same Minecraft line; no upper bound); **GeckoLib 5.5.7 or compatible 5.x**. Optional Easy Magic, Puzzles Lib and shader dependencies must match Minecraft 26.3.
 
-[Port 2.0.1 ALPHA4 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.3-neoforge-alpha.4)
+[Port 2.0.1 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.3-neoforge)
 
 ## Port 1.1.2.1 — Minecraft 26.3
 

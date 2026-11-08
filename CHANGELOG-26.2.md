@@ -2,7 +2,7 @@
 
 Released versions are listed **newest first**.
 
-## Port 2.0.1 ALPHA8 — Minecraft 26.2
+## Port 2.0.1 — Minecraft 26.2
 
 The Sift 2.0.1 substantially expands the dimension, creatures, equipment and progression in this unofficial Minecraft 26.2 NeoForge port.
 
@@ -40,7 +40,7 @@ The Sift 2.0.1 substantially expands the dimension, creatures, equipment and pro
 
 **Requirements:** Minecraft **26.2**; **Java 25**; **NeoForge 26.2.0.90 or newer** (same Minecraft line; no upper bound); **GeckoLib 5.5.6 or compatible 5.x**. Optional Easy Magic, Puzzles Lib and shader dependencies must match Minecraft 26.2.
 
-[Port 2.0.1 ALPHA8 — Minecraft 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.2-neoforge-alpha.8)
+[Port 2.0.1 — Minecraft 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.2-neoforge)
 
 ## Port 1.1.2.1 — Minecraft 26.2
 

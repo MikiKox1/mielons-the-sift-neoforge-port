@@ -1,0 +1,31 @@
+{
+  "minecraft": "26.2",
+  "purpose": "Photon and Complementary optional client rendering only",
+  "base_jar": "TheSift-2.0.1-MC26.2-NeoForge-ALPHA6-MAINPORTAL/mielon's-the-sift-2.0.1-mc26.2-neoforge-port-alpha6.jar",
+  "base_jar_sha256": "6afee99f13c92560aa7a32d7547f3be709c96dcc3f6ca21225e3c09e1230548e",
+  "added_resources": {
+    "assets/the_sift/shaders/core/photon_tide_sky.vsh": "3baf7ebc010b3c687714f285f0b3d29f23e3188ef7ebfe7a88fb79ffada1f885",
+    "assets/the_sift/shaders/core/photon_tide_sky.fsh": "19e36cfa3c6f79634e5cc092fe78c98ed12b8d4622e1484042032057d32bc6f8"
+  },
+  "modified_existing_resources": [],
+  "allowed_client_classes": [
+    "mielon/thesift/client/compat/SiftShaderCompat.class",
+    "mielon/thesift/client/render/SiftProceduralSkyRenderer.class",
+    "mielon/thesift/client/render/SiftShaderSkyRenderer.class",
+    "mielon/thesift/client/mixin/SiftSkyRendererMixin.class",
+    "mielon/thesift/client/mixin/SiftShaderSkyMixin.class",
+    "mielon/thesift/client/mixin/IrisPhotonFinalSkyMixin.class",
+    "mielon/thesift/client/mixin/SodiumIchorQuadAccessor.class",
+    "mielon/thesift/client/mixin/SodiumIchorFluidUvMixin.class",
+    "mielon/thesift/client/TheSiftClient.class",
+    "mielon/thesift/client/render/SonorousBeamRenderTypes.class",
+    "mielon/thesift/client/render/SonorousBeamRenderer.class",
+    "mielon/thesift/client/render/SiftPortalRenderTypes.class",
+    "mielon/thesift/client/render/SiftPortalRenderer.class",
+    "mielon/thesift/client/render/PixelPortalSurface.class",
+    "mielon/thesift/client/mixin/SiftCloudRendererMixin.class"
+  ],
+  "singer_policy": "unchanged; no old Singer glow correction",
+  "shaderpacks_bundled": false,
+  "manual_qa": "ALPHA7 manually FAILED portal holes under both shaderpacks, Complementary rim flicker, absent clouds and Photon FLOW/ENDURE/THRIVE sky; ALPHA8 awaits owner visual retest; no game or server executed."
+}

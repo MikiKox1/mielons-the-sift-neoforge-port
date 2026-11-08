@@ -8,11 +8,11 @@ Explore **The Sift**, a mysterious dimension of Ichor, ancient life, resonant so
 
 | Minecraft | Current build | Minimum NeoForge | Required GeckoLib | Optional Easy Magic | Download |
 | --- | --- | --- | --- | --- | --- |
-| **26.1.2** | **2.0.1 ALPHA4** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 2.0.1 ALPHA4 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.1.2-neoforge-alpha.4) |
-| **26.2** | **2.0.1 ALPHA8** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 2.0.1 ALPHA8 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.2-neoforge-alpha.8) |
-| **26.3** | **2.0.1 ALPHA4** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.1 ALPHA4 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.3-neoforge-alpha.4) |
+| **26.1.2** | **2.0.1** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 2.0.1 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.1.2-neoforge) |
+| **26.2** | **2.0.1** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 2.0.1 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.2-neoforge) |
+| **26.3** | **2.0.1** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.1 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.1-mc26.3-neoforge) |
 
-**Java 25** and a version-matched **NeoForge + GeckoLib** installation are required. NeoForge minimums have no artificial upper version limit within their respective Minecraft lines. **These are pre-release builds:** use the JAR for your exact Minecraft version, and keep a backup of existing worlds before upgrading from 1.x. Never install two versions of The Sift together or combine this port with the original Fabric build.
+**Java 25** and a version-matched **NeoForge + GeckoLib** installation are required. NeoForge minimums have no artificial upper version limit within their respective Minecraft lines. **Official 2.0.1 releases:** use the JAR for your exact Minecraft version, and keep a backup of existing worlds before upgrading from 1.x. Never install two versions of The Sift together or combine this port with the original Fabric build.
 
 All three Minecraft versions have independent [source branches for 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.1.2), [26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.2) and [26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.3), plus dedicated [changelogs for 26.1.2](CHANGELOG-26.1.2.md), [26.2](CHANGELOG-26.2.md) and [26.3](CHANGELOG-26.3.md).
 

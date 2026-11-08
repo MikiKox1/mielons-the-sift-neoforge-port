@@ -1,0 +1,567 @@
+{
+  "expected_data_version": 4903,
+  "fixed_template_count": 79,
+  "minecraft": "26.2",
+  "original_bad_palettes": 77,
+  "purpose": "Community-only repair of Sculkers' Lair templates for Minecraft 26.2",
+  "resource_evidence": {
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_1.nbt": {
+      "block_count": 1872,
+      "palette_count": 15,
+      "sha256": "d2a19dbc030e5813b7f7bfe908221a2266f6e34607b1c7e2b00f2124dad74f4a",
+      "source_sha256": "239c35cc98cef8c68772f6f338ca2238dd21ba5eaaaa68bfba353c146ff831c1"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_1_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 15,
+      "sha256": "c41f2cece512a97649d08f3173bad4f626c78abc071751780fd8feec42ceb20c",
+      "source_sha256": "b63fc71a39a76b631a7c2ea1730c5b3cb3879a97eec3ddb75ea0d69b21508e60"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_2.nbt": {
+      "block_count": 1872,
+      "palette_count": 23,
+      "sha256": "7f642c8051ccc1d78ba330437ca8906084c0106c098940dcab5fb3052c0debb4",
+      "source_sha256": "f894f8ce106c8cba2f9edce1850e406d573ce9afcca25e8d677d07569b72acac"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_2_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 23,
+      "sha256": "be1b8623351dcd054633bc461fb807b83b9d6d4e8b7368280593a2f625d2c3af",
+      "source_sha256": "8054cdc5a1ca8b2f67f5f83d51768b3057c9d8c377e6b4d35edf26bc4039fee9"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_3.nbt": {
+      "block_count": 1872,
+      "palette_count": 30,
+      "sha256": "04f1ff2ea8245a8171b8c8d185ed73127eb3030f8e8159330387ef0998badd6b",
+      "source_sha256": "338e4368aed4a2b0e9dcdd64e3d83600155607fc0248353ea3bb75a4f646e700"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_3_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 30,
+      "sha256": "cf4cfc734f88e485ad5ef84ef5d5249938677bc7ae665c17f138bb85da2d46cf",
+      "source_sha256": "8e55de43da5ceac6c6c86e969a8900235ed872b7326f69c12d46c3d7bbe5c882"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_4.nbt": {
+      "block_count": 1872,
+      "palette_count": 25,
+      "sha256": "2e9ecadca06674ef71777a2d6e4ab70fbb69099ad387bdb9d00f5ba143d1ba2c",
+      "source_sha256": "0aee316552dfa366a4b90e44e86741ec4e68e7bef619e98126f00d4f4a1dbbc9"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_4_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 25,
+      "sha256": "ccd3748fe7acdea0081185818f0c3c8225fdb62f74af6802160d09490ec72716",
+      "source_sha256": "ad32b397cc662605a7eff8c2ae0bc64567d57c0b05fc236c3cb1cf710be033fa"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_1.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "a3dc1b784bbe0711a82dac420b646ae82fc46fa77092d2fd620eee8ad96d8d6d",
+      "source_sha256": "428fa16ebcdd41fa3c4bb7037659ec9ab516e2f6ec287e3d9639fbf663473946"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_1_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "67027e725d969efdb76cf883a080c5d586c70d830c45f2bc2da351904edfc99e",
+      "source_sha256": "a277f84290833f25ba2a7b8e04df7305d1eb5a0551e8161dc34d35149f87e38b"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_2.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "f8ae7f0932f6aa4484e40c36f24f67524d57a255efc8e43f82416d6068523b16",
+      "source_sha256": "7c23bca72fe6f3a5ec30da340589a71eb939acec9a2afbffe16cdb8dbd5755dc"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_2_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "4e836b6fe7d45ac9409bb9711963d4a97397fc9dff75f11ee44b329a154f0bce",
+      "source_sha256": "48348125649b05168a860cd86ed172aab6a50a7f0897399f6c3a2896641be645"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_3.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "79527d62cd021b021d3cfa02b1b5a64a6987e87f27a16689594a0e192645df3d",
+      "source_sha256": "297667c928c17be45724a9acf94a5d37253821cf47eb7f5ddba17804b113b699"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_3_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "43d171401a43a3aede0a5cbf41f4b91562f3e5512b5264319683e9573f254089",
+      "source_sha256": "e29fd06b41ce821c4cbfb5b9bc1db19e049bab105a23670267daf5156bd0a370"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_4.nbt": {
+      "block_count": 2431,
+      "palette_count": 38,
+      "sha256": "bcc9eb34d4e308c6e682ca210e02baefeab847f3bcde155780e85334fa77eac4",
+      "source_sha256": "508ca581f0153410a219a2eeb6efbd84bef950f74aa3feb03aa099d79613a6a4"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_4_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 38,
+      "sha256": "19bba485e7b30a55f8b1e7bb7322c38f109ece02d5161832c8775bc80b2b0ba3",
+      "source_sha256": "fa783ad69d8ff423ba9ba2fadb9e25548c9662345022101b0c7e1371516dea6e"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_5.nbt": {
+      "block_count": 2431,
+      "palette_count": 35,
+      "sha256": "52509d419a4938ec86d01b65586b8627171475b31888950e7f7d94b7fe5200c7",
+      "source_sha256": "f2c40404b65335dfceb2ae4ba0abc31c479b5c73b5600a81e99f53eb40a7c9df"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_5_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 35,
+      "sha256": "26ddeeb33186ab4d87c0dd8b9144a655b8d60b8f4173ed13169974894c3f5321",
+      "source_sha256": "c8ca233ad730b67b24eac89418b7ef205acf33d1df15ea8ac45bca8aac70380a"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_6.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "1f7c2692767245e0044a6d663d8963066a4dd9e3ce9bf99bb0b1e8ff8bef6564",
+      "source_sha256": "fe31a0c17ee0bc7483afd81dbf8a14bf37499b1e107cd2db073a9c741f5c2bc8"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_6_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "4fe871063c495ecbdef99e637ffb4a82a7ecda8632f845058bfee9193bdcd1ac",
+      "source_sha256": "8052fadbf9b481fd57ccdc30488dd700abb14e178a113263e7b10ef200711497"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_ending_1.nbt": {
+      "block_count": 624,
+      "palette_count": 7,
+      "sha256": "56a32150cfe79150c581c62dc8d6d52b2e185dba80356db4f28d29f36ec2430a",
+      "source_sha256": "6df3826cb3e00ff02708f31df30a234afe6e38b5ae476b3fe1f17b243f12e897"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1.nbt": {
+      "block_count": 3978,
+      "palette_count": 26,
+      "sha256": "82e4f46c33d8e9525fd4c348220db1d8d148633f1d0ce88cfadbad56ec2b69c7",
+      "source_sha256": "c6184e0c017a5bf98614f46d11209a5c2fdb94799a1c3fededb077a17498049f"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 26,
+      "sha256": "b9b1ab37b3ada0e93c71b0ae2385adf3ccbae1cec4cc3a58eea16becafae1bcc",
+      "source_sha256": "bb4d960568a69d9ce7860c00edeb3c1d0a926d933277c3ebaae4be0c3c53b0c5"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 26,
+      "sha256": "c32e42fdd6876c35ba2dd7296c0e48e019324e62d4b25cd2b29763b26824a373",
+      "source_sha256": "046793a5d9966ebc7842f2b2d6acbdf2058f973a1ce77f7501ef011b2f38f068"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 26,
+      "sha256": "83763d16a23894245963e57ecde6759b6e8032bc8bc389f71115ce417862c79a",
+      "source_sha256": "46d9f93f15e661a8a6ed175ef9ad26e4477bc4b986a656ca08176be79220819e"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2.nbt": {
+      "block_count": 3978,
+      "palette_count": 72,
+      "sha256": "3e4d68bea426682bcaf1fde891d0b9aeb5a84b60085b3f68506c8407578e2448",
+      "source_sha256": "9967c139e3059e78125ac65b3e35fec9bf47e7795eab5314a57c83b17a30a94c"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 72,
+      "sha256": "829ea712ff0d38a18aea91c592975e770043567baa3799ef745d55b1dd7d2644",
+      "source_sha256": "dfaac05a085c070c15b4ce5d8d7645252e180cbfe0c9de641c84b001510c33d5"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 72,
+      "sha256": "8ff8d96b2ebaaa26aa7162bfd3a2335a77041682abaacb38296313fa16a62461",
+      "source_sha256": "10ac99c2330b1281a387f8d4becbcc12da34171dc890bbeeafae7684db24ac58"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 72,
+      "sha256": "f7445ac2668bd4a3f19ee598d3d3d15bc2ffdeecc584533894abc7a9e05d93a0",
+      "source_sha256": "e1766f48600a51ba95cff16be469e81d78d8412747d79453760b37b1311f76f2"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3.nbt": {
+      "block_count": 3978,
+      "palette_count": 20,
+      "sha256": "e00c78d994e50be379233ee63e2fd62823e252fecf26ccd0d16e45671532d108",
+      "source_sha256": "bcc24705e2d77889d350ceef49a7504c11481999a319ba0f7f017a9d6150b05b"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 20,
+      "sha256": "21b83a938a9aee9638426018eec930eee46e52d8b172d7787d30e7401207c927",
+      "source_sha256": "58ac1c57895310cf97aaddcedb34c45d0d93d3acb9b26857abd2cc54598023cd"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 20,
+      "sha256": "65a15b098276bee5133afd7c1020b9d9fad7142f5822e1af5a011bbd69480d71",
+      "source_sha256": "d78e5982e28a27facf3c93f1197d41f458913fe4f6f6ada5b078d68d9a1d9874"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 20,
+      "sha256": "9078fb32e7d653ff5b87eccbacdc1aa0e6a05ec030053b43ebf9cdde62d7d71b",
+      "source_sha256": "ae439c5146f44b460313d6357a7c32ad505bb7ca190a6689e1c0ae83f25c9ab0"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4.nbt": {
+      "block_count": 3978,
+      "palette_count": 32,
+      "sha256": "f14ea8829051945b1112f3016308041d6a1ae35fcc68d781409a52e7cd251c1c",
+      "source_sha256": "548b7208ae2905223527377a5362dd58e305fe90e0835feeddf57846b47710ea"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 32,
+      "sha256": "b0ed6c983c2007d5c87f966f4fef80aa8fd3ad1da001997dab3812e9c9447143",
+      "source_sha256": "71c92b5fb016b3966e5dc4813785720b366b501497bcb83dd09011cdbe6ff3ab"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 32,
+      "sha256": "d1daaef84adb03d8c76b266520af61305314fa89ecccc0149f53e69176e72d44",
+      "source_sha256": "c26ecf749196c71ff16383660438346251934f13adf6f6f500df91a7da724ebd"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 32,
+      "sha256": "734ec35ac6b12732ef980eb42f3c163440eca464c137b96fc72ca58fa2736b78",
+      "source_sha256": "5b6c9b3cdc3c35772b7d2cb6ccf54d4fabe94363e96faccdd721665692d1c794"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5.nbt": {
+      "block_count": 3978,
+      "palette_count": 25,
+      "sha256": "a5ff0c28cb1c8782cec1c2f05588cc1a98e53ab77f9bdbe57fb0a5cae521a334",
+      "source_sha256": "84399dab90120a8da02e911b9c0c85c2e7fcf561609a1f885cc524c5ca7865e4"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 25,
+      "sha256": "2038a63b481a6528fe3a581e2c051eb80c4d7aac224c3cc7c9a3a50591f87867",
+      "source_sha256": "2bd075d420ef402533c48c40882a38b26c9b5f7cd0806d5654777556bc93e8f8"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 25,
+      "sha256": "038c6c37c27a88903c447eb71a393ea1c16ff2d9b2757b54ccb63c7a0514e7a3",
+      "source_sha256": "435e8271e66638ef8467ae1603ae02392904a2959d635e1f37a5ab2435346e0a"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 25,
+      "sha256": "f634a082f29a3127ea8ebe1a21bc916b3b111855c96582a4c0abfb0b8706ca92",
+      "source_sha256": "598ebe06d5999edda73e7442dad1fb0ee6619a8abcdb690c7b1314571330d8f9"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6.nbt": {
+      "block_count": 3978,
+      "palette_count": 43,
+      "sha256": "6c700bd30d51c95267bd000ee7ad89339dbfe3b453f5187a0c69c691c9eb6781",
+      "source_sha256": "2db9fa9ad47d6f158844a0f59a05a922feee88267b09ac09a2c0e5e1b091215a"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 43,
+      "sha256": "2d9297b686cbbb5a3637f49d6efb117bb7505d25630de79130383d920134dec9",
+      "source_sha256": "897cfba0095a3b2bf35f4a6ed716d2a4c617f54a5b523b2129d487c6ef872564"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_treasure.nbt": {
+      "block_count": 3978,
+      "palette_count": 43,
+      "sha256": "d9ecb478b4c89105bc89cd01d298bf8ab0f05e9710e7d2296f98c684576e8690",
+      "source_sha256": "3e22bf218d0d4725c560e3e7f6e9d433b1921412fe3b790a04bf4aed4954fcf8"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_treasure_crowded.nbt": {
+      "block_count": 3978,
+      "palette_count": 43,
+      "sha256": "66bab2636db2e8f271a0c57af7897b49f701ddef5b001d35a571adc634c4a378",
+      "source_sha256": "15f0ccfaaffb120581ee4889335830a9ab01c225b503fccc0de214561711b936"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/monarch_room_1.nbt": {
+      "block_count": 24864,
+      "palette_count": 25,
+      "sha256": "fefecf3fa8b7defa61fbd4e702f889ff022990f1d6a2f857dfe9d5198258b682",
+      "source_sha256": "aadca96145112bcf3c3e10c430545cd5e3511dc51f5ed0f82f159912194f10b1"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/monarch_room_1_crowded.nbt": {
+      "block_count": 24864,
+      "palette_count": 25,
+      "sha256": "0111dc8c1884af2b07757b97c1fbcfdf6ead0f604cf0fa9ee7da6cb60a8db9b4",
+      "source_sha256": "d280d9a8a584adbeaadb3b7089cffa3d47c4d3a2af03a74596f05ff7b001b699"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_1.nbt": {
+      "block_count": 1872,
+      "palette_count": 15,
+      "sha256": "24014769e3ed0b2ea6f9076ed43e28a3171dcc2193384ec3d93392cde740bba2",
+      "source_sha256": "e9d01426d949bc0bd25d0086cd356c8221774907bd1f1d4f60cf498640c05ead"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_1_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 15,
+      "sha256": "90a0983c8ffba18add27e726eba39839119c7011badd379c6a2a6d6103299226",
+      "source_sha256": "642944ab563675e324835448624b8f2175d9d2874a809d239165079fb77a45e3"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_2.nbt": {
+      "block_count": 1872,
+      "palette_count": 23,
+      "sha256": "5fa4d8d97c0de1577f8c3d9c90c1a50e05d970e5b98455bc1dababcdefd52b35",
+      "source_sha256": "40b2b99c57671848291ce4d2927565d524d537344b6145c12a50dbc042b2ca58"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_2_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 23,
+      "sha256": "41faac3b6810f292709d37cfb601d9506ecefd1dca10f6afe710857df3be50db",
+      "source_sha256": "05101d969ba766ac57ff4f6c791c2b12a28d92ca62c107e3852b9ede2e18b161"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_3.nbt": {
+      "block_count": 1872,
+      "palette_count": 30,
+      "sha256": "b59e59284a84767b974cbce211a67057f5295c5291e62e9da207bbb223c4172b",
+      "source_sha256": "4e27ce9018e099cac30428f2c9a7e0317b79d12200d20c7378cf5ca6be1109b0"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_3_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 30,
+      "sha256": "3c53dcb8a2411cb6daa9067b555f41254ce7b59d44216b4562f64fe40e59f2ed",
+      "source_sha256": "d3bade791301f242aca98244bf08cd03d4703907ac0eb44834eea15efed73c92"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_4.nbt": {
+      "block_count": 1872,
+      "palette_count": 25,
+      "sha256": "c21f1d21adcc643e4e09e03f93147c0d20aa00fd4f77a449ca480ffea6813fbe",
+      "source_sha256": "e8f82a7706c4df7ce54f930f704834487d2bc3cc88e448076e8b268f30cb91a3"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_4_crowded.nbt": {
+      "block_count": 1872,
+      "palette_count": 25,
+      "sha256": "59069f2762875c13a635c264aa88900d81792f15cb49fa8fb86a47bca7945d84",
+      "source_sha256": "41485f9de7279e07380b0954bdb8cd98418e0555509c40d6e159b9c599ee9c1a"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_1.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "11302af6f7d8b3f0e1fac31294cb6a78142bba7631132993b166593f654f371d",
+      "source_sha256": "c9552ac9f6f377c9e8150570b5a2d4760c9e25879b09e38b08ab210dc6c82282"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_1_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "d8fbeb14c8947b8cfe10b579842e69899e16d0760651e001648d5e9a3cbfa3f4",
+      "source_sha256": "cd27f59ece9ca83cf897bc27cbc603534a21a93734ecbed9f7ce39cbf636a4c8"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_2.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "7b91d4b60e6bc566dabeeb00a3227eacc6f6d6357902a54158a7b02f7370d71c",
+      "source_sha256": "ec2609749d319fabdbcbf417e82fb6104ef2e2bdb889e41deac513a498b75c48"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_2_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "3e988c583e730fddb0caa154469a225ee3e932e805c9dd98667474f879303907",
+      "source_sha256": "b700d209e3c6a25eb37f3f4dcfb443fe7c0aa9d54a7a41c8a7048111b74e5bda"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_3.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "a0ed8b3889c25c4341fe17e0642dd512317c9901689a454ef58960633c516215",
+      "source_sha256": "99caa03af36531bdf39d952cec10ced8134b47be5faf8253e218ca1e6aa9481c"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_3_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "06eed6ec298de6ed324507863117651bcb6d0194dd67eb899a52448150942379",
+      "source_sha256": "64181bc697d47fa9949b7e2d7ac7bd8337c34515b7f8145ca6ac9ec145138a9f"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_4.nbt": {
+      "block_count": 2431,
+      "palette_count": 37,
+      "sha256": "f9c4def3256387153e1e311a2a54a8b0a7124aee352966f8b20628e37110c224",
+      "source_sha256": "9c346e35d5cc211821c18d0ed934df5fc44c126c3b377f9d0443a997a72cb80f"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_4_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 37,
+      "sha256": "9c8f7e8bd73fe7e918caa3626eec22fc85a8c7a4e95462e5f2764759ee38f986",
+      "source_sha256": "98d1339f3a71c08290f56c91edc8d6158ea8401ed5f2614e18d22d65bc6aa0a9"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_5.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "64f30f7d87153619928ddc53588dd90af52fdb16cc0899bf8c73d860484008c3",
+      "source_sha256": "6c71bb8e1acaccc962f6443f8a650993d79893fab5c6a9f74175410effb16d76"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_5_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "decbab8a971beb14bd331f68de532af5f08babb76b72348c77094b451dba6af3",
+      "source_sha256": "1249ae30581803e664873bfecf1e828ad438f36fab9f872fb0c026ca74470343"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_6.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "9d3daca6f1551bc2c3b5f7db78feb2681b24bb8a93a7a0323226990ed60c0810",
+      "source_sha256": "0d731e56c34947af445ac581264c8c653986f979353fb28c459957c26fb24197"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_6_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "cbb9505167b250b684c9ded12f495301305a3e8fb57d88e9d2f1d5c6505f6448",
+      "source_sha256": "6f62f4b0005841bd864665aa37e70a0844ba33f228b8516ff76307f3d4c9a6f3"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_1.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "3bca32a8fbe83e1ba46fa1f5db7ffcf67b0608bf124c6e7845c392c279c0ae54",
+      "source_sha256": "5fbfb64b77b9753c74a2907665e4bfb55429e27ad6e3336a512d83cf89e38dab"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_1_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 32,
+      "sha256": "cf9f7aa67b9e6dc715243305c0431ced90a6c0998adb3ca022365522f72adad2",
+      "source_sha256": "188a81e8b559b7fb9e6dbb658046909a9cc6aef30e66784816a7710110479b4c"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_2.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "96bd9981cd66a83e7e91849375b170bfdc2cde4205796699ef03cce6f75204a8",
+      "source_sha256": "813a8df29ac40e4dca304fd4eb0f91ea9380b5c969d3e53cd45a30645c69b5fb"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_2_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 22,
+      "sha256": "d76111aa92c005a5a2d644185ffadbf626f9525059116c343a9b4871f8bac9f5",
+      "source_sha256": "aed23cef96f36b4b790eb878d04b7e31dbb9ac432330f167b746aaf2c81cfac5"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_3.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "eb91428ee4ede5c77b6ffdb51ef51397b73b3cb88dbbaa57f01b9b6d349437db",
+      "source_sha256": "9388d3f6d6c233c729a60b49c272c0a402c0c944381e0f6d89097c3f4dd0d038"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_3_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 30,
+      "sha256": "94dbb68ed6baed07dd5041984ce0f9d9efea0a135253f13cca38205624e06449",
+      "source_sha256": "e14704446e637e493449fa7e63a400383355e94ba15a0d67c7cbfd2a0a17276d"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_4.nbt": {
+      "block_count": 2431,
+      "palette_count": 37,
+      "sha256": "85233aa1dbee7d31b4fe3dd84b788966329b1c1bb601acb744e2778ba305a1b7",
+      "source_sha256": "37a64a79d8655344e151441edef22258a07492417dab460be865e902c5afa238"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_4_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 37,
+      "sha256": "faad72193a1c31b02ccc3e7db39488bc456da07e86c864948afb6bca2a7a09a1",
+      "source_sha256": "1469e6c68e2a5cf2de513dd476d493576fc09d6665e3a7407b22c35ea6168e57"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_5.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "3b387cb700a54d497e72e4610aa21ac29f5c178e96c6e3febbef3f94e5a4480a",
+      "source_sha256": "c6fb0cce9a3a1834d73f99b682cfa7f577c78ed171a3c828c7138dbbb7bb664c"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_5_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "4fc6671cf4c3b25c91e2dbcf7605db020df11f58f138c06171b834458d6796f4",
+      "source_sha256": "7c33f2c1edc2d7f3addb5b718eb3f1c0e60a58886c9e942a102861024c3cdd4d"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_6.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "7277455dc4434c0bd21dc7604fe65c3af2a7b2e90c0d682228dc1985895d4d04",
+      "source_sha256": "fe0cc1321c997f3e8af8b79adbcb2bff33ea8a01a9549e296e0b3a6ce1e55b68"
+    },
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_6_crowded.nbt": {
+      "block_count": 2431,
+      "palette_count": 34,
+      "sha256": "240147ff8bc072338b797a0dcfc48606339b6256528cc6f2d642353157afff90",
+      "source_sha256": "bf0650cb4c5a6a32635e4fa404dac51507d5ce45cc26bfdecaf1b2ab70afb0c0"
+    }
+  },
+  "resource_sha256": {
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_1.nbt": "d2a19dbc030e5813b7f7bfe908221a2266f6e34607b1c7e2b00f2124dad74f4a",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_1_crowded.nbt": "c41f2cece512a97649d08f3173bad4f626c78abc071751780fd8feec42ceb20c",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_2.nbt": "7f642c8051ccc1d78ba330437ca8906084c0106c098940dcab5fb3052c0debb4",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_2_crowded.nbt": "be1b8623351dcd054633bc461fb807b83b9d6d4e8b7368280593a2f625d2c3af",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_3.nbt": "04f1ff2ea8245a8171b8c8d185ed73127eb3030f8e8159330387ef0998badd6b",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_3_crowded.nbt": "cf4cfc734f88e485ad5ef84ef5d5249938677bc7ae665c17f138bb85da2d46cf",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_4.nbt": "2e9ecadca06674ef71777a2d6e4ab70fbb69099ad387bdb9d00f5ba143d1ba2c",
+    "data/the_sift/structure/sculkers_lair/parts/first_connector_4_crowded.nbt": "ccd3748fe7acdea0081185818f0c3c8225fdb62f74af6802160d09490ec72716",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_1.nbt": "a3dc1b784bbe0711a82dac420b646ae82fc46fa77092d2fd620eee8ad96d8d6d",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_1_crowded.nbt": "67027e725d969efdb76cf883a080c5d586c70d830c45f2bc2da351904edfc99e",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_2.nbt": "f8ae7f0932f6aa4484e40c36f24f67524d57a255efc8e43f82416d6068523b16",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_2_crowded.nbt": "4e836b6fe7d45ac9409bb9711963d4a97397fc9dff75f11ee44b329a154f0bce",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_3.nbt": "79527d62cd021b021d3cfa02b1b5a64a6987e87f27a16689594a0e192645df3d",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_3_crowded.nbt": "43d171401a43a3aede0a5cbf41f4b91562f3e5512b5264319683e9573f254089",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_4.nbt": "bcc9eb34d4e308c6e682ca210e02baefeab847f3bcde155780e85334fa77eac4",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_4_crowded.nbt": "19bba485e7b30a55f8b1e7bb7322c38f109ece02d5161832c8775bc80b2b0ba3",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_5.nbt": "52509d419a4938ec86d01b65586b8627171475b31888950e7f7d94b7fe5200c7",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_5_crowded.nbt": "26ddeeb33186ab4d87c0dd8b9144a655b8d60b8f4173ed13169974894c3f5321",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_6.nbt": "1f7c2692767245e0044a6d663d8963066a4dd9e3ce9bf99bb0b1e8ff8bef6564",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_6_crowded.nbt": "4fe871063c495ecbdef99e637ffb4a82a7ecda8632f845058bfee9193bdcd1ac",
+    "data/the_sift/structure/sculkers_lair/parts/first_corridor_ending_1.nbt": "56a32150cfe79150c581c62dc8d6d52b2e185dba80356db4f28d29f36ec2430a",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1.nbt": "82e4f46c33d8e9525fd4c348220db1d8d148633f1d0ce88cfadbad56ec2b69c7",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_crowded.nbt": "b9b1ab37b3ada0e93c71b0ae2385adf3ccbae1cec4cc3a58eea16becafae1bcc",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_treasure.nbt": "c32e42fdd6876c35ba2dd7296c0e48e019324e62d4b25cd2b29763b26824a373",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_1_treasure_crowded.nbt": "83763d16a23894245963e57ecde6759b6e8032bc8bc389f71115ce417862c79a",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2.nbt": "3e4d68bea426682bcaf1fde891d0b9aeb5a84b60085b3f68506c8407578e2448",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_crowded.nbt": "829ea712ff0d38a18aea91c592975e770043567baa3799ef745d55b1dd7d2644",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_treasure.nbt": "8ff8d96b2ebaaa26aa7162bfd3a2335a77041682abaacb38296313fa16a62461",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_2_treasure_crowded.nbt": "f7445ac2668bd4a3f19ee598d3d3d15bc2ffdeecc584533894abc7a9e05d93a0",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3.nbt": "e00c78d994e50be379233ee63e2fd62823e252fecf26ccd0d16e45671532d108",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_crowded.nbt": "21b83a938a9aee9638426018eec930eee46e52d8b172d7787d30e7401207c927",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_treasure.nbt": "65a15b098276bee5133afd7c1020b9d9fad7142f5822e1af5a011bbd69480d71",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_3_treasure_crowded.nbt": "9078fb32e7d653ff5b87eccbacdc1aa0e6a05ec030053b43ebf9cdde62d7d71b",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4.nbt": "f14ea8829051945b1112f3016308041d6a1ae35fcc68d781409a52e7cd251c1c",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_crowded.nbt": "b0ed6c983c2007d5c87f966f4fef80aa8fd3ad1da001997dab3812e9c9447143",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_treasure.nbt": "d1daaef84adb03d8c76b266520af61305314fa89ecccc0149f53e69176e72d44",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_4_treasure_crowded.nbt": "734ec35ac6b12732ef980eb42f3c163440eca464c137b96fc72ca58fa2736b78",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5.nbt": "a5ff0c28cb1c8782cec1c2f05588cc1a98e53ab77f9bdbe57fb0a5cae521a334",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_crowded.nbt": "2038a63b481a6528fe3a581e2c051eb80c4d7aac224c3cc7c9a3a50591f87867",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_treasure.nbt": "038c6c37c27a88903c447eb71a393ea1c16ff2d9b2757b54ccb63c7a0514e7a3",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_5_treasure_crowded.nbt": "f634a082f29a3127ea8ebe1a21bc916b3b111855c96582a4c0abfb0b8706ca92",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6.nbt": "6c700bd30d51c95267bd000ee7ad89339dbfe3b453f5187a0c69c691c9eb6781",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_crowded.nbt": "2d9297b686cbbb5a3637f49d6efb117bb7505d25630de79130383d920134dec9",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_treasure.nbt": "d9ecb478b4c89105bc89cd01d298bf8ab0f05e9710e7d2296f98c684576e8690",
+    "data/the_sift/structure/sculkers_lair/parts/mini_room_6_treasure_crowded.nbt": "66bab2636db2e8f271a0c57af7897b49f701ddef5b001d35a571adc634c4a378",
+    "data/the_sift/structure/sculkers_lair/parts/monarch_room_1.nbt": "fefecf3fa8b7defa61fbd4e702f889ff022990f1d6a2f857dfe9d5198258b682",
+    "data/the_sift/structure/sculkers_lair/parts/monarch_room_1_crowded.nbt": "0111dc8c1884af2b07757b97c1fbcfdf6ead0f604cf0fa9ee7da6cb60a8db9b4",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_1.nbt": "24014769e3ed0b2ea6f9076ed43e28a3171dcc2193384ec3d93392cde740bba2",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_1_crowded.nbt": "90a0983c8ffba18add27e726eba39839119c7011badd379c6a2a6d6103299226",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_2.nbt": "5fa4d8d97c0de1577f8c3d9c90c1a50e05d970e5b98455bc1dababcdefd52b35",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_2_crowded.nbt": "41faac3b6810f292709d37cfb601d9506ecefd1dca10f6afe710857df3be50db",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_3.nbt": "b59e59284a84767b974cbce211a67057f5295c5291e62e9da207bbb223c4172b",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_3_crowded.nbt": "3c53dcb8a2411cb6daa9067b555f41254ce7b59d44216b4562f64fe40e59f2ed",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_4.nbt": "c21f1d21adcc643e4e09e03f93147c0d20aa00fd4f77a449ca480ffea6813fbe",
+    "data/the_sift/structure/sculkers_lair/parts/second_connector_4_crowded.nbt": "59069f2762875c13a635c264aa88900d81792f15cb49fa8fb86a47bca7945d84",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_1.nbt": "11302af6f7d8b3f0e1fac31294cb6a78142bba7631132993b166593f654f371d",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_1_crowded.nbt": "d8fbeb14c8947b8cfe10b579842e69899e16d0760651e001648d5e9a3cbfa3f4",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_2.nbt": "7b91d4b60e6bc566dabeeb00a3227eacc6f6d6357902a54158a7b02f7370d71c",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_2_crowded.nbt": "3e988c583e730fddb0caa154469a225ee3e932e805c9dd98667474f879303907",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_3.nbt": "a0ed8b3889c25c4341fe17e0642dd512317c9901689a454ef58960633c516215",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_3_crowded.nbt": "06eed6ec298de6ed324507863117651bcb6d0194dd67eb899a52448150942379",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_4.nbt": "f9c4def3256387153e1e311a2a54a8b0a7124aee352966f8b20628e37110c224",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_4_crowded.nbt": "9c8f7e8bd73fe7e918caa3626eec22fc85a8c7a4e95462e5f2764759ee38f986",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_5.nbt": "64f30f7d87153619928ddc53588dd90af52fdb16cc0899bf8c73d860484008c3",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_5_crowded.nbt": "decbab8a971beb14bd331f68de532af5f08babb76b72348c77094b451dba6af3",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_6.nbt": "9d3daca6f1551bc2c3b5f7db78feb2681b24bb8a93a7a0323226990ed60c0810",
+    "data/the_sift/structure/sculkers_lair/parts/second_corridor_6_crowded.nbt": "cbb9505167b250b684c9ded12f495301305a3e8fb57d88e9d2f1d5c6505f6448",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_1.nbt": "3bca32a8fbe83e1ba46fa1f5db7ffcf67b0608bf124c6e7845c392c279c0ae54",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_1_crowded.nbt": "cf9f7aa67b9e6dc715243305c0431ced90a6c0998adb3ca022365522f72adad2",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_2.nbt": "96bd9981cd66a83e7e91849375b170bfdc2cde4205796699ef03cce6f75204a8",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_2_crowded.nbt": "d76111aa92c005a5a2d644185ffadbf626f9525059116c343a9b4871f8bac9f5",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_3.nbt": "eb91428ee4ede5c77b6ffdb51ef51397b73b3cb88dbbaa57f01b9b6d349437db",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_3_crowded.nbt": "94dbb68ed6baed07dd5041984ce0f9d9efea0a135253f13cca38205624e06449",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_4.nbt": "85233aa1dbee7d31b4fe3dd84b788966329b1c1bb601acb744e2778ba305a1b7",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_4_crowded.nbt": "faad72193a1c31b02ccc3e7db39488bc456da07e86c864948afb6bca2a7a09a1",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_5.nbt": "3b387cb700a54d497e72e4610aa21ac29f5c178e96c6e3febbef3f94e5a4480a",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_5_crowded.nbt": "4fc6671cf4c3b25c91e2dbcf7605db020df11f58f138c06171b834458d6796f4",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_6.nbt": "7277455dc4434c0bd21dc7604fe65c3af2a7b2e90c0d682228dc1985895d4d04",
+    "data/the_sift/structure/sculkers_lair/parts/third_corridor_6_crowded.nbt": "240147ff8bc072338b797a0dcfc48606339b6256528cc6f2d642353157afff90"
+  },
+  "source": "Official 2.0.1 Fabric MC26.2 unchanged JAR",
+  "source_jar_sha256": "ae43039aef36b773a063b28080f446f7a57adbcd9cf8009b0a8c33746e725a72",
+  "transformation": "Rename palette id->Name and properties->Properties; set DataVersion 5023->4903. No other logical NBT changes."
+}
