@@ -47,34 +47,29 @@ jobs:
           fi
           test -s "CHANGELOG-$mc.md"
 
-      - name: Prepare release description in the previous releases' style
+      - name: Prepare release description from changelog
         shell: bash
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-          minimum="$(sed -n 's/^neo_min_version=//p' gradle.properties)"
-          geckolib="$(sed -n 's/^geckolib_version=//p' gradle.properties)"
-          case "$mc" in
-            26.1.2) easy_magic='26.1.0' ;;
-            26.2) easy_magic='26.2.0' ;;
-            26.3) easy_magic='26.3.0' ;;
-            *) echo "Unsupported Minecraft version: $mc"; exit 1 ;;
-          esac
           notes="$RUNNER_TEMP/the-sift-2.0.1-release.md"
-          awk -v heading="## Port 2.0.1 — Minecraft $mc" '
+          awk -v heading="## Port 2.0.1 — Minecraft $mc" -v finish="## Port 1.1.2.1 — Minecraft $mc" -v backlink="[Port 2.0.1 — Minecraft $mc]" '
             $0 == heading { copying = 1; found = 1; print "# " substr($0, 4); next }
-            copying && $0 == "### Requirements" { stopped = 1; exit }
+            copying && $0 == finish { stopped = 1; exit }
+            copying && index($0, backlink) == 1 { next }
             copying { if ($0 == "### Changes") print "## Changes"; else print }
             END { if (!found || !stopped) exit 1 }
           ' "CHANGELOG-$mc.md" > "$notes"
           test -s "$notes"
           grep -Fq '## Changes' "$notes"
-          printf '\n## Requirements\n\n- **Minecraft:** %s (exact version)\n- **NeoForge:** %s or newer (no upper version limit within the Minecraft series)\n- **Java:** 25\n- **GeckoLib:** %s or compatible 5.x (required)\n- **Optional integrations:** Easy Magic %s (with Puzzles Lib), LambDynamicLights, Iris and compatible Sodium, Photon / Complementary shaderpacks\n\n## Credits\n\n**Original mod:** Mielon (MIT License). **Unofficial NeoForge port:** MikiKox1 (AI-assisted). Original content, contributor names and asset credits are preserved in SOURCE_PROVENANCE.md and AI_DISCLOSURE.md.\n' "$mc" "$minimum" "$geckolib" "$easy_magic" >> "$notes"
+          if grep -Eiq '^## (Requirements|Credits)$' "$notes"; then
+            echo 'Unexpected requirements or credits section in 2.0.1 notes'
+            exit 1
+          fi
           if grep -Eiq 'ALPHA[0-9]+|neoforge-alpha[.]' "$notes"; then
             echo 'Unexpected pre-release label in official release description'
             exit 1
           fi
-
       - name: Set up Java 25
         if: github.ref_type == 'tag'
         uses: actions/setup-java@v4
