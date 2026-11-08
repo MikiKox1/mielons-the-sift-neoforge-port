@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v2.0.1-mc*-neoforge'
+    branches:
+      - minecraft/26.1.2
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,10 +17,18 @@ concurrency:
 
 jobs:
   release:
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && github.ref_type == 'tag') ||
+        (github.event_name == 'push' &&
+         github.ref == 'refs/heads/minecraft/26.1.2' &&
+         github.event.head_commit.message == 'Publish source-only 2.0.1 via Actions MC26.1.2')
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Check out tagged source
+      - name: Check out selected source
         uses: actions/checkout@v4
 
       - name: Set up Java 25
@@ -35,15 +46,48 @@ jobs:
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
-          test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
           test "$version" = "2.0.1-neoforge.1-mc${mc}"
-          test -s RELEASE-NOTES-2.0.1.md
+          tag="v2.0.1-mc${mc}-neoforge"
+          case "$GITHUB_EVENT_NAME" in
+            push)
+              if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+                test "$GITHUB_REF_NAME" = "$tag"
+              else
+                test "$GITHUB_REF_TYPE" = branch
+                test "$GITHUB_REF_NAME" = "minecraft/${mc}"
+                test "$(git log -1 --format=%s)" = 'Publish source-only 2.0.1 via Actions MC26.1.2'
+              fi
+              ;;
+            workflow_dispatch)
+              test "$GITHUB_REF_TYPE" = branch
+              test "$GITHUB_REF_NAME" = "minecraft/${mc}"
+              ;;
+            *)
+              echo "Unsupported release trigger: $GITHUB_EVENT_NAME"
+              exit 1
+              ;;
+          esac
           test -s "CHANGELOG-${mc}.md"
-          if grep -Eiq 'alpha[0-9]|-alpha\.' gradle.properties README.md RELEASE-NOTES-2.0.1.md "CHANGELOG-${mc}.md"; then
+          if grep -Eiq 'alpha[0-9]|-alpha\.' gradle.properties README.md "CHANGELOG-${mc}.md"; then
             echo 'Official release metadata contains a development version label.'
             exit 1
           fi
           echo "Publishing The Sift ${version} for Minecraft ${mc}"
+
+      - name: Generate release notes from changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+          notes="$RUNNER_TEMP/the-sift-release-notes.md"
+          awk -v heading="## Port 2.0.1 — Minecraft ${mc}" '
+            $0 == heading { copying = 1; found = 1 }
+            copying && /^## Port 1[.]1[.]2[.]1 — Minecraft / { stopped = 1; exit }
+            copying { print }
+            END { if (!found || !stopped) exit 1 }
+          ' "CHANGELOG-${mc}.md" > "$notes"
+          test -s "$notes"
+          grep -Fq '**Requirements:**' "$notes"
 
       - name: Build and verify production JAR
         shell: bash
@@ -78,7 +122,7 @@ jobs:
       - name: Archive built binaries
         uses: actions/upload-artifact@v4
         with:
-          name: the-sift-2.0.1-${{ github.ref_name }}
+          name: the-sift-2.0.1-${{ github.run_id }}
           path: dist/*
           if-no-files-found: error
 
@@ -89,16 +133,20 @@ jobs:
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-          tag="$GITHUB_REF_NAME"
+          tag="v2.0.1-mc${mc}-neoforge"
           latest=false
           if [[ "$mc" == "26.3" ]]; then latest=true; fi
           if gh release view "$tag" --json tagName >/dev/null 2>&1; then
             gh release upload "$tag" dist/* --clobber
-            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file RELEASE-NOTES-2.0.1.md --prerelease=false --latest="$latest"
+            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file "$RUNNER_TEMP/the-sift-release-notes.md" --prerelease=false --latest="$latest"
           else
+            if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo "Manual dispatch requires an existing release: $tag"
+              exit 1
+            fi
             gh release create "$tag" dist/* \
               --title "Port 2.0.1 — Minecraft $mc" \
-              --notes-file RELEASE-NOTES-2.0.1.md \
+              --notes-file "$RUNNER_TEMP/the-sift-release-notes.md" \
               --verify-tag \
               --latest="$latest"
           fi

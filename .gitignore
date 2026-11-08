@@ -5,14 +5,17 @@ run-data/
 /logs/
 .idea/
 *.iml
-tools/tests/__pycache__/
-tools/tests/_qa_vendor/
-tools/__pycache__/
+/*.log
 
-# Development and test utilities remain outside the public source tree
+# Internal development files are excluded from the public source tree.
+/tests/
 /tools/
 /evidence/
 /src/test/
+/src/coreTest/
 /src/client/test/
+/src/**/*-NOTES.md
+/*.json
+/RELEASE-NOTES-*.md
 **/__pycache__/
 .pytest_cache/
