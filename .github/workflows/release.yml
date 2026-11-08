@@ -37,9 +37,20 @@ jobs:
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
           test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
           test "$version" = "2.0.1-neoforge.1-mc${mc}"
-          test -s RELEASE-NOTES-2.0.1.md
           test -s "CHANGELOG-${mc}.md"
-          if grep -Eiq 'alpha[0-9]|-alpha\.' gradle.properties README.md RELEASE-NOTES-2.0.1.md "CHANGELOG-${mc}.md"; then
+          notes_file="$RUNNER_TEMP/the-sift-release-notes.md"
+          awk -v start="## Port 2.0.1 — Minecraft ${mc}" \
+              -v end="## Port 1.1.2.1 — Minecraft ${mc}" '
+            $0 == start { in_release = 1; found_start = 1 }
+            $0 == end && in_release { found_end = 1; exit }
+            in_release { print }
+            END { if (!found_start || !found_end) exit 1 }
+          ' "CHANGELOG-${mc}.md" > "$notes_file" || {
+            echo "Could not extract the complete 2.0.1 changelog entry."
+            exit 1
+          }
+          test -s "$notes_file"
+          if grep -Eiq 'alpha[0-9]|-alpha\.' gradle.properties README.md "$notes_file" "CHANGELOG-${mc}.md"; then
             echo 'Official release metadata contains a development version label.'
             exit 1
           fi
@@ -90,15 +101,17 @@ jobs:
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           tag="$GITHUB_REF_NAME"
+          notes_file="$RUNNER_TEMP/the-sift-release-notes.md"
+          test -s "$notes_file"
           latest=false
           if [[ "$mc" == "26.3" ]]; then latest=true; fi
           if gh release view "$tag" --json tagName >/dev/null 2>&1; then
             gh release upload "$tag" dist/* --clobber
-            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file RELEASE-NOTES-2.0.1.md --prerelease=false --latest="$latest"
+            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file "$notes_file" --prerelease=false --latest="$latest"
           else
             gh release create "$tag" dist/* \
               --title "Port 2.0.1 — Minecraft $mc" \
-              --notes-file RELEASE-NOTES-2.0.1.md \
+              --notes-file "$notes_file" \
               --verify-tag \
               --latest="$latest"
           fi

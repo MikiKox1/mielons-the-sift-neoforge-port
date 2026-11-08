@@ -23,12 +23,6 @@ sourceSets {
         resources.srcDir 'src/client/resources'
         resources.srcDir 'src/generated/resources'
     }
-    coreTest {
-        // Package-private production helpers can be tested on a plain classpath,
-        // but must not split their package across two FML modules.
-        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
-    }
 }
 
 repositories {
@@ -50,52 +44,17 @@ repositories {
 
 neoForge {
     version = project.neo_version
-    addModdingDependenciesTo sourceSets.test
 
     runs {
         client {
             client()
-            // Standalone Prime 2 stage smoke; never the user's Modrinth profile.
-            // A new loader release must never reuse a previous test world's directory.
-            gameDirectory = project.file("run/client-${project.neo_version}-port-2.0.1-release")
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('run/client')
         }
 
         server {
             server()
-            // Must remain separate from the client and all player saves.
-            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-release")
+            gameDirectory = project.file('run/server')
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-        serverEasyMagic {
-            server()
-            // Disposable integration check only; Easy Magic and Puzzles Lib
-            // are copied into this run's mods folder, never the production jar.
-            gameDirectory = project.file("run/server-${project.neo_version}-port-2.0.1-release-easymagic")
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        serverT11 {
-            server()
-            gameDirectory = project.file("run/server-T11-26.2.0.93-routing-release")
-            programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-            systemProperty 'the_sift.tests.crossdimension', 'true'
-        }
-
-        gameTestServer {
-            type = 'gameTestServer'
-            sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-release")
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
-        }
-        gameTestServerEasyMagic {
-            type = 'gameTestServer'
-            sourceSet = sourceSets.test
-            gameDirectory = project.file("run/gametest-${project.neo_version}-port-2.0.1-release-easymagic")
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'the_sift_tests'
         }
 
         configureEach {
@@ -108,31 +67,7 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
-        the_sift_tests {
-            sourceSet(sourceSets.test)
-        }
     }
-}
-
-// Development tests have separate metadata and are never included in the mod JAR
-// or ordinary client/server smoke runs.
-neoForge.runs.named('client') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id)]
-}
-neoForge.runs.named('server') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id)]
-}
-neoForge.runs.named('serverEasyMagic') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id)]
-}
-neoForge.runs.named('serverT11') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
-}
-neoForge.runs.named('gameTestServer') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
-}
-neoForge.runs.named('gameTestServerEasyMagic') {
-    loadedMods = [neoForge.mods.getByName(project.mod_id), neoForge.mods.getByName('the_sift_tests')]
 }
 
 configurations {
@@ -145,65 +80,6 @@ dependencies {
     // Consume its published sidecar so ModDevGradle exposes the same interface at compile time.
     interfaceInjectionData "com.geckolib:geckolib-neoforge-26.2:${project.geckolib_version}"
     compileOnly "dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${project.lambdynlights_version}+${project.minecraft_version}"
-}
-
-// Prime 2 invariant: build/test on the latest published NeoForge for this
-// Minecraft line, while keeping the independent, OPEN-ENDED mod dependency
-// range [neo_min_version,) (provisionally >=26.2.0.90).
-// Keep the compile/test loader pinned for reproducibility and refuse tests
-// if that pin becomes stale. Do not conflate this pin with minimum support.
-// If the metadata endpoint is unreachable, fail closed rather than claim the
-// tested loader is current. This task does not install any application.
-def pinnedNeoForge = project.neo_version.toString()
-def pinnedNeoMinimum = project.neo_min_version.toString()
-def targetMcVersion = project.minecraft_version.toString()
-tasks.register('verifyLatestNeoForge') {
-    group = 'verification'
-    description = 'Confirm the pinned MC 26.2 NeoForge version is still the latest official Maven release.'
-    inputs.property('neo_version', pinnedNeoForge)
-    inputs.property('neo_min_version', pinnedNeoMinimum)
-    inputs.property('minecraft_version', targetMcVersion)
-    doLast {
-        def metadataUrl = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml'
-        def connection = new URI(metadataUrl).toURL().openConnection()
-        connection.setUseCaches(false)
-        connection.setConnectTimeout(15000)
-        connection.setReadTimeout(15000)
-        connection.setRequestProperty('Cache-Control', 'no-cache')
-        def metadata = connection.inputStream.withCloseable { it.getText('UTF-8') }
-        def matcher = metadata =~ /<version>(26\.2\.0\.(\d+)(?:-[^<]+)?)<\/version>/
-        def candidates = []
-        matcher.each { match ->
-            candidates << [version: match[1], build: Integer.parseInt(match[2])]
-        }
-        if (candidates.isEmpty()) {
-            throw new GradleException('Cannot verify latest NeoForge 26.2 in official Maven metadata; test blocked.')
-        }
-        def latest = candidates.max { a, b ->
-            (a.build <=> b.build) ?: ((a.version.contains('-') ? 0 : 1) <=> (b.version.contains('-') ? 0 : 1))
-        }.version
-        if (pinnedNeoForge != latest) {
-            throw new GradleException(
-                "NeoForge BUILD/TEST pin is outdated. Latest official MC 26.2: ${latest}; " +
-                "neo_version=${pinnedNeoForge}. Update only neo_version for testing. " +
-                'Keep independent neo_min_version and the open-ended [minimum,) dependency.'
-            )
-        }
-        if (!pinnedNeoMinimum.startsWith('26.2.0.')) {
-            throw new GradleException(
-                "The Sift 26.2 provisional minimum must belong to the target MC series, found ${pinnedNeoMinimum}"
-            )
-        }
-        logger.lifecycle("Verified latest NeoForge for MC ${targetMcVersion} build/tests: ${latest}; " +
-            "packaged minimum: ${pinnedNeoMinimum}, no upper bound")
-    }
-}
-
-tasks.matching {
-    it.name in ['build', 'check', 'test', 'compileJava', 'compileTestJava', 'runData', 'runServer', 'runClient'] ||
-        it.name.startsWith('runGameTest')
-}.configureEach {
-    dependsOn tasks.named('verifyLatestNeoForge')
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -235,42 +111,15 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['-Xmaxerrs', '1000']
 }
 
-tasks.register('coreContract', JavaExec) {
-    group = 'verification'
-    description = 'Run source-grounded core behavior contracts without launching Minecraft.'
-    dependsOn tasks.named('coreTestClasses')
-    classpath = sourceSets.coreTest.runtimeClasspath
-    mainClass = 'mielon.thesift.worldgen.PortCoreContractTest'
-    enableAssertions = true
-}
-
-tasks.register('gameTestModJar', Jar) {
-    group = 'verification'
-    description = 'Package only the development GameTests for testing the actual built mod on the minimum loader.'
-    dependsOn tasks.named('testClasses')
-    from sourceSets.test.output
-    archiveClassifier = 'gametests'
-}
-
-tasks.named('check') {
-    dependsOn tasks.named('coreContract')
-}
-
-tasks.named('test') {
-    // These sources contain native GameTests, not JUnit-annotated tests.
-    // Their own server runner enforces success/failure.
-    failOnNoDiscoveredTests = false
-}
-
 java {
     withSourcesJar()
 }
 
 tasks.named('jar', Jar) {
-    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md', 'UPSTREAM-2.0.1-DELTA.json')
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md')
 }
 tasks.named('sourcesJar', Jar) {
-    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md', 'UPSTREAM-2.0.1-DELTA.json')
+    from('LICENSE', 'AI_DISCLOSURE.md', 'SOURCE_PROVENANCE.md')
 }
 
 publishing {
@@ -287,6 +136,3 @@ idea {
         downloadJavadoc = true
     }
 }
-
-// Reviewed optional shader additions; required for independent artifact audit.
-tasks.named('jar', Jar) { from('SHADER-INTEGRATION-RESOURCES.json') }

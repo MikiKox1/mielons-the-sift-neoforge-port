@@ -8,8 +8,10 @@ run-data/
 
 # Development and test utilities remain outside the public source tree
 /tools/
+/tests/
 /evidence/
 /src/test/
+/src/coreTest/
 /src/client/test/
 **/__pycache__/
 .pytest_cache/
