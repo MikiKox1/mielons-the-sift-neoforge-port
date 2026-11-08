@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v2.0.1-mc*-neoforge'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -35,7 +36,11 @@ jobs:
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
-          test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            test "$GITHUB_REF_NAME" = "minecraft/${mc}"
+          else
+            test "$GITHUB_REF_NAME" = "v2.0.1-mc${mc}-neoforge"
+          fi
           test "$version" = "2.0.1-neoforge.1-mc${mc}"
           grep -Fq "## Port 2.0.1 — Minecraft ${mc}" "CHANGELOG-${mc}.md"
           if printf '%s' "$version" | grep -Eiq 'alpha|beta|rc'; then
@@ -99,17 +104,18 @@ EOF
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
+          tag="v2.0.1-mc${mc}-neoforge"
           latest=false
           if [[ "$mc" == "26.3" ]]; then latest=true; fi
           notes="$RUNNER_TEMP/the-sift-release-notes.md"
-          if gh release view "$GITHUB_REF_NAME" --json tagName >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
-            gh release edit "$GITHUB_REF_NAME" --title "Port 2.0.1 — Minecraft $mc" --notes-file "$notes" --prerelease=false --latest="$latest"
+          if gh release view "$tag" --json tagName >/dev/null 2>&1; then
+            gh release upload "$tag" dist/* --clobber
+            gh release edit "$tag" --title "Port 2.0.1 — Minecraft $mc" --notes-file "$notes" --prerelease=false --latest="$latest"
           else
-            gh release create "$GITHUB_REF_NAME" dist/* \
+            gh release create "$tag" dist/* \
               --title "Port 2.0.1 — Minecraft $mc" \
               --notes-file "$notes" \
               --verify-tag \
               --latest="$latest"
           fi
-          gh release view "$GITHUB_REF_NAME" --json tagName,isPrerelease,isDraft,url --jq '{tag: .tagName, draft: .isDraft, prerelease: .isPrerelease, url: .url}'
+          gh release view "$tag" --json tagName,isPrerelease,isDraft,url --jq '{tag: .tagName, draft: .isDraft, prerelease: .isPrerelease, url: .url}'
