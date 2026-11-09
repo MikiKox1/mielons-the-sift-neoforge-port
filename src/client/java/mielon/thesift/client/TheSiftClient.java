@@ -30,6 +30,7 @@ import mielon.thesift.client.particle.SoundWaveParticle;
 import mielon.thesift.client.render.IchorCauldronRenderer;
 import mielon.thesift.client.render.IchorFluidRendering;
 import mielon.thesift.client.render.SiftCloudRenderPipelines;
+import mielon.thesift.client.render.SiftCloudWeatherGate;
 import mielon.thesift.client.render.SiftPortalRenderer;
 import mielon.thesift.client.render.SiftPortalRenderTypes;
 import mielon.thesift.client.render.SiftProceduralSkyRenderer;
@@ -44,6 +45,7 @@ import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 public final class TheSiftClient {
    private static final ModelLayerLocation ASH_WILLOW_BOAT_LAYER = new ModelLayerLocation(
@@ -69,6 +71,7 @@ public final class TheSiftClient {
       SonorousBeamRenderTypes.initialize();
       SiftProceduralSkyRenderer.initialize();
       SiftCloudRenderPipelines.initialize();
+      NeoForge.EVENT_BUS.addListener(SiftCloudWeatherGate::onExtract);
    }
 
    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {

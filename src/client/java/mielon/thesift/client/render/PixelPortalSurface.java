@@ -9,6 +9,8 @@ public final class PixelPortalSurface {
    private static final float RIM_SHADER_SPACING = 0.03125F;
    private static final float RIM_SHADER_SIDE_INSET = 0.015625F;
 
+   private static final int BACKING = color(38, 192, 197, 228);
+
    private PixelPortalSurface() {
    }
 
@@ -373,5 +375,107 @@ public final class PixelPortalSurface {
          float var12,
          int var13
       );
+   }
+
+   // Keep the accepted shader geometry above unchanged; only native output uses the 2.0.2 composition.
+   public static void drawNativeSurface(boolean axisX, int worldU, int worldY, boolean positiveSide, double seconds, PixelPortalSurface.QuadSink sink) {
+      partitionNative(sink, axisX, positiveSide, seconds, worldU, worldY, Math.floorDiv(worldU, 2), Math.floorDiv(worldY, 2), 0, 0, 4, 4, 1, 0);
+   }
+
+   private static void partitionNative(
+      PixelPortalSurface.QuadSink sink,
+      boolean axisX,
+      boolean positive,
+      double seconds,
+      int worldU,
+      int worldY,
+      int macroU,
+      int macroV,
+      int u,
+      int v,
+      int width,
+      int height,
+      int node,
+      int depth
+   ) {
+      double x = macroU * 2.0 + u * 0.5 - worldU;
+      double y = macroV * 2.0 + v * 0.5 - worldY;
+      if (!(x >= 1.0) && !(y >= 1.0) && !(x + width * 0.5 <= 0.0) && !(y + height * 0.5 <= 0.0)) {
+         int seed = 1729 + node * 1931;
+         boolean smallerTile = depth == 2 && width >= 2 && height >= 2 && hash(macroU, macroV, seed + 7) < 0.65;
+         if ((depth < 2 || smallerTile) && (width > 1 || height > 1)) {
+            boolean vertical = width > height || width == height && hash(macroU, macroV, seed) < 0.5;
+            if (width == 1) {
+               vertical = false;
+            }
+
+            if (height == 1) {
+               vertical = true;
+            }
+
+            int size = vertical ? width : height;
+            int cut = size / 2;
+            if (depth == 0 && hash(macroU, macroV, seed + 11) < 0.22) {
+               cut = hash(macroU, macroV, seed + 13) < 0.5 ? 1 : size - 1;
+            }
+
+            partitionNative(
+               sink, axisX, positive, seconds, worldU, worldY, macroU, macroV, u, v, vertical ? cut : width, vertical ? height : cut, node * 2, depth + 1
+            );
+            partitionNative(
+               sink,
+               axisX,
+               positive,
+               seconds,
+               worldU,
+               worldY,
+               macroU,
+               macroV,
+               vertical ? u + cut : u,
+               vertical ? v : v + cut,
+               vertical ? width - cut : width,
+               vertical ? height : height - cut,
+               node * 2 + 1,
+               depth + 1
+            );
+         } else {
+            double tone = 0.82 * field((macroU * 2.0 + (u + width * 0.5) * 0.5) / 4.0, (macroV * 2.0 + (v + height * 0.5) * 0.5) / 4.0)
+               + 0.18 * hash(macroU, macroV, seed + 53);
+            int rgba = surfaceColor(tone);
+            double phase = seconds / (6.5 + hash(macroU, macroV, 71) * 3.0) + hash(macroU, macroV, 97) * 0.25 + hash(macroU, macroV, seed + 71);
+            float sheet = positive ? 0.56F : 0.44F;
+            int tileColor = over(fadeColor(rgba, phase), BACKING);
+            if (width * height >= 2 && hash(macroU, macroV, seed + 101) < 0.5) {
+               double accentWidth = hash(macroU, macroV, seed + 113) < 0.5 ? 0.25 : 0.5;
+               double accentHeight = hash(macroU, macroV, seed + 127) < 0.5 ? 0.25 : 0.5;
+               double ax = x + (hash(macroU, macroV, seed + 131) < 0.5 ? 0.0 : width * 0.5 - accentWidth);
+               double ay = y + (hash(macroU, macroV, seed + 137) < 0.5 ? 0.0 : height * 0.5 - accentHeight);
+               int accentColor = fadeColor(color(196, 255, 246, 100), phase + 0.12);
+               tile(sink, axisX, ax, ay, accentWidth, accentHeight, sheet, over(accentColor, tileColor));
+               double otherX = ax == x ? x + accentWidth : x;
+               double otherY = ay == y ? y + accentHeight : y;
+               tile(sink, axisX, otherX, y, width * 0.5 - accentWidth, height * 0.5, sheet, tileColor);
+               tile(sink, axisX, ax, otherY, accentWidth, height * 0.5 - accentHeight, sheet, tileColor);
+            } else {
+               tile(sink, axisX, x, y, width * 0.5, height * 0.5, sheet, tileColor);
+            }
+         }
+      }
+   }
+
+   private static int over(int foreground, int background) {
+      int frontAlpha = foreground >>> 24;
+      int backAlpha = (background >>> 24) * (255 - frontAlpha) / 255;
+      int alpha = frontAlpha + backAlpha;
+      return color(
+         blendChannel(foreground, background, frontAlpha, backAlpha, alpha, 16),
+         blendChannel(foreground, background, frontAlpha, backAlpha, alpha, 8),
+         blendChannel(foreground, background, frontAlpha, backAlpha, alpha, 0),
+         alpha
+      );
+   }
+
+   private static int blendChannel(int foreground, int background, int frontAlpha, int backAlpha, int alpha, int shift) {
+      return ((foreground >>> shift & 0xFF) * frontAlpha + (background >>> shift & 0xFF) * backAlpha) / alpha;
    }
 }

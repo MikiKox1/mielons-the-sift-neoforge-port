@@ -71,15 +71,15 @@ public final class SiftPortalRenderer implements BlockEntityRenderer<SiftPortalB
          collector.submitCustomGeometry(
             poses,
             SiftPortalRenderTypes.surface(shaderPack),
-            (pose, buffer) -> PixelPortalSurface.drawSurface(
-               axisX,
-               worldU,
-               worldY,
-               positive,
-               seconds,
-               quality,
-               (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color) -> quad(pose, buffer, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color)
-            )
+            (pose, buffer) -> {
+               PixelPortalSurface.QuadSink sink =
+                  (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color) -> quad(pose, buffer, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color);
+               if (shaderPack) {
+                  PixelPortalSurface.drawSurface(axisX, worldU, worldY, positive, seconds, quality, sink);
+               } else {
+                  PixelPortalSurface.drawNativeSurface(axisX, worldU, worldY, positive, seconds, sink);
+               }
+            }
          );
       }
 

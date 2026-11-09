@@ -1,5 +1,9 @@
 package mielon.thesift.client.mixin;
 
+import net.minecraft.client.player.LocalPlayer;
+
+import net.minecraft.client.multiplayer.ClientLevel;
+
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.MusicManager;
@@ -26,11 +30,17 @@ public abstract class SiftMusicManagerMixin {
 
    @Inject(method = "tick", at = @At("HEAD"))
    private void theSift$changeDimensionMusic(CallbackInfo ci) {
-      boolean inSift = this.minecraft.level != null && this.minecraft.level.dimension().equals(TheSiftDimension.LEVEL_KEY);
-      if (inSift != this.theSift$wasInSift) {
-         this.theSift$wasInSift = inSift;
-         this.stopPlaying();
-         this.nextSongDelay = 100;
+      ClientLevel level = this.minecraft.level;
+      LocalPlayer player = this.minecraft.player;
+      if (level == null || player != null && player.level() == level) {
+         if (level != null || player == null) {
+            boolean inSift = level != null && level.dimension().equals(TheSiftDimension.LEVEL_KEY);
+            if (inSift != this.theSift$wasInSift) {
+               this.theSift$wasInSift = inSift;
+               this.stopPlaying();
+               this.nextSongDelay = 100;
+            }
+         }
       }
    }
 }

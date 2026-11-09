@@ -1,5 +1,7 @@
 package mielon.thesift.worldgen;
 
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+
 import net.minecraft.core.BlockPos;
 
 public final class SiftFeaturePlacementGuard {
@@ -96,5 +98,9 @@ public final class SiftFeaturePlacementGuard {
       boolean intersects(SiftFeaturePlacementGuard.ProtectedRectangle other) {
          return this.maxX >= other.minX && this.minX <= other.maxX && this.maxZ >= other.minZ && this.minZ <= other.maxZ;
       }
+   }
+
+   public static BoundingBox portalTerrainBounds(BlockPos origin, int sizeX, int sizeZ) {
+      return new BoundingBox(origin.getX() - 1, origin.getY() - 3, origin.getZ() - 1, origin.getX() + sizeX, origin.getY() + 22, origin.getZ() + sizeZ);
    }
 }

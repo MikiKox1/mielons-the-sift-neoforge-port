@@ -1,5 +1,9 @@
 package mielon.thesift.block;
 
+import net.minecraft.world.phys.Vec3;
+
+import mielon.thesift.world.PortalCrossing;
+
 import mielon.thesift.block.entity.SiftPortalBlockEntity;
 import mielon.thesift.particle.ModParticles;
 import mielon.thesift.world.SiftTeleportManager;
@@ -94,5 +98,13 @@ public class SiftPortalBlock extends BaseEntityBlock {
    @Override
    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
       return state.getValue(AXIS) == Axis.X ? X_SHAPE : Z_SHAPE;
+   }
+
+   public static boolean crossesPortal(Entity entity, BlockPos pos, BlockState state, Vec3 from) {
+      if (!state.getValue(ACTIVE)) {
+         return false;
+      }
+      VoxelShape shape = state.getValue(AXIS) == Axis.X ? X_SHAPE : Z_SHAPE;
+      return PortalCrossing.intersects(shape.bounds().move(pos), entity.getBbWidth(), entity.getBbHeight(), from, entity.position());
    }
 }
