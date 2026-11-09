@@ -1,5 +1,9 @@
 package mielon.thesift.entity;
 
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+
+import net.minecraft.core.Holder;
+
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager.ControllerRegistrar;
@@ -260,7 +264,7 @@ public final class MonarchEntity extends Monster implements GeoEntity {
 
    @Override
    protected SoundEvent getDeathSound() {
-      return ModSounds.MONARCH_DEATH;
+      return this.isEcho() ? ModSounds.MONARCH_DEATH : null;
    }
 
    @Override
@@ -1581,6 +1585,7 @@ public final class MonarchEntity extends Monster implements GeoEntity {
 
    @Override
    public void die(DamageSource source) {
+      boolean announce = !this.dead && !this.isEcho();
       if (this.isEcho() && this.ownerId != null && this.level() instanceof ServerLevel server && server.getEntity(this.ownerId) instanceof MonarchEntity parent
          )
        {
@@ -1598,6 +1603,18 @@ public final class MonarchEntity extends Monster implements GeoEntity {
 
       this.boss.removeAllPlayers();
       super.die(source);
+      if (announce && this.dead && !this.isSilent() && this.level() instanceof ServerLevel server) {
+         Holder<SoundEvent> sound = Holder.direct(ModSounds.MONARCH_DEATH);
+         float volume = this.getSoundVolume();
+         float pitch = this.getVoicePitch();
+         long soundSeed = this.random.nextLong();
+
+         for (ServerPlayer player : server.getServer().getPlayerList().getPlayers()) {
+            Entity camera = player.getCamera();
+            player.connection
+               .send(new ClientboundSoundPacket(sound, this.getSoundSource(), camera.getX(), camera.getEyeY(), camera.getZ(), volume, pitch, soundSeed));
+         }
+      }
    }
 
    @Override

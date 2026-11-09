@@ -1,5 +1,13 @@
 package mielon.thesift.worldgen;
 
+import net.minecraft.world.level.block.state.BlockState;
+
+import net.minecraft.util.RandomSource;
+
+import net.minecraft.core.BlockPos.MutableBlockPos;
+
+import mielon.thesift.block.ModBlocks;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,14 +38,16 @@ public final class SiftCampProtection {
    private static final ThreadLocal<SiftCampProtection> DECORATION = new ThreadLocal<>();
    private final List<BoundingBox> pieces;
    private final List<BoundingBox> domes;
+   private final List<BoundingBox> campGround;
 
    private SiftCampProtection(List<BoundingBox> pieces) {
-      this(pieces, List.of());
+      this(pieces, List.of(), List.of());
    }
 
-   private SiftCampProtection(List<BoundingBox> pieces, List<BoundingBox> domes) {
+   private SiftCampProtection(List<BoundingBox> pieces, List<BoundingBox> domes, List<BoundingBox> campGround) {
       this.pieces = pieces;
       this.domes = domes;
+      this.campGround = campGround;
    }
 
    public static SiftCampProtection around(WorldGenLevel level, int minX, int minZ, int maxX, int maxZ) {
@@ -52,6 +62,7 @@ public final class SiftCampProtection {
       Set<StructureStart> starts = new HashSet<>();
       List<BoundingBox> pieces = new ArrayList<>();
       List<BoundingBox> domes = new ArrayList<>();
+      List<BoundingBox> campGround = new ArrayList<>();
 
       for (int cx = (minX >> 4) - 2; cx <= (maxX >> 4) + 2; cx++) {
          for (int cz = (minZ >> 4) - 2; cz <= (maxZ >> 4) + 2; cz++) {
@@ -99,6 +110,9 @@ public final class SiftCampProtection {
                if (registry.getKey(start.getStructure()).getPath().startsWith("ichor_dome_")) {
                   domes.add(new BoundingBox(box.minX(), box.minY() - 5, box.minZ(), box.maxX(), box.maxY() + 2, box.maxZ()));
                } else {
+                  if (start.getStructure() != lair) {
+                     campGround.add(box);
+                  }
                   int margin = start.getStructure() == lair ? 1 : 0;
                   pieces.add(
                      new BoundingBox(box.minX() - margin, box.minY() - 5, box.minZ() - margin, box.maxX() + margin, box.maxY() + 2, box.maxZ() + margin)
@@ -108,7 +122,7 @@ public final class SiftCampProtection {
          }
       }
 
-      return new SiftCampProtection(pieces, domes);
+      return new SiftCampProtection(pieces, domes, campGround);
    }
 
    private static ChunkAccess availableChunk(WorldGenLevel level, int x, int z) {
@@ -188,5 +202,46 @@ public final class SiftCampProtection {
 
    public static boolean near(WorldGenLevel level, int x, int z, int radius) {
       return intersects(level, new BoundingBox(x - radius, level.getMinY(), z - radius, x + radius, level.getMaxY() - 1, z + radius));
+   }
+
+   public static void decorateCampGround(WorldGenLevel level, int minX, int minZ) {
+      if (level.getLevel().dimension().equals(TheSiftDimension.LEVEL_KEY)) {
+         SiftCampProtection protection = around(level, minX, minZ, minX + 15, minZ + 15);
+
+         for (BoundingBox box : protection.campGround) {
+            for (int x = Math.max(minX, box.minX()); x <= Math.min(minX + 15, box.maxX()); x++) {
+               for (int z = Math.max(minZ, box.minZ()); z <= Math.min(minZ + 15, box.maxZ()); z++) {
+                  BlockPos floor = new BlockPos(x, box.minY(), z);
+                  BlockState state = level.getBlockState(floor);
+                  if ((state.is(ModBlocks.CORAL_SOIL) || state.is(ModBlocks.HEALTHY_SCULK) || state.is(ModBlocks.DRY_HEALTHY_SCULK))
+                     && protection.isOpenCampColumn(level, floor, box.maxY())) {
+                     RandomSource random = RandomSource.create(level.getSeed() ^ floor.asLong() ^ 1779748151L);
+                     SiftSurfaceDecorator.decorateCampGround(level, random, floor);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   private boolean isOpenCampColumn(WorldGenLevel level, BlockPos floor, int top) {
+      int x = floor.getX();
+      int z = floor.getZ();
+
+      for (BoundingBox box : this.campGround) {
+         if (x >= box.minX() && x <= box.maxX() && z >= box.minZ() && z <= box.maxZ() && box.minY() <= floor.getY() + 1) {
+            top = Math.max(top, box.maxY());
+         }
+      }
+
+      MutableBlockPos pos = new MutableBlockPos();
+
+      for (int y = floor.getY() + 1; y <= Math.max(floor.getY() + 2, top); y++) {
+         if (!level.isEmptyBlock(pos.set(x, y, z))) {
+            return false;
+         }
+      }
+
+      return true;
    }
 }

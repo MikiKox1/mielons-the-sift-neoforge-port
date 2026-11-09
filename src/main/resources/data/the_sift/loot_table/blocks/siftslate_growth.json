@@ -27,7 +27,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "the_sift:siftslate",
+              "name": "the_sift:cobbled_siftslate",
               "condition": {
                 "type": "minecraft:survives_explosion"
               }

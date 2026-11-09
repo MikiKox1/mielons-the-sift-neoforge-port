@@ -26,6 +26,14 @@ public final class SiftSurfaceDecorator {
 
    public static boolean decorate(WorldGenLevel level, RandomSource random, BlockPos floorPos, float densityScale, int updateFlags) {
       ensureCoralPortalSoil(level, floorPos, updateFlags);
+      return placeGroundPlant(level, random, floorPos, densityScale, updateFlags);
+   }
+
+   static boolean decorateCampGround(WorldGenLevel level, RandomSource random, BlockPos floor) {
+      return placeGroundPlant(level, random, floor, 1.45F, 2);
+   }
+
+   private static boolean placeGroundPlant(WorldGenLevel level, RandomSource random, BlockPos floorPos, float densityScale, int updateFlags) {
       BlockState floor = level.getBlockState(floorPos);
       BlockPos plantPos = floorPos.above();
       if (level.isEmptyBlock(plantPos) && level.ensureCanWrite(plantPos)) {

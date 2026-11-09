@@ -83,13 +83,20 @@ public final class SiftWorldStorage extends SavedData {
    }
 
    public static SiftWorldStorage.ReturnPoint captureReturnPoint(Entity entity) {
-      BlockPos portal = BlockPos.containing(entity.position());
-      BlockPos min = BlockPos.containing(entity.getBoundingBox().minX, entity.getBoundingBox().minY, entity.getBoundingBox().minZ);
-      BlockPos max = BlockPos.containing(entity.getBoundingBox().maxX, entity.getBoundingBox().maxY, entity.getBoundingBox().maxZ);
-      for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
-         if (SiftPortalBlock.isActivePortal(entity.level().getBlockState(pos))) {
-            portal = pos.immutable();
-            break;
+      return captureReturnPoint(entity, null);
+   }
+
+   public static SiftWorldStorage.ReturnPoint captureReturnPoint(Entity entity, BlockPos crossedPortal) {
+      BlockPos portal = crossedPortal;
+      if (portal == null) {
+         portal = BlockPos.containing(entity.position());
+         BlockPos min = BlockPos.containing(entity.getBoundingBox().minX, entity.getBoundingBox().minY, entity.getBoundingBox().minZ);
+         BlockPos max = BlockPos.containing(entity.getBoundingBox().maxX, entity.getBoundingBox().maxY, entity.getBoundingBox().maxZ);
+         for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            if (SiftPortalBlock.isActivePortal(entity.level().getBlockState(pos))) {
+               portal = pos.immutable();
+               break;
+            }
          }
       }
       return new SiftWorldStorage.ReturnPoint(
@@ -303,5 +310,16 @@ public final class SiftWorldStorage extends SavedData {
    }
 
    public record ReturnPoint(double x, double y, double z, float yaw, float pitch, BlockPos portalBlock) {
+   }
+
+   static boolean hasBlendedPortalCoral(MinecraftServer server) {
+      CompoundTag state = data(server).getOrMigrateDimensionState(server);
+      return state.getBooleanOr("portal_coral_blended", false);
+   }
+
+   static void markPortalCoralBlended(MinecraftServer server) {
+      SiftWorldStorage data = data(server);
+      data.getOrMigrateDimensionState(server).putBoolean("portal_coral_blended", true);
+      data.setDirty();
    }
 }

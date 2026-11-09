@@ -1,5 +1,9 @@
 package mielon.thesift.worldgen;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
+
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,11 +16,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.LongStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -27,17 +29,7 @@ import net.minecraft.world.level.storage.LevelResource;
 
 public final class SiftTerrainFeatureMemory {
    private static Path storage;
-   private static final Map<Long, SiftTerrainFeatureMemory.Marks> CHUNKS = new LinkedHashMap<Long, SiftTerrainFeatureMemory.Marks>(128, 0.75F, true) {
-      @Override
-      protected boolean removeEldestEntry(Entry<Long, SiftTerrainFeatureMemory.Marks> entry) {
-         if (this.size() <= 4096) {
-            return false;
-         }
-
-         SiftTerrainFeatureMemory.save(entry.getKey(), entry.getValue());
-         return true;
-      }
-   };
+   private static final Long2ObjectLinkedOpenHashMap<SiftTerrainFeatureMemory.Marks> CHUNKS = new Long2ObjectLinkedOpenHashMap<>(128);
 
    private SiftTerrainFeatureMemory() {
    }
@@ -191,8 +183,8 @@ public final class SiftTerrainFeatureMemory {
    }
 
    public static synchronized void flush(MinecraftServer server) {
-      for (Entry<Long, SiftTerrainFeatureMemory.Marks> entry : CHUNKS.entrySet()) {
-         save(entry.getKey(), entry.getValue());
+      for (Entry<SiftTerrainFeatureMemory.Marks> entry : CHUNKS.long2ObjectEntrySet()) {
+         save(entry.getLongKey(), entry.getValue());
       }
    }
 
@@ -200,9 +192,9 @@ public final class SiftTerrainFeatureMemory {
       if (server.overworld().getGameTime() % 100L == 0L) {
          int budget = 8;
 
-         for (Entry<Long, SiftTerrainFeatureMemory.Marks> entry : CHUNKS.entrySet()) {
+         for (Entry<SiftTerrainFeatureMemory.Marks> entry : CHUNKS.long2ObjectEntrySet()) {
             if (entry.getValue().dirty) {
-               save(entry.getKey(), entry.getValue());
+               save(entry.getLongKey(), entry.getValue());
                if (--budget == 0) {
                   break;
                }
@@ -218,7 +210,18 @@ public final class SiftTerrainFeatureMemory {
    }
 
    private static SiftTerrainFeatureMemory.Marks readable(long key) {
-      return CHUNKS.computeIfAbsent(key, SiftTerrainFeatureMemory::load);
+      SiftTerrainFeatureMemory.Marks marks = CHUNKS.getAndMoveToLast(key);
+      if (marks != null) {
+         return marks;
+      }
+      marks = load(key);
+      CHUNKS.put(key, marks);
+      if (CHUNKS.size() > 4096) {
+         long oldest = CHUNKS.firstLongKey();
+         save(oldest, CHUNKS.get(oldest));
+         CHUNKS.removeFirst();
+      }
+      return marks;
    }
 
    private static Path file(long key) {
