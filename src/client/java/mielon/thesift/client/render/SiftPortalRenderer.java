@@ -85,7 +85,7 @@ public final class SiftPortalRenderer implements BlockEntityRenderer<SiftPortalB
                if (shaderPack) {
                   PixelPortalSurface.drawSurfaceDetails(axisX, worldU, worldY, positive, seconds, quality, sink);
                } else {
-                  PixelPortalSurface.drawSurface(axisX, worldU, worldY, positive, seconds, quality, sink);
+                  PixelPortalSurface.drawNativeSurface(axisX, worldU, worldY, positive, seconds, sink);
                }
             }
          );

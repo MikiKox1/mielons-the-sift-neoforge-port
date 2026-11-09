@@ -101,7 +101,8 @@
     "SiftPortalVegetationWriteMixin",
     "SiftSpawnPopulationMixin",
     "SiftPortalStartupMixin",
-    "SiftAfterPlayerDeathMixin"
+    "SiftAfterPlayerDeathMixin",
+    "SiftPortalMovementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -2,6 +2,19 @@
 
 Released versions are listed **newest first**.
 
+## Port 2.0.2 — Minecraft 26.3
+
+A gameplay, compatibility and world-generation update to the unofficial NeoForge port of Mielon's The Sift.
+
+- **Siftslate crafting:** Added smelting and blasting recipes for Siftslate ores, matching recipe discoveries and updated Siftslate Growth materials.
+- **Portal and Rift travel:** Improved high-speed portal crossing, remembered Overworld/Sift return positions and safe underground arrivals, including passenger and vehicle travel.
+- **World generation:** Improved biome transitions, Abandoned Camp decorations, portal coral and the surrounding vegetation while preserving Minecraft-specific structure formats.
+- **Chunk-generation efficiency:** Reduced unnecessary chunk access with bounded primitive-key LRU storage and reusable terrain lookups, without changing the intended world layout.
+- **Visuals, creatures and sound:** Updated native portal presentation, Nester attack animation, Blub variants, Monarch audio and biome music behavior.
+- **Shader compatibility:** Maintained the eight-layer FLOW/ENDURE/THRIVE sky with Photon and Complementary, including depth-aware composition and cloud visibility appropriate to weather and rendering mode.
+
+[Port 2.0.2 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.2-mc26.3-neoforge)
+
 ## Port 2.0.1 — Minecraft 26.3
 
 A major update to the unofficial NeoForge port of Mielon's The Sift, bringing the new 2.0.1 content and gameplay to Minecraft 26.3.

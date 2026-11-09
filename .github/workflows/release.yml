@@ -1,11 +1,11 @@
-name: Publish The Sift 2.0.1
+name: Publish The Sift 2.0.2
 
 on:
   push:
     branches:
       - minecraft/26.2
     tags:
-      - 'v2.0.1-mc*-neoforge'
+      - 'v2.0.2-mc*-neoforge'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
       (github.event_name == 'push' && github.ref_type == 'tag') ||
       (github.event_name == 'push' &&
        github.ref == 'refs/heads/minecraft/26.2' &&
-       github.event.head_commit.message == 'Refresh 2.0.1 release notes MC26.2')
+       github.event.head_commit.message == 'Refresh 2.0.2 release notes MC26.2')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -36,13 +36,13 @@ jobs:
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
           version="$(sed -n 's/^mod_version=//p' gradle.properties)"
           test "$mc" = "26.2"
-          test "$version" = "2.0.1-neoforge.1-mc$mc"
+          test "$version" = "2.0.2-neoforge.1-mc$mc"
           if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
-            test "$GITHUB_REF_NAME" = "v2.0.1-mc$mc-neoforge"
+            test "$GITHUB_REF_NAME" = "v2.0.2-mc$mc-neoforge"
           else
             test "$GITHUB_REF_NAME" = "minecraft/$mc"
             if [[ "$GITHUB_EVENT_NAME" == 'push' ]]; then
-              test "$(git log -1 --format=%s)" = 'Refresh 2.0.1 release notes MC26.2'
+              test "$(git log -1 --format=%s)" = 'Refresh 2.0.2 release notes MC26.2'
             fi
           fi
           test -s "CHANGELOG-$mc.md"
@@ -52,8 +52,8 @@ jobs:
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-          notes="$RUNNER_TEMP/the-sift-2.0.1-release.md"
-          awk -v heading="## Port 2.0.1 — Minecraft $mc" -v finish="## Port 1.1.2.1 — Minecraft $mc" -v backlink="[Port 2.0.1 — Minecraft $mc]" '
+          notes="$RUNNER_TEMP/the-sift-2.0.2-release.md"
+          awk -v heading="## Port 2.0.2 — Minecraft $mc" -v finish="## Port 2.0.1 — Minecraft $mc" -v backlink="[Port 2.0.2 — Minecraft $mc]" '
             $0 == heading { copying = 1; found = 1; print "# " substr($0, 4); next }
             copying && $0 == finish { stopped = 1; exit }
             copying && index($0, backlink) == 1 { next }
@@ -64,7 +64,7 @@ jobs:
           test -s "$notes"
           grep -Fq '## Changes' "$notes"
           if grep -Eiq '^## (Requirements|Credits)$' "$notes"; then
-            echo 'Unexpected requirements or credits section in 2.0.1 notes'
+            echo 'Unexpected requirements or credits section in 2.0.2 notes'
             exit 1
           fi
           neo_min="$(sed -n 's/^neo_min_version=//p' gradle.properties)"
@@ -114,15 +114,15 @@ jobs:
           unzip -tqq "$sources"
           unzip -p "$jar" META-INF/neoforge.mods.toml | grep -F "version=\"$version\""
           mkdir -p dist
-          cp "$jar" "dist/mielons-the-sift-2.0.1-mc$mc-neoforge-port.jar"
-          cp "$sources" "dist/mielons-the-sift-2.0.1-mc$mc-neoforge-port-sources.jar"
+          cp "$jar" "dist/mielons-the-sift-2.0.2-mc$mc-neoforge-port.jar"
+          cp "$sources" "dist/mielons-the-sift-2.0.2-mc$mc-neoforge-port-sources.jar"
           test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 2
 
       - name: Archive the two JAR assets
         if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v4
         with:
-          name: the-sift-2.0.1-${{ github.run_id }}
+          name: the-sift-2.0.2-${{ github.run_id }}
           path: dist/*.jar
           if-no-files-found: error
 
@@ -133,21 +133,21 @@ jobs:
         run: |
           set -euo pipefail
           mc="$(sed -n 's/^minecraft_version=//p' gradle.properties)"
-          tag="v2.0.1-mc$mc-neoforge"
-          notes="$RUNNER_TEMP/the-sift-2.0.1-release.md"
+          tag="v2.0.2-mc$mc-neoforge"
+          notes="$RUNNER_TEMP/the-sift-2.0.2-release.md"
           latest=false
           if [[ "$mc" == "26.3" ]]; then latest=true; fi
           if gh release view "$tag" --json tagName >/dev/null 2>&1; then
             if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
               gh release upload "$tag" dist/*.jar --clobber
             fi
-            gh release edit "$tag" --title "Port 2.0.1 $mc" --notes-file "$notes" --prerelease=false --latest="$latest"
+            gh release edit "$tag" --title "Port 2.0.2 $mc" --notes-file "$notes" --prerelease=false --latest="$latest"
           else
             if [[ "$GITHUB_REF_TYPE" != 'tag' ]]; then
               echo "Existing release required for notes-only refresh: $tag"
               exit 1
             fi
-            gh release create "$tag" dist/*.jar --title "Port 2.0.1 $mc" --notes-file "$notes" --verify-tag --latest="$latest"
+            gh release create "$tag" dist/*.jar --title "Port 2.0.2 $mc" --notes-file "$notes" --verify-tag --latest="$latest"
           fi
           if gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fxq 'SHA256SUMS.txt'; then
             gh release delete-asset "$tag" 'SHA256SUMS.txt' --yes

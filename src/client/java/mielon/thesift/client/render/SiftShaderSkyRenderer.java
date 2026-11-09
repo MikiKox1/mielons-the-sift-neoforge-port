@@ -143,19 +143,12 @@ public final class SiftShaderSkyRenderer {
    public static boolean renderSky(PoseStack pose, ClientLevel level, RenderTarget target, AutoStorageIndexBuffer indices) {
       prepare(indices);
       if (!isManagedPack() || !SiftSkyShaderCompat.restoreSky() || !ready()) return false;
-      if (SiftShaderCompat.isPhotonShaderPackSelected()) {
-         queuedLevel = level;
-         queuedPack = SiftShaderCompat.currentPackName();
-         QUEUED_POSE.set(pose.last().pose());
-         QUEUED_MODELVIEW.set(RenderSystem.getModelViewStack());
-      } else {
-         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-            () -> "The Sift Complementary tide sky", target.getColorTextureView(), Optional.empty(),
-            target.getDepthTextureView(), OptionalDouble.empty())) {
-            draw(pose, level, pass, false);
-         }
-         frameDrawn = true;
-      }
+      // Complementary and Photon both need the final Iris composite.
+      // The early opaque TEXTURED pass washed out Complementary's own sky.
+      queuedLevel = level;
+      queuedPack = SiftShaderCompat.currentPackName();
+      QUEUED_POSE.set(pose.last().pose());
+      QUEUED_MODELVIEW.set(RenderSystem.getModelViewStack());
       return true;
    }
 
@@ -164,7 +157,7 @@ public final class SiftShaderSkyRenderer {
       Minecraft client = Minecraft.getInstance();
       if (queuedLevel == null) return;
       if (queuedLevel != client.level || !queuedPack.equals(SiftShaderCompat.currentPackName())
-         || !SiftShaderCompat.isPhotonShaderPackSelected() || !SiftSkyShaderCompat.restoreSky() || !ready()) {
+         || !isManagedPack() || !SiftSkyShaderCompat.restoreSky() || !ready()) {
          queuedLevel = null;
          return;
       }
@@ -183,18 +176,11 @@ public final class SiftShaderSkyRenderer {
       }
    }
 
-   /** Fallback when a shader skips vanilla sky callbacks; never draw a second sky. */
+   /** Do not consume the queued known-pack sky before the Iris final callback. */
    public static void finishFrame(Matrix4fc view) {
-      // LevelRenderer TAIL and Iris' TAIL injector may run in either order.
-      // Only the real Iris final callback may consume a queued Photon frame.
-      if (SiftShaderCompat.isPhotonShaderPackSelected()) return;
-      if (isManagedPack() && !frameDrawn && SiftSkyShaderCompat.restoreSky()) {
-         AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
-         prepare(indices);
-         PoseStack pose = new PoseStack();
-         pose.mulPose(new Matrix4f(view));
-         if (ready()) drawFinal(pose, Minecraft.getInstance().level);
-      }
+      // LevelRenderer TAIL may precede Iris finalization. Never consume
+      // or clear a queued Photon/Complementary sky here.
+      if (isManagedPack()) return;
       queuedLevel = null;
       queuedPack = "";
       frameDrawn = false;
@@ -220,27 +206,28 @@ public final class SiftShaderSkyRenderer {
       float thrive = SiftTides.thriveBlend(ticks);
       float weather = 1.0F - level.getRainLevel(1.0F) * 0.16F;
       float time = (float)level.getGameTime() / 20.0F;
+      boolean complementaryPost = postFinal && SiftShaderCompat.isComplementaryShaderPackSelected();
       // Budget ALL eight Photon layers (not just the base sky): alpha
       // compositing of nearly opaque far/near ribbons would otherwise erase
       // Photon's own sky during FLOW/ENDURE. Per-phase exponent weights sum
       // to one, including while transitioning among all three tides.
       GpuBufferSlice[] transforms = new GpuBufferSlice[8];
       transforms[7] = SiftProceduralSkyRenderer.transform(pose, time * 1.0E-4F, 0.0F, weather,
-         postFinal ? photonCompositeOpacity(thrive * 0.18F) : thrive);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(7, night, day, thrive) : (postFinal ? photonCompositeOpacity(thrive * 0.18F) : thrive));
       transforms[6] = SiftProceduralSkyRenderer.transform(pose, time * 1.0E-4F, 0.0F, weather,
-         postFinal ? photonCompositeOpacity(thrive * 0.42F) : thrive);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(6, night, day, thrive) : (postFinal ? photonCompositeOpacity(thrive * 0.42F) : thrive));
       transforms[0] = SiftProceduralSkyRenderer.transform(pose, time * 1.0E-4F, 0.0F, weather,
-         postFinal ? photonCompositeOpacity(0.40F) : 1.0F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(0, night, day, thrive) : (postFinal ? photonCompositeOpacity(0.40F) : 1.0F));
       transforms[1] = SiftProceduralSkyRenderer.transform(pose, time * 1.0E-4F, 0.0F, weather,
-         postFinal ? photonCompositeOpacity(night * 0.20F) : (thrive >= 0.99999F ? 0.0F : night / (1.0F - thrive)));
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(1, night, day, thrive) : (postFinal ? photonCompositeOpacity(night * 0.20F) : (thrive >= 0.99999F ? 0.0F : night / (1.0F - thrive))));
       transforms[2] = SiftProceduralSkyRenderer.transform(pose, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather,
-         postFinal ? 0.96F * photonCompositeOpacity(day * 0.36F) : day * 0.96F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(2, night, day, thrive) : (postFinal ? 0.96F * photonCompositeOpacity(day * 0.36F) : day * 0.96F));
       transforms[3] = SiftProceduralSkyRenderer.transform(pose, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather,
-         postFinal ? 0.96F * photonCompositeOpacity(night * 0.24F) : night * 0.96F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(3, night, day, thrive) : (postFinal ? 0.96F * photonCompositeOpacity(night * 0.24F) : night * 0.96F));
       transforms[4] = SiftProceduralSkyRenderer.transform(pose, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather,
-         postFinal ? 0.78F * photonCompositeOpacity(day * 0.24F) : day * 0.78F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(4, night, day, thrive) : (postFinal ? 0.78F * photonCompositeOpacity(day * 0.24F) : day * 0.78F));
       transforms[5] = SiftProceduralSkyRenderer.transform(pose, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather,
-         postFinal ? 0.82F * photonCompositeOpacity(night * 0.16F) : night * 0.82F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(5, night, day, thrive) : (postFinal ? 0.82F * photonCompositeOpacity(night * 0.16F) : night * 0.82F));
       pass.setPipeline(postFinal ? PHOTON_PIPELINE : TEXTURED_PIPELINE);
       RenderSystem.bindDefaultUniforms(pass);
       pass.setIndexBuffer(indexBuffer, preparedIndices.type());

@@ -1,5 +1,7 @@
 package mielon.thesift.worldgen;
 
+import net.minecraft.core.Registry;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -222,10 +224,11 @@ public final class SiftPortalVegetation {
                   if (TheSiftDimension.isOrganicDesert(biome)) {
                      OrganicDesertVegetation.place(level, generator, random, chunk);
                   } else {
+                     Registry<PlacedFeature> placedFeatures = level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
                      for (HolderSet<PlacedFeature> step : biome.value().getGenerationSettings().features()) {
                         for (Holder<PlacedFeature> feature : step) {
-                           Identifier id = feature.unwrapKey().orElseThrow().identifier();
-                           if (id.getNamespace().equals("the_sift") && plants(id.getPath())) {
+                           Identifier id = placedFeatures.getKey(feature.value());
+                           if (id != null && id.getNamespace().equals("the_sift") && plants(id.getPath())) {
                               feature.value().placeWithBiomeCheck(level, generator, random, origin);
                            }
                         }
