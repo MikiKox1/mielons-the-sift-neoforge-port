@@ -1,5 +1,7 @@
 package mielon.thesift.entity;
 
+import net.minecraft.network.chat.Component;
+
 import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -122,12 +124,8 @@ public final class BlubEntity extends TamableAnimal implements GeoEntity {
    }
 
    public boolean isMielonAppearance() {
-      if (this.getCustomName() == null) {
-         return false;
-      }
-
-      String name = this.getCustomName().getString();
-      return "mielon".equals(name) || "Mielon".equals(name) || "MIELON".equals(name);
+      Component name = this.getCustomName();
+      return name != null && "mielon".equalsIgnoreCase(name.getString().strip());
    }
 
    public BlubVariant getVisualVariant() {

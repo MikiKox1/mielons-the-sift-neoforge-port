@@ -2,6 +2,8 @@ package mielon.thesift.client.render;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -65,6 +67,7 @@ public final class SiftProceduralSkyRenderer {
    private static boolean photonSkyQueued;
    private static ClientLevel photonSkyLevel;
    private static AutoStorageIndexBuffer photonSkyQuadIndices;
+   private static String queuedShaderPack = "";
    private static final Matrix4f PHOTON_POSE = new Matrix4f();
    private static final Matrix4f PHOTON_MODELVIEW = new Matrix4f();
    private static final RenderPipeline TEXTURED_SKY_PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
@@ -82,6 +85,16 @@ public final class SiftProceduralSkyRenderer {
          .withSampler("Sampler0")
          .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
          .withDepthStencilState(new DepthStencilState(CompareOp.EQUAL, false))
+         .withCull(false)
+         .build();
+   private static final RenderPipeline COMPLEMENTARY_POST_FINAL_SKY_PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+         .withLocation(Identifier.fromNamespaceAndPath("the_sift", "pipeline/complementary_post_final_sky_2612"))
+         .withVertexShader(Identifier.fromNamespaceAndPath("the_sift", "core/photon_sky_overlay"))
+         .withFragmentShader(Identifier.fromNamespaceAndPath("the_sift", "core/photon_sky_overlay"))
+         .withSampler("Sampler0")
+         .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+         .withDepthStencilState(new DepthStencilState(CompareOp.EQUAL, false))
+         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
          .withCull(false)
          .build();
    private static final float[][] DAY_PALETTE = new float[][]{
@@ -111,7 +124,8 @@ public final class SiftProceduralSkyRenderer {
       photonSkyQueued = false;
       ClientLevel level = Minecraft.getInstance().level;
       if (level == null || level != photonSkyLevel || !SiftSkyShaderCompat.restoreSky()
-         || !SiftShaderCompat.isPhotonShaderPackSelected()) {
+         || !(SiftShaderCompat.isPhotonShaderPackSelected() || SiftShaderCompat.isComplementaryShaderPackSelected())
+         || !queuedShaderPack.equals(SiftShaderCompat.activeShaderPackName())) {
          clearPhotonQueue();
          return;
       }
@@ -133,12 +147,14 @@ public final class SiftProceduralSkyRenderer {
       photonSkyQueued = false;
       photonSkyLevel = null;
       photonSkyQuadIndices = null;
+      queuedShaderPack = "";
    }
 
    private static void queuePhoton(PoseStack poses, ClientLevel level, AutoStorageIndexBuffer quadIndices) {
       photonSkyQueued = true;
       photonSkyLevel = level;
       photonSkyQuadIndices = quadIndices;
+      queuedShaderPack = SiftShaderCompat.activeShaderPackName();
       PHOTON_POSE.set(poses.last().pose());
       PHOTON_MODELVIEW.set(RenderSystem.getModelViewStack());
    }
@@ -149,6 +165,7 @@ public final class SiftProceduralSkyRenderer {
    public static void registerPipelines(RegisterRenderPipelinesEvent event) {
       event.registerPipeline(TEXTURED_SKY_PIPELINE);
       event.registerPipeline(PHOTON_POST_FINAL_SKY_PIPELINE);
+      event.registerPipeline(COMPLEMENTARY_POST_FINAL_SKY_PIPELINE);
    }
 
    public static void initialize() {
@@ -160,7 +177,7 @@ public final class SiftProceduralSkyRenderer {
          if (!SiftSkyShaderCompat.restoreSky()) {
             return;
          }
-         if (SiftShaderCompat.isPhotonShaderPackSelected()) {
+         if (SiftShaderCompat.isPhotonShaderPackSelected() || SiftShaderCompat.isComplementaryShaderPackSelected()) {
             queuePhoton(poseStack, level, quadIndices);
          } else {
             renderTextured(poseStack, level, renderTarget, quadIndices, false);
@@ -239,23 +256,24 @@ public final class SiftProceduralSkyRenderer {
       float photonBaseBlend = postFinal ? 0.72F - 0.20F * thrive : 1.0F;
       float photonThriveBlend = postFinal ? thrive * 0.48F : thrive;
       float photonSunriseBlend = postFinal ? thrive * 0.36F : thrive;
+      boolean complementaryPost = postFinal && SiftShaderCompat.isComplementaryShaderPackSelected();
       GpuBufferSlice[] transforms = new GpuBufferSlice[8];
-      transforms[7] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, photonSunriseBlend);
-      transforms[6] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, photonThriveBlend);
-      transforms[0] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, photonBaseBlend);
+      transforms[7] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(7, night, day, thrive) : photonSunriseBlend);
+      transforms[6] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(6, night, day, thrive) : photonThriveBlend);
+      transforms[0] = transform(poseStack, time * 1.0E-4F, 0.0F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(0, night, day, thrive) : photonBaseBlend);
       transforms[1] = transform(poseStack, time * 1.0E-4F, 0.0F, weather,
-         (thrive >= 0.99999F ? 0.0F : night / (1.0F - thrive)) * photonBaseBlend);
-      transforms[2] = transform(poseStack, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather, day * 0.96F);
-      transforms[3] = transform(poseStack, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather, night * 0.96F);
-      transforms[4] = transform(poseStack, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather, day * 0.78F);
-      transforms[5] = transform(poseStack, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather, night * 0.82F);
+         complementaryPost ? SiftComplementarySkyOpacity.forLayer(1, night, day, thrive) : (thrive >= 0.99999F ? 0.0F : night / (1.0F - thrive)) * photonBaseBlend);
+      transforms[2] = transform(poseStack, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(2, night, day, thrive) : day * 0.96F);
+      transforms[3] = transform(poseStack, time * 0.00135F, (float)Math.sin(time * 0.004F) * 0.01F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(3, night, day, thrive) : night * 0.96F);
+      transforms[4] = transform(poseStack, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(4, night, day, thrive) : day * 0.78F);
+      transforms[5] = transform(poseStack, -time * 0.00205F, (float)Math.sin(time * 0.0065F + 1.8F) * 0.016F, weather, complementaryPost ? SiftComplementarySkyOpacity.forLayer(5, night, day, thrive) : night * 0.82F);
 
       try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
          () -> "The Sift 2.0.1 shaderpack sky",
          renderTarget.getColorTextureView(), OptionalInt.empty(),
          renderTarget.getDepthTextureView(), OptionalDouble.empty()
       )) {
-         pass.setPipeline(postFinal ? PHOTON_POST_FINAL_SKY_PIPELINE : TEXTURED_SKY_PIPELINE);
+         pass.setPipeline(complementaryPost ? COMPLEMENTARY_POST_FINAL_SKY_PIPELINE : (postFinal ? PHOTON_POST_FINAL_SKY_PIPELINE : TEXTURED_SKY_PIPELINE));
          RenderSystem.bindDefaultUniforms(pass);
          pass.setIndexBuffer(indexBuffer, quadIndices.type());
          pass.setVertexBuffer(0, TEXTURED_DOME_BUFFER);

@@ -1,5 +1,7 @@
 package mielon.thesift.world;
 
+import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -46,6 +48,7 @@ public final class SiftTeleportManager {
    private static final Set<UUID> PORTAL_GUARD_CHECKED = new HashSet<>();
    private static final Set<UUID> INITIALIZED_PLAYERS = new HashSet<>();
    private static final Set<UUID> PORTAL_CONTACTS = new HashSet<>();
+   private static final Map<UUID, PlayerContact> PLAYER_CONTACTS = new HashMap<>();
    private static int cleanupCooldown;
 
    private SiftTeleportManager() {
@@ -76,6 +79,7 @@ public final class SiftTeleportManager {
             WAITING_FOR_EXIT.removeIf(id -> overworld.getEntityInAnyDimension(id) == null);
             PORTAL_GUARD_CHECKED.removeIf(id -> overworld.getEntityInAnyDimension(id) == null);
             INITIALIZED_PLAYERS.removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+            PLAYER_CONTACTS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
          }
       }
    }
@@ -97,6 +101,7 @@ public final class SiftTeleportManager {
       PORTAL_GUARD_CHECKED.clear();
       INITIALIZED_PLAYERS.clear();
       PORTAL_CONTACTS.clear();
+      PLAYER_CONTACTS.clear();
       cleanupCooldown = 0;
       SiftDeferredSnifferSpawner.clear();
       SiftSpawnBudget.clear();
@@ -115,6 +120,7 @@ public final class SiftTeleportManager {
    }
 
    private static void processPlayer(MinecraftServer server, ServerPlayer player) {
+      PlayerContact contact = PLAYER_CONTACTS.remove(player.getUUID());
       if (player.isAlive()) {
          boolean touchingPortal = isTouchingPortal(player);
          UUID id = player.getUUID();
@@ -127,7 +133,8 @@ public final class SiftTeleportManager {
                suppressUntilExit(player);
             }
          } else {
-            processTouchState(server, player, touchingPortal);
+            BlockPos crossedPortal = contact != null && contact.level() == player.level() ? contact.portal() : null;
+            processTouchState(server, player, touchingPortal, crossedPortal);
          }
       }
    }
@@ -146,7 +153,7 @@ public final class SiftTeleportManager {
          for (UUID id : contacts) {
             Entity entity = overworld.getEntityInAnyDimension(id);
             if (entity != null && !(entity instanceof ServerPlayer) && !entity.isRemoved() && entity.isAlive()) {
-               processTouchState(server, entity, true);
+               processTouchState(server, entity, true, null);
             }
          }
       }
@@ -169,7 +176,7 @@ public final class SiftTeleportManager {
       }
    }
 
-   private static void processTouchState(MinecraftServer server, Entity entity, boolean touchingPortal) {
+   private static void processTouchState(MinecraftServer server, Entity entity, boolean touchingPortal, BlockPos crossedPortal) {
       UUID id = entity.getUUID();
       if (PORTAL_GUARD_CHECKED.add(id) && SiftWorldStorage.requiresPortalExit(server, id)) {
          WAITING_FOR_EXIT.add(id);
@@ -181,7 +188,7 @@ public final class SiftTeleportManager {
                WAITING_FOR_EXIT.remove(id);
                SiftWorldStorage.clearPortalExitRequired(server, id);
             }
-         } else if (touchingPortal) {
+         } else if (touchingPortal || crossedPortal != null) {
             SiftTeleportManager.ResourceKeyMatch dimension = classifyDimension(entity.level());
             if (dimension == SiftTeleportManager.ResourceKeyMatch.OVERWORLD || dimension == SiftTeleportManager.ResourceKeyMatch.THE_SIFT) {
                ServerPlayer player = entity instanceof ServerPlayer serverPlayer ? serverPlayer : null;
@@ -193,7 +200,7 @@ public final class SiftTeleportManager {
 
                try {
                   transferring = dimension == SiftTeleportManager.ResourceKeyMatch.OVERWORLD
-                     ? teleportIntoSift(server, entity)
+                     ? teleportIntoSift(server, entity, crossedPortal)
                      : teleportBackToOverworld(server, entity);
                } finally {
                   if (player != null && (!transferring || classifyDimension(player.level()) != dimension)) {
@@ -205,7 +212,7 @@ public final class SiftTeleportManager {
       }
    }
 
-   private static boolean teleportIntoSift(MinecraftServer server, Entity entity) {
+   private static boolean teleportIntoSift(MinecraftServer server, Entity entity, BlockPos crossedPortal) {
       ServerLevel sift = server.getLevel(TheSiftDimension.LEVEL_KEY);
       if (sift == null) {
          return false;
@@ -218,7 +225,7 @@ public final class SiftTeleportManager {
 
       BlockPos anchor = anchorOptional.get();
       Vec3 destination = new Vec3(anchor.getX() + 0.5, anchor.getY(), anchor.getZ() + 0.5);
-      Optional<Vec3> safe = SafePortalArrival.find(sift, entity, destination);
+      Optional<Vec3> safe = SafePortalArrival.findForEntry(sift, entity, destination);
       if (safe.isEmpty()) {
          return false;
       }
@@ -227,7 +234,7 @@ public final class SiftTeleportManager {
       // the destination accepted the actual traveler and its passengers.
       Map<UUID, SiftWorldStorage.ReturnPoint> entranceTickets = new LinkedHashMap<>();
       entity.getSelfAndPassengers().forEach(traveler ->
-         entranceTickets.put(traveler.getUUID(), SiftWorldStorage.captureReturnPoint(traveler))
+         entranceTickets.put(traveler.getUUID(), SiftWorldStorage.captureReturnPoint(traveler, crossedPortal))
       );
       Entity teleported = teleport(entity, sift, safe.get(), entity.getYRot(), entity.getXRot());
       if (teleported != null) {
@@ -387,34 +394,7 @@ public final class SiftTeleportManager {
    }
 
    public static boolean isTouchingPortal(Entity entity) {
-      AABB box = entity.getBoundingBox().deflate(1.0E-7);
-      Level level = entity.level();
-      int minX = Mth.floor(box.minX);
-      int minY = Mth.floor(box.minY);
-      int minZ = Mth.floor(box.minZ);
-      int maxX = Mth.floor(box.maxX);
-      int maxY = Mth.floor(box.maxY);
-      int maxZ = Mth.floor(box.maxZ);
-      MutableBlockPos pos = new MutableBlockPos();
-
-      for (int x = minX; x <= maxX; x++) {
-         for (int z = minZ; z <= maxZ; z++) {
-            ChunkAccess chunk = level instanceof ServerLevel serverLevel
-               ? serverLevel.getChunkSource().getChunkNow(x >> 4, z >> 4)
-               : level.getChunkSource().getChunk(x >> 4, z >> 4, ChunkStatus.FULL, false);
-            if (chunk != null) {
-               for (int y = minY; y <= maxY; y++) {
-                  pos.set(x, y, z);
-                  BlockState state = chunk.getBlockState(pos);
-                  if (state.is(ModBlocks.SIFT_PORTAL) && SiftPortalBlock.intersectsPortal(entity, pos, state)) {
-                     return true;
-                  }
-               }
-            }
-         }
-      }
-
-      return false;
+      return findPortalContact(entity, null) != null;
    }
 
    private static SiftTeleportManager.ResourceKeyMatch classifyDimension(Level level) {
@@ -431,5 +411,57 @@ public final class SiftTeleportManager {
       OVERWORLD,
       THE_SIFT,
       OTHER;
+   }
+
+   public static void onPlayerMovement(ServerPlayer player, Vec3 from) {
+      if (PortalCrossing.isUsableMove(from, player.position())
+         && !player.isSpectator()
+         && player.isAlive()
+         && classifyDimension(player.level()) != SiftTeleportManager.ResourceKeyMatch.OTHER
+         && !PLAYER_CONTACTS.containsKey(player.getUUID())) {
+         BlockPos portal = findPortalContact(player, from);
+         if (portal != null) {
+            PLAYER_CONTACTS.put(player.getUUID(), new SiftTeleportManager.PlayerContact(player.level(), portal));
+         }
+      }
+   }
+
+   private record PlayerContact(Level level, BlockPos portal) {
+   }
+
+   private static BlockPos findPortalContact(Entity entity, Vec3 from) {
+      AABB box = entity.getBoundingBox().deflate(1.0E-7);
+      if (from != null) {
+         box = box.expandTowards(from.subtract(entity.position()));
+      }
+
+      Level level = entity.level();
+      int minX = Mth.floor(box.minX);
+      int minY = Mth.floor(box.minY);
+      int minZ = Mth.floor(box.minZ);
+      int maxX = Mth.floor(box.maxX);
+      int maxY = Mth.floor(box.maxY);
+      int maxZ = Mth.floor(box.maxZ);
+      MutableBlockPos pos = new MutableBlockPos();
+
+      for (int x = minX; x <= maxX; x++) {
+         for (int z = minZ; z <= maxZ; z++) {
+            ChunkAccess chunk = (ChunkAccess)(level instanceof ServerLevel serverLevel
+               ? serverLevel.getChunkSource().getChunkNow(x >> 4, z >> 4)
+               : level.getChunkSource().getChunk(x >> 4, z >> 4, ChunkStatus.FULL, false));
+            if (chunk != null) {
+               for (int y = minY; y <= maxY; y++) {
+                  pos.set(x, y, z);
+                  BlockState state = chunk.getBlockState(pos);
+                  if (state.is(ModBlocks.SIFT_PORTAL)
+                     && (from == null ? SiftPortalBlock.intersectsPortal(entity, pos, state) : SiftPortalBlock.crossesPortal(entity, pos, state, from))) {
+                     return pos.immutable();
+                  }
+               }
+            }
+         }
+      }
+
+      return null;
    }
 }

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "ingredient": "the_sift:siftslate_siftite_ore",
+  "result": {
+    "id": "the_sift:siftite_nugget"
+  },
+  "experience": 1.0,
+  "cookingtime": 200
+}

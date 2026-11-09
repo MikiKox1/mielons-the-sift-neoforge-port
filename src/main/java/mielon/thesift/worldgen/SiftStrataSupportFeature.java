@@ -1,5 +1,9 @@
 package mielon.thesift.worldgen;
 
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+import net.minecraft.server.level.WorldGenRegion;
+
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
@@ -91,14 +95,41 @@ public final class SiftStrataSupportFeature extends Feature<NoneFeatureConfigura
 
    static SiftStrataSupportShape.Terrain terrainView(final WorldGenLevel level, final SiftWorldgenBounds bounds) {
       return new SiftStrataSupportShape.Terrain() {
+         private final WorldGenRegion region;
+         private final MutableBlockPos cursor;
+         private ChunkAccess lastChunk;
+         private int lastChunkX;
+         private int lastChunkZ;
+
+         {
+            this.region = level instanceof WorldGenRegion worldgen ? worldgen : null;
+            this.cursor = new MutableBlockPos();
+         }
+
+         private BlockState block(int x, int y, int z) {
+            if (this.region != null && bounds.contains(x, z)) {
+               int chunkX = x >> 4;
+               int chunkZ = z >> 4;
+               if (this.lastChunk == null || this.lastChunkX != chunkX || this.lastChunkZ != chunkZ) {
+                  this.lastChunk = this.region.getChunk(chunkX, chunkZ);
+                  this.lastChunkX = chunkX;
+                  this.lastChunkZ = chunkZ;
+               }
+
+               return this.lastChunk.getBlockState(this.cursor.set(x, y, z));
+            } else {
+               return level.getBlockState(new BlockPos(x, y, z));
+            }
+         }
+
          @Override
          public boolean ground(int x, int y, int z) {
-            return SiftLandmarkTerrain.isGround(level.getBlockState(new BlockPos(x, y, z)));
+            return SiftLandmarkTerrain.isGround(this.block(x, y, z));
          }
 
          @Override
          public boolean air(int x, int y, int z) {
-            BlockState state = level.getBlockState(new BlockPos(x, y, z));
+            BlockState state = this.block(x, y, z);
             return state.getFluidState().isEmpty() && !SiftLandmarkTerrain.isGround(state) && SiftLandmarkTerrain.canReplace(state);
          }
 

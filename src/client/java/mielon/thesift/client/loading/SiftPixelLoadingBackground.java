@@ -17,7 +17,7 @@ public final class SiftPixelLoadingBackground {
          for (int column = 0; column < columns; column++) {
             int u = column;
             int v = row;
-            PixelPortalSurface.drawSurface(true, column, 80 + row, true, seconds, 8, (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color) -> {
+            PixelPortalSurface.drawNativeSurface(true, column, 80 + row, true, seconds, (x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, color) -> {
                float minX = Math.min(Math.min(x0, x1), Math.min(x2, x3));
                float maxX = Math.max(Math.max(x0, x1), Math.max(x2, x3));
                float minY = Math.min(Math.min(y0, y1), Math.min(y2, y3));

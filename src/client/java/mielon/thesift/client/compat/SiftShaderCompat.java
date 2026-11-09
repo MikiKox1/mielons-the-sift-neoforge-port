@@ -80,6 +80,10 @@ public final class SiftShaderCompat {
       return activePackName().startsWith("complementary");
    }
 
+   public static String activeShaderPackName() {
+      return activePackName();
+   }
+
    private static String activePackName() {
       if (!isShaderPackInUse() || currentPackName == null) {
          return "";

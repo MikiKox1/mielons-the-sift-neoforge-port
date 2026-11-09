@@ -1,5 +1,7 @@
 package mielon.thesift.world;
 
+import net.minecraft.world.level.levelgen.Heightmap.Types;
+
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -118,5 +120,30 @@ public final class SafePortalArrival {
       AABB feet = entity.getBoundingBox().move(delta);
       AABB support = new AABB(feet.minX, feet.minY - 0.1, feet.minZ, feet.maxX, feet.minY + 0.01, feet.maxZ);
       return level.getBlockCollisions(entity, support).iterator().hasNext();
+   }
+
+   public static Optional<Vec3> findForEntry(ServerLevel level, Entity entity, Vec3 preferred) {
+      Optional<Vec3> nearby = find(level, entity, preferred);
+      if (nearby.isPresent()) {
+         return nearby;
+      }
+
+      for (int ring = 0; ring <= 8; ring++) {
+         for (int dx = -ring; dx <= ring; dx++) {
+            for (int dz = -ring; dz <= ring; dz++) {
+               if (Math.max(Math.abs(dx), Math.abs(dz)) == ring) {
+                  double x = preferred.x + dx;
+                  double z = preferred.z + dz;
+                  int y = level.getHeight(Types.MOTION_BLOCKING_NO_LEAVES, (int)Math.floor(x), (int)Math.floor(z));
+                  Vec3 candidate = new Vec3(x, y, z);
+                  if (safe(level, entity, candidate)) {
+                     return Optional.of(candidate);
+                  }
+               }
+            }
+         }
+      }
+
+      return Optional.empty();
    }
 }

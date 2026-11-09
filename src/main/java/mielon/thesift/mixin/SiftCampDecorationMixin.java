@@ -1,5 +1,15 @@
 package mielon.thesift.mixin;
 
+import net.minecraft.world.level.StructureManager;
+
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import org.spongepowered.asm.mixin.injection.Inject;
+
+import net.minecraft.world.level.ChunkPos;
+
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import mielon.thesift.worldgen.SiftCampProtection;
@@ -33,5 +43,11 @@ public abstract class SiftCampDecorationMixin {
          SiftPortalVegetation.endNatural(vegetation);
          SiftCampProtection.endDecoration(previous);
       }
+   }
+
+   @Inject(method = "applyBiomeDecoration", at = @At("TAIL"))
+   private void theSift$landscapeCampSoil(WorldGenLevel level, ChunkAccess chunk, StructureManager structures, CallbackInfo ci) {
+      ChunkPos chunkPos = chunk.getPos();
+      SiftCampProtection.decorateCampGround(level, chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
    }
 }

@@ -34,7 +34,7 @@
                   "condition": "minecraft:survives_explosion"
                 }
               ],
-              "name": "the_sift:siftslate"
+              "name": "the_sift:cobbled_siftslate"
             }
           ]
         }

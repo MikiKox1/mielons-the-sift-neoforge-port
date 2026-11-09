@@ -6,7 +6,7 @@
 
 **Public source snapshot:** [Arta48/Mielons-The-Sift](https://github.com/Arta48/Mielons-The-Sift).
 
-**The Sift 2.0.1 reference:** The 2.0.1 NeoForge implementations follow Mielon's official Minecraft 26.2/26.3 Fabric releases and, for compatibility and behavior comparison, the published NeoForge 1.21.1 release. The earlier public snapshot predates 2.0.1; adapted Java and platform code were reconstructed from released artifacts and checked against the relevant Minecraft/NeoForge APIs. Reconstructed source is not represented as Mielon's original development repository.
+**The Sift 2.0.2 reference:** The 2.0.2 NeoForge implementations follow Mielon's official Minecraft 26.2/26.3 Fabric releases and, for compatibility and behavior comparison, the published NeoForge 1.21.1 release. The earlier public snapshot predates 2.0.2; adapted Java and platform code were reconstructed from released artifacts and checked against the relevant Minecraft/NeoForge APIs. Reconstructed source is not represented as Mielon's original development repository.
 
 The port uses independent, version-specific branches for MC26.1.2, 26.2 and 26.3. It also includes community-specific Ancient City portal/Rift return routing, underground destination handling, version-correct Sculkers' Lair structure data, NeoForge adaptations and optional Easy Magic integration.
 

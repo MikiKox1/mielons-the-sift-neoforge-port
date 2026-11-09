@@ -1,5 +1,9 @@
 package mielon.thesift.world;
 
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+
+import mielon.thesift.worldgen.CoralSurfaceFeature;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -390,6 +394,10 @@ public final class SiftPortalStructure {
          BlockPos storedOrigin = stored.get().offset(-PLAYER_RELATIVE.getX(), -PLAYER_RELATIVE.getY(), -PLAYER_RELATIVE.getZ());
          SiftFeaturePlacementGuard.reservePortal(storedOrigin, 9, 40);
          restorePortalVegetation(sift, storedOrigin, stored.get());
+         if (!SiftWorldStorage.hasBlendedPortalCoral(server) && sift.getBlockState(stored.get()).is(ModBlocks.SIFT_PORTAL)) {
+            blendPortalCoral(sift, storedOrigin);
+            SiftWorldStorage.markPortalCoralBlended(server);
+         }
          return stored;
       }
 
@@ -456,7 +464,9 @@ public final class SiftPortalStructure {
                normalizeCoveredGrowth(sift, origin);
                restorePortalVegetation(sift, origin, playerAnchor);
                clearPortalEntities(sift, origin);
+               blendPortalCoral(sift, origin);
                SiftWorldStorage.setPortalAnchor(server, playerAnchor);
+               SiftWorldStorage.markPortalCoralBlended(server);
                TheSiftMod.LOGGER.info("Main Sift portal ready at {}", playerAnchor);
                return Optional.of(playerAnchor);
             }
@@ -1104,5 +1114,33 @@ public final class SiftPortalStructure {
    }
 
    private record TerrainSample(int medianHeight, int range, int outerRange, double roughness) {
+   }
+
+   private static void blendPortalCoral(ServerLevel level, BlockPos origin) {
+      BoundingBox bounds = SiftFeaturePlacementGuard.portalTerrainBounds(origin, 9, 40);
+      MutableBlockPos floor = new MutableBlockPos();
+
+      for (int x = bounds.minX(); x <= bounds.maxX(); x++) {
+         for (int z = bounds.minZ(); z <= bounds.maxZ(); z++) {
+            if (CoralSurfaceFeature.brightPatch(level.getSeed(), x, z)) {
+               for (int y = bounds.maxY(); y >= bounds.minY(); y--) {
+                  floor.set(x, y, z);
+                  if (level.getBlockState(floor).is(ModBlocks.CORAL_GROWTH)) {
+                     BlockPos above = floor.above();
+                     BlockState cover = level.getBlockState(above);
+                     if (cover.isAir() || cover.is(ModBlocks.CORAL_BUSH) || cover.is(ModBlocks.BRIGHT_CORAL_BUSH)) {
+                        BlockState soil = level.getBlockState(floor.below());
+                        if (soil.is(ModBlocks.CORAL_SOIL) || soil.is(ModBlocks.SOULSHALE)) {
+                           setDuringPortalBuild(level, floor, ModBlocks.BRIGHT_CORAL_GROWTH.defaultBlockState());
+                           if (cover.is(ModBlocks.CORAL_BUSH)) {
+                              setDuringPortalBuild(level, above, ModBlocks.BRIGHT_CORAL_BUSH.defaultBlockState());
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
    }
 }
