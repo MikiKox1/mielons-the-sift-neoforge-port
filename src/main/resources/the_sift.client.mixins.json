@@ -3,6 +3,7 @@
   "package": "mielon.thesift.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "CreativeRiftPickingMixin",
     "RiftAmbientSoundMixin",
     "IchorFluidUvMixin",
     "SodiumIchorFluidUvMixin",

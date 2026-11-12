@@ -1,3 +1,9 @@
+## Port 2.0.3 — Minecraft 26.3 (NeoForge)
+
+The source-only community port adapts Mielon's official Fabric 2.0.3 behavior for Minecraft 26.3: the natural Bedrock advancement, closing Rifts in Creative, Nuzzle dyeing, Nester head movement, native Sifter Cap rendering, Rift tooltip and updated languages. Existing NeoForge portal, shaders and world-generation behavior is preserved. Original author: **Mielon**. Independent port maintainer: **MikiKox1** (AI-assisted). Simplified Chinese localization: **kulisaiji**. See the version-specific changelog and preserved credits below. This source snapshot does not assert new client/server/GPU tests.
+
+---
+
 # Source and credits
 
 **Original mod:** [Mielon's The Sift](https://modrinth.com/mod/mielons-the-sift) by **Mielon** — © 2026, MIT License. The original work is also available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/mielons-the-sift).

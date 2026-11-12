@@ -15,6 +15,7 @@ import mielon.thesift.platform.NeoEvents.ServerLivingEntityEvents.AfterDeath;
 import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents;
 import mielon.thesift.platform.NeoEvents.PlayerBlockBreakEvents.After;
 import mielon.thesift.platform.NeoEvents.UseBlockCallback;
+import mielon.thesift.platform.NeoEvents.ServerTickEvents;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -80,6 +81,7 @@ public final class ModAdvancements {
    public static void register() {
       if (!registered) {
          registered = true;
+         ServerTickEvents.END_SERVER_TICK.register(BedrockAdvancement::tick);
          UseBlockCallback.EVENT
             .register(
                (UseBlockCallback)(player, level, hand, hit) -> {
