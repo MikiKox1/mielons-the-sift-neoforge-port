@@ -1,6 +1,6 @@
-# Mielon's The Sift 2.0.2 — NeoForge (Unofficial Port)
+# Mielon's The Sift 2.0.3 — NeoForge (Unofficial Port)
 
-Explore **The Sift**, a mysterious dimension of Ichor, ancient life, resonant souls, strange creatures and shifting skies. This community-maintained NeoForge port brings **Mielon's The Sift 2.0.2** to Minecraft **26.1.2, 26.2 and 26.3**, with the original `the_sift` mod ID, gameplay and content.
+Explore **The Sift**, a mysterious dimension of Ichor, ancient life, resonant souls, strange creatures and shifting skies. This community-maintained NeoForge port brings **Mielon's The Sift 2.0.3** to Minecraft **26.1.2, 26.2 and 26.3**, with the original `the_sift` mod ID, gameplay and content.
 
 **Original creator:** [Mielon](https://modrinth.com/mod/mielons-the-sift) · **Unofficial NeoForge port:** MikiKox1 · **License:** [MIT](LICENSE)
 
@@ -8,11 +8,11 @@ Explore **The Sift**, a mysterious dimension of Ichor, ancient life, resonant so
 
 | Minecraft | Current build | Minimum NeoForge | Required GeckoLib | Optional Easy Magic | Download |
 | --- | --- | --- | --- | --- | --- |
-| **26.1.2** | **2.0.2** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 2.0.2 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.2-mc26.1.2-neoforge) |
-| **26.2** | **2.0.2** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 2.0.2 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.2-mc26.2-neoforge) |
-| **26.3** | **2.0.2** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.2 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.2-mc26.3-neoforge) |
+| **26.1.2** | **2.0.3** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 2.0.3 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.1.2-neoforge) |
+| **26.2** | **2.0.3** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 2.0.3 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.2-neoforge) |
+| **26.3** | **2.0.3** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.3 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.3-neoforge) |
 
-**Java 25** and a version-matched **NeoForge + GeckoLib** installation are required. NeoForge minimums have no artificial upper version limit within their respective Minecraft lines. **Official 2.0.2 releases:** use the JAR for your exact Minecraft version, and keep a backup of existing worlds before upgrading from 1.x. Never install two versions of The Sift together or combine this port with the original Fabric build.
+**Java 25** and a version-matched **NeoForge + GeckoLib** installation are required. NeoForge minimums have no artificial upper version limit within their respective Minecraft lines. **Official 2.0.3 releases:** use the JAR for your exact Minecraft version, and keep a backup of existing worlds before upgrading from 1.x. Never install two versions of The Sift together or combine this port with the original Fabric build.
 
 All three Minecraft versions have independent [source branches for 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.1.2), [26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.2) and [26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/tree/minecraft/26.3), plus dedicated [changelogs for 26.1.2](CHANGELOG-26.1.2.md), [26.2](CHANGELOG-26.2.md) and [26.3](CHANGELOG-26.3.md).
 
@@ -75,7 +75,7 @@ The port adapts the original registries, entities, structures, world generation,
 
 ## Credits and source
 
-**Mielon** created The Sift and its original design. This **unofficial, AI-assisted NeoForge port** is maintained by **MikiKox1**. Its 2.0.2 implementation follows Mielon's published 2.0.2 binaries and preserves the original mod's authorship and applicable attribution.
+**Mielon** created The Sift and its original design. This **unofficial, AI-assisted NeoForge port** is maintained by **MikiKox1**. Its 2.0.3 implementation follows Mielon's published 2.0.3 binaries and preserves the original mod's authorship and applicable attribution.
 
 Original contributor and asset credits include **ImpSteve** (Dark Sniffer texture), **Fuzja Jądrowa** (Rift music disc), **Echo_Dev** (Wellspring music), **StrawberrySushi_** (Korean localization), **Lealeanz** (ambient music), **Frumptle** (Russian localization) and **Grelinho** (Brazilian Portuguese localization). The original mod also credits creature sounds from Minecraft Dungeons II and certain Soulshale sounds/textures from a Minecraft 26.4 snapshot.
 

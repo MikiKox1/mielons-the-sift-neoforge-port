@@ -103,7 +103,8 @@
     "SiftSpawnPopulationMixin",
     "SiftPortalStartupMixin",
     "SiftAfterPlayerDeathMixin",
-    "SiftPortalMovementMixin"
+    "SiftPortalMovementMixin",
+    "PlacedBedrockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

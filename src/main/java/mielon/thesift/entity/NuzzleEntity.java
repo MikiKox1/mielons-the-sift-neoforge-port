@@ -12,13 +12,18 @@ import mielon.thesift.sound.ModSounds;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
@@ -30,6 +35,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.Goal.Flag;
 import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -68,6 +74,21 @@ public final class NuzzleEntity extends Sheep implements GeoEntity {
       this.goalSelector.removeAllGoals(goal -> goal instanceof TemptGoal);
       this.goalSelector.addGoal(3, new TemptGoal(this, 1.1, this::isFood, false));
       this.goalSelector.addGoal(5, new NuzzleEntity.SiftGrazeGoal());
+   }
+
+   @Override
+   public InteractionResult mobInteract(Player player, InteractionHand hand) {
+      ItemStack stack = player.getItemInHand(hand);
+      DyeColor color = stack.get(DataComponents.DYE);
+      if (color != null && this.isAlive() && !this.isSheared() && this.getColor() != color) {
+         this.level().playSound(player, this, SoundEvents.DYE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
+         if (!this.level().isClientSide()) {
+            this.setColor(color);
+            if (!player.getAbilities().instabuild) stack.shrink(1);
+         }
+         return InteractionResult.SUCCESS;
+      }
+      return super.mobInteract(player, hand);
    }
 
    @Override

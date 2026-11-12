@@ -13,6 +13,7 @@ import net.minecraft.util.Mth;
 
 public final class NesterRenderer extends GeoEntityRenderer<NesterEntity, EntityRenderState> {
    private static final DataTicket<Boolean> ACTION = DataTicket.create("the_sift_nester_action", Boolean.class);
+   private static final DataTicket<Float> HEAD_YAW = DataTicket.create("the_sift_nester_head_yaw", Float.class);
 
    public NesterRenderer(Context context) {
       super(context, new NesterModel());
@@ -31,12 +32,15 @@ public final class NesterRenderer extends GeoEntityRenderer<NesterEntity, Entity
    public void addRenderData(NesterEntity entity, Void related, EntityRenderState state, float partialTick) {
       super.addRenderData(entity, related, state, partialTick);
       state.addGeckolibData(ACTION, entity.isPerformingAction());
+      float head = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
+      float body = this.calculateYRot(entity, 0.0F, partialTick);
+      state.addGeckolibData(HEAD_YAW, NesterHeadRotation.relativeYaw(head, body));
    }
 
    @Override
    public void adjustModelBonesForRender(RenderPassInfo<EntityRenderState> renderPassInfo, BoneSnapshots snapshots) {
       boolean action = renderPassInfo.getOrDefaultGeckolibData(ACTION, false);
-      float yaw = renderPassInfo.getOrDefaultGeckolibData(DataTickets.ENTITY_YAW, 0.0F);
+      float yaw = renderPassInfo.getOrDefaultGeckolibData(HEAD_YAW, 0.0F);
       float pitch = action ? 0.0F : renderPassInfo.getOrDefaultGeckolibData(DataTickets.ENTITY_PITCH, 0.0F);
       float headYaw = action ? Mth.clamp(yaw, -15.0F, 15.0F) : yaw;
       snapshots.ifPresent("LowerHead", head -> {

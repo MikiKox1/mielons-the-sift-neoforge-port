@@ -1,7 +1,6 @@
 package mielon.thesift.client;
 
 import mielon.thesift.block.ModBlocks;
-import mielon.thesift.client.armor.SifterCapRenderer;
 import mielon.thesift.client.compat.SiftShaderCompat;
 import mielon.thesift.client.entity.BlubRenderer;
 import mielon.thesift.client.entity.DarkSnifferRenderer;
@@ -36,7 +35,6 @@ import mielon.thesift.client.render.SiftProceduralSkyRenderer;
 import mielon.thesift.client.render.SonorousBeamRenderTypes;
 import mielon.thesift.client.render.SonorousBeamRenderer;
 import mielon.thesift.entity.ModEntities;
-import mielon.thesift.item.SifterCapItem;
 import mielon.thesift.particle.ModParticles;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.object.boat.BoatModel;
@@ -66,7 +64,6 @@ public final class TheSiftClient {
    public static void initialize() {
       Sheets.addWoodType(ModBlocks.OVERGROWN_WILLOW_WOOD_TYPE);
       Sheets.addWoodType(ModBlocks.ASH_WILLOW_WOOD_TYPE);
-      SifterCapItem.installRenderer(SifterCapRenderer::provider);
       SiftShaderCompat.initialize();
       SiftPortalRenderTypes.initialize();
       SonorousBeamRenderTypes.initialize();

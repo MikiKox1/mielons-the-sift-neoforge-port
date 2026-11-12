@@ -1,6 +1,8 @@
 package mielon.thesift.client;
 
 import mielon.thesift.TheSiftMod;
+import mielon.thesift.client.armor.SifterCapClientExtension;
+import mielon.thesift.item.ModItems;
 import mielon.thesift.client.loading.SiftLoadingBackgroundRenderer;
 import mielon.thesift.client.render.IchorFluidRendering;
 import mielon.thesift.client.render.RiftRenderTypes;
@@ -18,10 +20,16 @@ import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 @EventBusSubscriber(modid = TheSiftMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientModEvents {
    private ClientModEvents() {
+   }
+
+   @SubscribeEvent
+   private static void registerItemExtensions(RegisterClientExtensionsEvent event) {
+      event.registerItem(new SifterCapClientExtension(), ModItems.SIFTER_CAP);
    }
 
    // NeoForge 26.2 keeps RenderPipelines.register private. Register every

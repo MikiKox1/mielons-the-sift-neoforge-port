@@ -502,5 +502,10 @@
   "subtitles.the_sift.block.royal_sculk.activate": "Królewski sculk się aktywuje",
   "subtitles.the_sift.block.royal_sculk.deactivate": "Królewski sculk się dezaktywuje",
   "death.attack.the_sift.pollinator_drool": "Gracz %1$s zginął od śliny zapylacza",
-  "item.the_sift.monarch_elytra.flight": "Naciśnij spację podczas lotu, aby wzlecieć wyżej"
+  "item.the_sift.monarch_elytra.flight": "Naciśnij spację podczas lotu, aby wzlecieć wyżej",
+  "gamerule.the_sift.spawn_rifts": "Generowanie szczelin",
+  "gamerule.the_sift.spawn_rifts.description": "Czy szczeliny mogą pojawiać się naturalnie w Sifcie.",
+  "advancement.the_sift.make_it_for_bedrock.title": "Zrób wersję na Bedrocka, proszę",
+  "advancement.the_sift.make_it_for_bedrock.description": "Dokop się do skały macierzystej w Sifcie. I nie, nie będzie wersji na Bedrocka.",
+  "tooltip.the_sift.sift_rift": "Postawienie tego przedmiotu działa jak portal do Siftu"
 }
