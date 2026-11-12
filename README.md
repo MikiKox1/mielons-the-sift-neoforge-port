@@ -10,7 +10,7 @@ Explore **The Sift**, a mysterious dimension of Ichor, ancient life, resonant so
 | --- | --- | --- | --- | --- | --- |
 | **26.1.2** | **2.0.3** | 26.1.2.100 | 5.5.2 (compatible 5.x) | 26.1.0 | [Port 2.0.3 — MC 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.1.2-neoforge) |
 | **26.2** | **2.0.3** | 26.2.0.90 | 5.5.6 (compatible 5.x) | 26.2.0 | [Port 2.0.3 — MC 26.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.2-neoforge) |
-| **26.3** | **2.0.3** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.3 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.3-neoforge.2) |
+| **26.3** | **2.0.3** | 26.3.0.64-beta | 5.5.7 (compatible 5.x) | 26.3.0 | [Port 2.0.3 — MC 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.3-neoforge) |
 
 **Java 25** and a version-matched **NeoForge + GeckoLib** installation are required. NeoForge minimums have no artificial upper version limit within their respective Minecraft lines. **Official 2.0.3 releases:** use the JAR for your exact Minecraft version, and keep a backup of existing worlds before upgrading from 1.x. Never install two versions of The Sift together or combine this port with the original Fabric build.
 

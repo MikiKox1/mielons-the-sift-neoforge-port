@@ -2,20 +2,11 @@
 
 Released versions are listed **newest first**.
 
-## Port 2.0.3 — Monarch Echo shader hotfix (Minecraft 26.3)
-
-A targeted shader compatibility fix to the NeoForge 26.3 build of Mielon's The Sift 2.0.3. No changes to gameplay, world generation or other Minecraft editions.
-
-- **Monarch Echo + Iris:** Fixed large black areas and stretched colored artifacts while shaderpacks are active by using the native entity translucent emissive render pass for Echo's glow layer.
-- **Preserved rendering:** The normal Monarch, shaderless Echo, Photon/Complementary sky, portal shaders, clouds and all other mobs retain their original rendering behavior.
-- **Verification:** Owner reported PASS on the private MC26.3 candidate. Source, compiler and integrity tests passed independently; no additional frame-rate measurements are claimed.
-
-[Port 2.0.3 — Monarch Echo shader hotfix (MC 26.3)](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.3-neoforge.2)
-
 ## Port 2.0.3 — Minecraft 26.3
 
 A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes while retaining the community port's previously accepted shader and portal behavior.
 
+- **Monarch Echo shaders:** Corrected the giant black polygons and stretched magenta/cyan artifacts with Iris shaderpacks. The Echo glow layer now uses Minecraft's native translucent emissive pass when shaders are active; normal Monarch, shaderless rendering, portals, clouds and other creatures are unchanged. The owner confirmed the fix in-game (PASS).
 - **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
 - **Creative Rifts:** Creative players can strike an active Rift to close it, immediately removing the offered exit while preserving main-portal and Rift return routing.
 - **Nuzzle dyeing:** Explicitly handles valid dye interactions, including one-item consumption in Survival and no consumption in Creative.
