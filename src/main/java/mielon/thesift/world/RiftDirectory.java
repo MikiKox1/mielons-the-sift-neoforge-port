@@ -78,7 +78,13 @@ public final class RiftDirectory {
 
    public static void removed(RiftEntity rift, boolean destroyed) {
       loaded.remove(rift.getUUID());
-      if (destroyed && exits.remove(rift.getUUID()) != null) {
+      if (destroyed) {
+         stopOfferingExit(rift);
+      }
+   }
+
+   public static void stopOfferingExit(RiftEntity rift) {
+      if (exits.remove(rift.getUUID()) != null) {
          dirty = true;
       }
    }

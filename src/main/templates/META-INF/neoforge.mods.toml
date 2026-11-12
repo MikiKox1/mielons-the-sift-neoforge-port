@@ -9,7 +9,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_author}"
-credits="Development NeoForge 26.3 port: MikiKox1, assisted by AI; original author Mielon; ImpSteve — Dark Sniffer texture; Fuzja Jądrowa — Rift music disc; StrawberrySushi_ — Korean localization; Frumptle — Russian localization; Grelinho — Brazilian Portuguese localization; Echo_Dev — Wellspring remix; Lealeanz — ambient music"
+credits="Development NeoForge 26.3 port: MikiKox1, assisted by AI; original author Mielon; ImpSteve — Dark Sniffer texture; Fuzja Jądrowa — Rift music disc; StrawberrySushi_ — Korean localization; Frumptle — Russian localization; Grelinho — Brazilian Portuguese localization; kulisaiji — Simplified Chinese localization; Echo_Dev — Wellspring remix; Lealeanz — ambient music"
 displayURL="https://github.com/MikiKox1/mielons-the-sift-neoforge-port"
 # FML 11.0.16 (NeoForge 26.2.0.90) explicitly recommends iconFile over the
 # deprecated logoFile. This does not change the mod's loader version range.

@@ -232,7 +232,6 @@ public final class ModItems {
    public static final Item SIFTER_HIDE = registerItem("sifter_hide", new Properties());
    public static final Item SIFTER_CAP = registerItem(
       "sifter_cap",
-      SifterCapItem::new,
       new Properties()
          .humanoidArmor(ArmorMaterials.LEATHER, ArmorType.HELMET)
          .component(
