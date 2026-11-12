@@ -1,6 +1,7 @@
 package mielon.thesift.advancement;
 
 import java.util.Optional;
+import mielon.thesift.platform.NeoEvents.ServerTickEvents;
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.entity.BlubEntity;
 import mielon.thesift.entity.DarkSnifferEntity;
@@ -80,6 +81,7 @@ public final class ModAdvancements {
    public static void register() {
       if (!registered) {
          registered = true;
+         ServerTickEvents.END_SERVER_TICK.register(BedrockAdvancement::tick);
          UseBlockCallback.EVENT
             .register(
                (UseBlockCallback)(player, level, hand, hit) -> {

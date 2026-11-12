@@ -42,7 +42,8 @@
     "SiftShaderSkyMixin",
     "WillowSignEditScreenMixin",
     "SingerTransitionSoundMixin",
-    "SiftMusicManagerMixin"
+    "SiftMusicManagerMixin",
+    "CreativeRiftPickingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

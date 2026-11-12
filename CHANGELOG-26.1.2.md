@@ -2,6 +2,19 @@
 
 Released versions are listed **newest first**.
 
+## Port 2.0.3 — Minecraft 26.1.2
+
+A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes while retaining the community port's previously accepted shader and portal behavior.
+
+- **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
+- **Creative Rifts:** Creative players can strike an active Rift to close it, immediately removing the offered exit while preserving main-portal and Rift return routing.
+- **Nuzzle dyeing:** Explicitly handles valid dye interactions, including one-item consumption in Survival and no consumption in Creative.
+- **Sifter Cap:** Updated native helmet geometry through NeoForge's supported armor-model extension, preserving the item ID and the standard armor trim and enchantment-glint pipeline.
+- **Nester and Rift item:** More stable head rotation relative to the body; a descriptive yellow tooltip for the Rift item.
+- **Localization:** Revised Russian and Korean strings, added Simplified Chinese by kulisaiji, and supplied the new English/Polish advancement and tooltip text.
+
+[Port 2.0.3 — Minecraft 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.3-mc26.1.2-neoforge)
+
 ## Port 2.0.2 — Minecraft 26.1.2
 
 A gameplay, compatibility and world-generation update to the unofficial NeoForge port of Mielon's The Sift.

@@ -1,6 +1,9 @@
 package mielon.thesift.client;
 
 import mielon.thesift.TheSiftMod;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import mielon.thesift.client.armor.SifterCapRenderer;
 import mielon.thesift.client.loading.SiftLoadingBackgroundRenderer;
 import mielon.thesift.client.render.IchorFluidRendering;
 import mielon.thesift.client.render.RiftRenderTypes;
@@ -8,6 +11,11 @@ import mielon.thesift.client.render.SiftCloudRenderPipelines;
 import mielon.thesift.client.render.SiftPortalRenderTypes;
 import mielon.thesift.client.render.SiftProceduralSkyRenderer;
 import mielon.thesift.client.render.SonorousBeamRenderTypes;
+import mielon.thesift.item.ModItems;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.resources.model.EquipmentClientInfo.LayerType;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -17,11 +25,28 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 
 @EventBusSubscriber(modid = TheSiftMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientModEvents {
    private ClientModEvents() {
+   }
+
+   @SubscribeEvent
+   private static void registerSifterCapExtension(RegisterClientExtensionsEvent event) {
+      Map<HumanoidModel<?>, SifterCapRenderer> models = new IdentityHashMap<>();
+      event.registerItem(new IClientItemExtensions() {
+         @Override
+         @SuppressWarnings("rawtypes")
+         public Model getGenericArmorModel(ItemStack stack, LayerType layer, Model originalModel) {
+            if (stack.is(ModItems.SIFTER_CAP) && originalModel instanceof HumanoidModel<?> humanoid) {
+               return models.computeIfAbsent(humanoid, SifterCapRenderer::new);
+            }
+            return originalModel;
+         }
+      }, ModItems.SIFTER_CAP);
    }
 
    // NeoForge 26.2 keeps RenderPipelines.register private. Register every

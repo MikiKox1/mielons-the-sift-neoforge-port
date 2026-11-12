@@ -18,6 +18,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
@@ -294,7 +295,7 @@ public final class RiftEntity extends Entity {
 
    @Override
    public boolean isAttackable() {
-      return false;
+      return !this.isRemoved() && !this.isClosing();
    }
 
    @Override
@@ -324,6 +325,13 @@ public final class RiftEntity extends Entity {
 
    @Override
    public boolean skipAttackInteraction(Entity attacker) {
+      if (this.level() instanceof ServerLevel level && attacker instanceof Player player && player.isCreative() && this.isAttackable()) {
+         this.expiresAt = level.getGameTime() + 16L;
+         this.entityData.set(DATA_END, this.expiresAt);
+         this.entityData.set(DATA_CLOSING, true);
+         this.closingTicks = 0;
+         RiftDirectory.stopOfferingExit(this);
+      }
       return true;
    }
 
