@@ -6,6 +6,7 @@ import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderer;
 import com.geckolib.renderer.base.RenderPassInfo;
 import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer;
+import mielon.thesift.client.compat.SiftShaderCompat;
 import mielon.thesift.entity.MonarchEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -25,8 +26,19 @@ public final class MonarchRenderer extends GeoEntityRenderer<MonarchEntity, Enti
       this.withRenderLayer(new SiftGlowingOutlineLayer<>(this));
       if (variant) {
          this.withRenderLayer(new AutoGlowingGeoLayer<MonarchEntity, Void, EntityRenderState>(this) {
+            @Override
             protected Identifier getTextureResource(EntityRenderState state) {
                return Identifier.fromNamespaceAndPath("the_sift", "textures/entity/monarch/monarch_echo_emissive.png");
+            }
+
+            @Override
+            protected RenderType getRenderType(EntityRenderState state) {
+               if (state.isInvisible || !SiftShaderCompat.isShaderPackInUse()) {
+                  return super.getRenderType(state);
+               }
+
+               // Iris recognizes the native entity emissive pass, not GeckoLib's custom OIT pipeline.
+               return RenderTypes.entityTranslucentEmissive(this.getTextureResource(state));
             }
          });
       }
