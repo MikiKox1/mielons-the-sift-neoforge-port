@@ -6,9 +6,7 @@ Released versions are listed **newest first**.
 
 A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes while retaining the community port's previously accepted shader and portal behavior.
 
-- **Monarch Echo shaders:** Corrected the giant black polygons and stretched magenta/cyan artifacts with Iris shaderpacks. The Echo glow layer now uses Minecraft's native translucent emissive pass when shaders are active; normal Monarch, shaderless rendering, portals, clouds and other creatures are unchanged. The owner confirmed the fix in-game (PASS).
-- **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
-- **Creative Rifts:** Creative players can strike an active Rift to close it, immediately removing the offered exit while preserving main-portal and Rift return routing.
+- **Monarch Echo shaders:** Corrected the giant black polygons and stretched magenta/cyan artifacts with Iris shaderpacks. The Echo glow layer now uses Minecraft's native translucent emissive pass when shaders are active; normal Monarch, shaderless rendering, portals, clouds and other creatures are unchanged.
 - **Nuzzle dyeing:** Explicitly handles valid dye interactions, including one-item consumption in Survival and no consumption in Creative.
 - **Sifter Cap:** Updated native helmet geometry through NeoForge's supported armor-model extension, preserving the item ID and the standard armor trim and enchantment-glint pipeline.
 - **Nester and Rift item:** More stable head rotation relative to the body; a descriptive yellow tooltip for the Rift item.
