@@ -4,7 +4,7 @@ Released versions are listed **newest first**.
 
 ## Port 2.0.3 — Minecraft 26.3
 
-A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes while retaining the community port's previously accepted shader and portal behavior.
+A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes.
 
 - **Monarch Echo shaders:** Corrected the giant black polygons and stretched magenta/cyan artifacts with Iris shaderpacks. The Echo glow layer now uses Minecraft's native translucent emissive pass when shaders are active; normal Monarch, shaderless rendering, portals, clouds and other creatures are unchanged.
 - **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
