@@ -4,7 +4,7 @@ Released versions are listed **newest first**.
 
 ## Port 2.0.3 — Minecraft 26.2
 
-A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes while retaining the community port's previously accepted shader and portal behavior.
+A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes.
 
 - **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
 - **Creative Rifts:** Creative players can strike an active Rift to close it, immediately removing the offered exit while preserving main-portal and Rift return routing.
