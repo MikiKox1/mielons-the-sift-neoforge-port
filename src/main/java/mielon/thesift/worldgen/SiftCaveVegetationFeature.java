@@ -9,9 +9,11 @@ import mielon.thesift.block.OvergrownWillowVinesBlock;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Direction.Plane;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,53 +44,60 @@ public final class SiftCaveVegetationFeature extends Feature<NoneFeatureConfigur
 
       for (int x = minX; x < minX + 16; x++) {
          for (int z = minZ; z < minZ + 16; z++) {
-            int top = Math.min(220, Math.min(SiftCaveHabitat.rockTop(level, x, z), SiftCaveHabitat.surfaceRockBottom(level, x, z) - 1));
+            int rockTop = SiftCaveHabitat.rockTop(level, x, z);
+            int top = Math.min(220, Math.min(rockTop, SiftCaveHabitat.surfaceRockBottom(level, x, z, rockTop) - 1));
+            if (top >= 12) {
+               BlockState above = blocks.get(x, top + 1, z);
 
-            for (int y = top; y >= 12; y--) {
-               BlockPos floor = new BlockPos(x, y, z);
-               if (!SiftTerrainFeatureMemory.isShelter(floor) && !SiftFeaturePlacementGuard.protectsPortalTerrain(floor)) {
-                  BlockState state = blocks.get(floor);
-                  if (!state.isAir()) {
-                     if (biomes.get(floor).is(TheSiftDimension.SIFTSLATE_CAVES)) {
-                        if ((
-                              state.is(ModBlocks.SIFTSLATE)
-                                 || state.is(ModBlocks.SIFTSLATE_GROWTH)
-                                 || state.is(ModBlocks.HEALTHY_SCULK)
-                                 || state.is(ModBlocks.DRY_HEALTHY_SCULK)
-                                 || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-                           )
-                           && blocks.get(floor.above()).isAir()
-                           && blocks.get(floor.above(2)).isAir()
-                           && SiftCaveHabitat.plantFloor(level, floor)) {
-                           siftslateFloors.add(floor);
-                           y -= 2;
-                        }
-                     } else {
-                        boolean lush = (state.is(ModBlocks.SIFTSLATE_GROWTH) || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH))
-                           && biomes.get(floor).is(TheSiftDimension.OVERGROWN_CAVES);
-                        boolean grim = (
-                              state.is(ModBlocks.SOULSHALE_GROWTH)
-                                 || state.is(ModBlocks.SOULSHALE)
-                                 || state.is(ModBlocks.DRY_HEALTHY_SCULK)
-                                 || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-                           )
-                           && biomes.get(floor).is(TheSiftDimension.SOULSHALE_CAVES);
-                        if ((lush || grim)
-                           && blocks.get(floor.above()).isAir()
-                           && blocks.get(floor.above(2)).isAir()
-                           && (lush ? SiftCaveHabitat.broadFloor(level, floor) : SiftCaveHabitat.plantFloor(level, floor))) {
-                           if (lush) {
-                              lushFloors.add(floor);
-                           } else if (!state.is(ModBlocks.DRY_HEALTHY_SCULK) && !state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)) {
-                              bushFloors.add(floor);
-                              if (state.is(ModBlocks.SOULSHALE_GROWTH)) {
-                                 grimFloors.add(floor);
-                              }
-                           } else {
-                              dryFloors.add(floor);
+               for (int y = top; y >= 12; y--) {
+                  BlockState state = blocks.get(x, y, z);
+                  boolean open = above.isAir();
+                  above = state;
+                  if (open && !state.isAir()) {
+                     BlockPos floor = new BlockPos(x, y, z);
+                     if (!SiftTerrainFeatureMemory.isShelter(floor) && !SiftFeaturePlacementGuard.protectsPortalTerrain(floor)) {
+                        Holder<Biome> biome = biomes.get(floor);
+                        if (biome.is(TheSiftDimension.SIFTSLATE_CAVES)) {
+                           if ((
+                                 state.is(ModBlocks.SIFTSLATE)
+                                    || state.is(ModBlocks.SIFTSLATE_GROWTH)
+                                    || state.is(ModBlocks.HEALTHY_SCULK)
+                                    || state.is(ModBlocks.DRY_HEALTHY_SCULK)
+                                    || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
+                              )
+                              && blocks.get(x, y + 2, z).isAir()
+                              && SiftCaveHabitat.plantFloor(level, floor)) {
+                              siftslateFloors.add(floor);
+                              y -= 2;
+                              above = blocks.get(x, y, z);
                            }
+                        } else {
+                           boolean lush = (state.is(ModBlocks.SIFTSLATE_GROWTH) || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH))
+                              && biome.is(TheSiftDimension.OVERGROWN_CAVES);
+                           boolean grim = (
+                                 state.is(ModBlocks.SOULSHALE_GROWTH)
+                                    || state.is(ModBlocks.SOULSHALE)
+                                    || state.is(ModBlocks.DRY_HEALTHY_SCULK)
+                                    || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
+                              )
+                              && biome.is(TheSiftDimension.SOULSHALE_CAVES);
+                           if ((lush || grim)
+                              && blocks.get(x, y + 2, z).isAir()
+                              && (lush ? SiftCaveHabitat.broadFloor(level, floor) : SiftCaveHabitat.plantFloor(level, floor))) {
+                              if (lush) {
+                                 lushFloors.add(floor);
+                              } else if (!state.is(ModBlocks.DRY_HEALTHY_SCULK) && !state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)) {
+                                 bushFloors.add(floor);
+                                 if (state.is(ModBlocks.SOULSHALE_GROWTH)) {
+                                    grimFloors.add(floor);
+                                 }
+                              } else {
+                                 dryFloors.add(floor);
+                              }
 
-                           y -= 2;
+                              y -= 2;
+                              above = blocks.get(x, y, z);
+                           }
                         }
                      }
                   }

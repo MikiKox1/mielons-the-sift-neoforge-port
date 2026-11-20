@@ -502,5 +502,6 @@
   "subtitles.the_sift.block.royal_sculk.activate": "왕실 스컬크가 활성화됨",
   "subtitles.the_sift.block.royal_sculk.deactivate": "왕실 스컬크가 비활성화됨",
   "death.attack.the_sift.pollinator_drool": "%1$s이(가) 수분꾼의 침에 죽었습니다",
-  "item.the_sift.monarch_elytra.flight": "활공 중 스페이스바를 눌러 더 높이 날아오르세요"
+  "item.the_sift.monarch_elytra.flight": "활공 중 스페이스바를 눌러 더 높이 날아오르세요",
+  "item.the_sift.monarch_spawn_egg": "군주 생성 알"
 }

@@ -113,10 +113,6 @@ public final class SiftTerrainFeatureMemory {
    }
 
    static synchronized boolean isProtectedTerrain(int x, int y, int z) {
-      if (SiftPortalVegetation.allowsFloor(new BlockPos(x, y, z))) {
-         return false;
-      }
-
       SiftTerrainFeatureMemory.Marks marks = readable(key(x, z));
       if (marks == null) {
          return false;
@@ -126,7 +122,7 @@ public final class SiftTerrainFeatureMemory {
       if (spans != null) {
          for (SiftTerrainFeatureMemory.Span span : spans) {
             if (y >= span.bottom() && y <= span.top()) {
-               return true;
+               return !SiftPortalVegetation.allowsFloor(new BlockPos(x, y, z));
             }
          }
       }
@@ -140,16 +136,22 @@ public final class SiftTerrainFeatureMemory {
    }
 
    static synchronized boolean isCanyonWall(int x, int y, int z) {
+      long lastKey = key(x - 2, z - 2);
+      SiftTerrainFeatureMemory.Marks marks = readable(lastKey);
+
       for (int dx = -2; dx <= 2; dx++) {
          for (int dz = -2; dz <= 2; dz++) {
-            SiftTerrainFeatureMemory.Marks marks = readable(key(x + dx, z + dz));
-            if (marks != null) {
-               List<SiftTerrainFeatureMemory.Span> spans = marks.canyons.get(column(x + dx, z + dz));
-               if (spans != null) {
-                  for (SiftTerrainFeatureMemory.Span span : spans) {
-                     if (y >= span.bottom() && y <= span.top()) {
-                        return true;
-                     }
+            long chunkKey = key(x + dx, z + dz);
+            if (chunkKey != lastKey) {
+               marks = readable(chunkKey);
+               lastKey = chunkKey;
+            }
+
+            List<SiftTerrainFeatureMemory.Span> spans = marks.canyons.get(column(x + dx, z + dz));
+            if (spans != null) {
+               for (SiftTerrainFeatureMemory.Span span : spans) {
+                  if (y >= span.bottom() && y <= span.top()) {
+                     return true;
                   }
                }
             }

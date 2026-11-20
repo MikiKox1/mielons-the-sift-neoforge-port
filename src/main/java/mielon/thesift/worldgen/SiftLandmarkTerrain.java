@@ -2,6 +2,7 @@ package mielon.thesift.worldgen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import mielon.thesift.block.ModBlocks;
 import mielon.thesift.world.TheSiftDimension;
 import net.minecraft.core.BlockPos;
@@ -58,33 +59,8 @@ public final class SiftLandmarkTerrain {
    }
 
    static boolean isGround(BlockState state) {
-      return state.is(ModBlocks.CORAL_SOIL)
-         || state.is(ModBlocks.CORAL_GROWTH)
-         || state.is(ModBlocks.BRIGHT_CORAL_GROWTH)
-         || state.is(ModBlocks.SIFTSLATE)
-         || state.is(ModBlocks.SOULSHALE)
-         || state.is(ModBlocks.SOULSHALE_GROWTH)
-         || state.is(ModBlocks.SOULSHALE_COAL_ORE)
-         || state.is(ModBlocks.SOULSHALE_DIAMOND_ORE)
-         || state.is(ModBlocks.SOULSHALE_EMERALD_ORE)
-         || state.is(ModBlocks.SOULSHALE_CHAROITE_ORE)
-         || state.is(ModBlocks.SOULSHALE_SIFTITE_ORE)
-         || state.is(ModBlocks.COBBLED_SIFTSLATE)
-         || state.is(ModBlocks.SIFT_RUBBLE)
-         || state.is(ModBlocks.SIFTSLATE_GROWTH)
-         || state.is(ModBlocks.HEALTHY_SCULK)
-         || state.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
-         || state.is(ModBlocks.HEALTHY_SCULK_PORES)
-         || state.is(ModBlocks.DRY_HEALTHY_SCULK)
-         || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
-         || state.is(ModBlocks.SIFTSLATE_COAL_ORE)
-         || state.is(ModBlocks.SIFTSLATE_DIAMOND_ORE)
-         || state.is(ModBlocks.SIFTSLATE_EMERALD_ORE)
-         || state.is(ModBlocks.SIFTSLATE_CHAROITE_ORE)
-         || state.is(ModBlocks.SIFTSLATE_SIFTITE_ORE)
-         || state.is(ModBlocks.ICHOR_SNOW_BLOCK)
-         || state.is(Blocks.SCULK)
-         || state.is(Blocks.BONE_BLOCK);
+      Block block = state.getBlock();
+      return block == ModBlocks.SIFTSLATE || block == ModBlocks.SOULSHALE || SiftLandmarkTerrain.GroundBlocks.VALUES.contains(block);
    }
 
    static boolean canReplace(BlockState state) {
@@ -172,5 +148,35 @@ public final class SiftLandmarkTerrain {
       } else {
          return false;
       }
+   }
+
+   private static final class GroundBlocks {
+      private static final Set<Block> VALUES = Set.of(
+         ModBlocks.CORAL_SOIL,
+         ModBlocks.CORAL_GROWTH,
+         ModBlocks.BRIGHT_CORAL_GROWTH,
+         ModBlocks.SOULSHALE_GROWTH,
+         ModBlocks.SOULSHALE_COAL_ORE,
+         ModBlocks.SOULSHALE_DIAMOND_ORE,
+         ModBlocks.SOULSHALE_EMERALD_ORE,
+         ModBlocks.SOULSHALE_CHAROITE_ORE,
+         ModBlocks.SOULSHALE_SIFTITE_ORE,
+         ModBlocks.COBBLED_SIFTSLATE,
+         ModBlocks.SIFT_RUBBLE,
+         ModBlocks.SIFTSLATE_GROWTH,
+         ModBlocks.HEALTHY_SCULK,
+         ModBlocks.HEALTHY_SCULK_CARTILAGE,
+         ModBlocks.HEALTHY_SCULK_PORES,
+         ModBlocks.DRY_HEALTHY_SCULK,
+         ModBlocks.DRY_HEALTHY_SCULK_GROWTH,
+         ModBlocks.SIFTSLATE_COAL_ORE,
+         ModBlocks.SIFTSLATE_DIAMOND_ORE,
+         ModBlocks.SIFTSLATE_EMERALD_ORE,
+         ModBlocks.SIFTSLATE_CHAROITE_ORE,
+         ModBlocks.SIFTSLATE_SIFTITE_ORE,
+         ModBlocks.ICHOR_SNOW_BLOCK,
+         Blocks.SCULK,
+         Blocks.BONE_BLOCK
+      );
    }
 }

@@ -1,5 +1,7 @@
 package mielon.thesift.worldgen;
 
+import java.util.Arrays;
+
 public final class SiftCaveLayers {
    private final long seed;
    private final int[] heights = new int[36];
@@ -16,6 +18,13 @@ public final class SiftCaveLayers {
 
    public int[] column(int x, int z, int minY, int maxY) {
       int[] result = new int[maxY - minY];
+      this.fillColumn(x, z, minY, result);
+      return result;
+   }
+
+   void fillColumn(int x, int z, int minY, int[] result) {
+      Arrays.fill(result, 0);
+      int maxY = minY + result.length;
       double foldedX = x * 0.8 + z * 0.6;
       double foldedZ = z * 0.8 - x * 0.6;
       double fold = 1.15 * field(this.seed, foldedX + 113.0, foldedZ - 97.0, 72.0);
@@ -28,13 +37,15 @@ public final class SiftCaveLayers {
             center = Math.max(previous + 8, Math.min(previous + 12, center));
          }
 
+         if (center >= maxY) {
+            break;
+         }
+
          previous = center;
-         if (center >= minY && center < maxY) {
+         if (center >= minY) {
             result[center - minY] = index + 1;
          }
       }
-
-      return result;
    }
 
    public boolean dryFloor(int x, int z) {
