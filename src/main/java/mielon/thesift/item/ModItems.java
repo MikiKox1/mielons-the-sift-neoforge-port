@@ -104,6 +104,12 @@ public final class ModItems {
    public static final Item SLABBER_SPAWN_EGG = ModRegistration.register(
       BuiltInRegistries.ITEM, SLABBER_SPAWN_EGG_KEY, new SpawnEggItem(new Properties().setId(SLABBER_SPAWN_EGG_KEY).spawnEgg(ModEntities.SLABBER))
    );
+   public static final ResourceKey<Item> MONARCH_SPAWN_EGG_KEY = ResourceKey.create(
+      BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath("the_sift", "monarch_spawn_egg")
+   );
+   public static final Item MONARCH_SPAWN_EGG = ModRegistration.register(
+      BuiltInRegistries.ITEM, MONARCH_SPAWN_EGG_KEY, new SpawnEggItem(new Properties().setId(MONARCH_SPAWN_EGG_KEY).spawnEgg(ModEntities.MONARCH))
+   );
    public static final ResourceKey<Item> NESTER_SPAWN_EGG_KEY = ResourceKey.create(
       BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath("the_sift", "nester_spawn_egg")
    );
@@ -505,6 +511,7 @@ public final class ModItems {
             output.accept(NESTER_SPAWN_EGG);
             output.accept(NUZZLE_SPAWN_EGG);
             output.accept(SLABBER_SPAWN_EGG);
+            output.accept(MONARCH_SPAWN_EGG);
             output.accept(DARK_SNIFFER_SPAWN_EGG);
             output.accept(STALKER_SPAWN_EGG);
             output.accept(SCAVENGER_SPAWN_EGG);

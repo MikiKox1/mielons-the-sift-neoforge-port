@@ -232,9 +232,10 @@ public final class SiftTeleportManager {
 
       // Capture source positions before teleport, but commit them only after
       // the destination accepted the actual traveler and its passengers.
+      BlockPos entrance = crossedPortal != null ? crossedPortal : findPortalContact(entity, null);
       Map<UUID, SiftWorldStorage.ReturnPoint> entranceTickets = new LinkedHashMap<>();
       entity.getSelfAndPassengers().forEach(traveler ->
-         entranceTickets.put(traveler.getUUID(), SiftWorldStorage.captureReturnPoint(traveler, crossedPortal))
+         entranceTickets.put(traveler.getUUID(), SiftWorldStorage.captureReturnPoint(traveler, entrance))
       );
       Entity teleported = teleport(entity, sift, safe.get(), entity.getYRot(), entity.getXRot());
       if (teleported != null) {

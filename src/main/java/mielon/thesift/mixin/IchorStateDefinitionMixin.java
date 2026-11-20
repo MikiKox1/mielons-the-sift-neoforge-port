@@ -28,6 +28,7 @@ public abstract class IchorStateDefinitionMixin {
          && this.properties.get("waterlogged") instanceof BooleanProperty
          && (
             block.getClass().getName().startsWith("mielon.thesift.")
+               || block.getClass().getName().startsWith("fuzs.diagonalblocks.")
                || block.getClass().getName().startsWith("net.minecraft.") && theSift$isKnownRegistration()
          )) {
          this.properties.putIfAbsent("ichorlogged", IchorState.ICHORLOGGED);

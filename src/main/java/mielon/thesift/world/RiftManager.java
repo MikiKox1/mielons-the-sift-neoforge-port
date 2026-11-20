@@ -398,7 +398,10 @@ public final class RiftManager {
    private static RiftManager.Destination outOfSift(MinecraftServer server, Entity entity, RiftEntity origin) {
       ServerLevel overworld = server.overworld();
       BlockPos linkedOverworld = origin == null ? null : origin.getLinkedPos();
-      BlockPos anchor = linkedOverworld == null ? overworldAnchor(server, entity) : linkedOverworld;
+      BlockPos anchor = origin == null
+         ? SiftWorldStorage.getReturnPoint(server, entity.getUUID())
+            .map(SiftWorldStorage.ReturnPoint::portalBlock).orElseGet(() -> overworldAnchor(server, entity))
+         : linkedOverworld == null ? overworldAnchor(server, entity) : linkedOverworld;
       long expiry = origin == null ? overworld.getGameTime() + 6000L : Math.max(overworld.getGameTime() + 20L, origin.getExpiresAt());
       Optional<RiftDirectory.Exit> existing = Optional.empty();
       boolean waitingForEntitySections = false;

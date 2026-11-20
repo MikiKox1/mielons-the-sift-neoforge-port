@@ -110,17 +110,25 @@ public final class SiftTerrainUpgrade {
    public static boolean protects(WorldGenRegion region, BlockPos pos, BlockState replacement) {
       if (region.getLevel().dimension().equals(TheSiftDimension.LEVEL_KEY) && region.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) {
          ChunkAccess chunk = region.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
-         if (legacy(chunk) && chunk.getPersistedStatus().isOrAfter(ChunkStatus.FEATURES)) {
+         boolean old = legacy(chunk);
+         if (old && chunk.getPersistedStatus().isOrAfter(ChunkStatus.FEATURES)) {
             return true;
-         } else {
-            BlockState previous = chunk.getBlockState(pos);
-            boolean removesGround = isTerrain(previous) && replacement.isAir();
-            boolean fillsAir = previous.isAir() && isTerrain(replacement);
-            if (!removesGround && !fillsAir) {
+         }
+
+         if (!old) {
+            double[] edge = data(chunk).theSift$edgeProfile();
+            if (edge != null && edge.length == 0) {
                return false;
-            } else {
-               return legacy(chunk) ? true : SiftSurfaceTransition.protects(region, chunk, pos, removesGround);
             }
+         }
+
+         BlockState previous = chunk.getBlockState(pos);
+         boolean removesGround = isTerrain(previous) && replacement.isAir();
+         boolean fillsAir = previous.isAir() && isTerrain(replacement);
+         if (!removesGround && !fillsAir) {
+            return false;
+         } else {
+            return old ? true : SiftSurfaceTransition.protects(region, chunk, pos, removesGround);
          }
       } else {
          return false;
