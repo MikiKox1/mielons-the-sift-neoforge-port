@@ -77,7 +77,7 @@ The port adapts the original registries, entities, structures, world generation,
 
 **Mielon** created The Sift and its original design. This **unofficial, AI-assisted NeoForge port** is maintained by **MikiKox1**. Its 2.0.5 implementation follows Mielon's published 2.0.4 and 2.0.5 binaries and preserves the original mod's authorship and applicable attribution.
 
-Original contributor and asset credits include **ImpSteve** (Dark Sniffer texture), **Fuzja Jądrowa** (Rift music disc), **Echo_Dev** (Wellspring music), **StrawberrySushi_** (Korean localization), **Lealeanz** (ambient music), **Frumptle** (Russian localization) and **Grelinho** (Brazilian Portuguese localization). The original mod also credits creature sounds from Minecraft Dungeons II and certain Soulshale sounds/textures from a Minecraft 26.4 snapshot.
+Original contributor and asset credits include **ImpSteve** (Dark Sniffer texture), **Fuzja Jądrowa** (Rift music disc), **Echo_Dev** (Wellspring music), **StrawberrySushi_** (Korean localization), **Lealeanz** (ambient music), **Frumptle** (Russian localization), **Grelinho** (Brazilian Portuguese localization) and **Smagard** (Ukrainian localization). The original mod also credits creature sounds from Minecraft Dungeons II and certain Soulshale sounds/textures from a Minecraft 26.4 snapshot.
 
 Original mod: [Modrinth](https://modrinth.com/mod/mielons-the-sift) · [CurseForge](https://www.curseforge.com/minecraft/mc-mods/mielons-the-sift). Public earlier source snapshot: [Arta48/Mielons-The-Sift](https://github.com/Arta48/Mielons-The-Sift).
 
