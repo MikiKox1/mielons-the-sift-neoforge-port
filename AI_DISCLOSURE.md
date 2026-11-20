@@ -1,15 +1,3 @@
-## Port 2.0.5 — NeoForge MC26.2
-
-This release includes substantial AI-assisted Java adaptation, QA and documentation for Mielon's The Sift 2.0.4/2.0.5. Mielon retains original authorship; MikiKox1 maintains the unofficial port. The original content and contributor credits, including translator Smagard, are preserved. Source and build tests passed, but this update was not independently tested in-game by the agent.
-
----
-
-## Port 2.0.3 — NeoForge MC26.2
-
-This unofficial community port of Mielon's 2.0.3 includes AI-assisted code adaptation, verification and documentation. Mielon retains original authorship; MikiKox1 maintains the port. The original contributor credits, including Simplified Chinese translator kulisaiji, remain preserved. No new game-client, server, GPU or manual runtime test is claimed for this source-only release.
-
----
-
 # AI assistance disclosure
 
 This unofficial NeoForge port of **Mielon's The Sift** for Minecraft **26.1.2, 26.2 and 26.3** includes substantial AI-assisted Java code, mixins, compatibility integrations and documentation, including contributions made with OpenAI language models. It must not be described as entirely human-written.
