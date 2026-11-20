@@ -507,5 +507,6 @@
   "gamerule.the_sift.spawn_rifts.description": "Whether Rifts can spawn naturally in The Sift.",
   "advancement.the_sift.make_it_for_bedrock.title": "Make it for Bedrock please",
   "advancement.the_sift.make_it_for_bedrock.description": "Mine to the Bedrock level in the Sift. And no, it's not coming for Bedrock",
-  "tooltip.the_sift.sift_rift": "Placing this item acts like a Sift Portal"
+  "tooltip.the_sift.sift_rift": "Placing this item acts like a Sift Portal",
+  "item.the_sift.monarch_spawn_egg": "Monarch Spawn Egg"
 }

@@ -502,5 +502,6 @@
   "subtitles.the_sift.block.royal_sculk.activate": "Королевский скалк активирован",
   "subtitles.the_sift.block.royal_sculk.deactivate": "Королевский скалк деактивирован",
   "death.attack.the_sift.pollinator_drool": "%1$s был убит слюной опылителя",
-  "item.the_sift.monarch_elytra.flight": "Нажмите Пробел, чтобы взлететь выше"
+  "item.the_sift.monarch_elytra.flight": "Нажмите Пробел, чтобы взлететь выше",
+  "item.the_sift.monarch_spawn_egg": "Яйцо призыва монарха"
 }

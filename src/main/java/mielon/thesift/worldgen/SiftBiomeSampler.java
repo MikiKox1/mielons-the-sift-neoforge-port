@@ -41,11 +41,13 @@ final class SiftBiomeSampler {
             Holder<Biome> first = this.corner(x, y, z);
             boolean same = true;
 
+            label52:
             for (int dx = 0; dx <= 1; dx++) {
                for (int dz = 0; dz <= 1; dz++) {
                   for (int dy = 0; dy <= 1; dy++) {
                      if (this.corner(x + dx, y + dy, z + dz) != first) {
                         same = false;
+                        break label52;
                      }
                   }
                }

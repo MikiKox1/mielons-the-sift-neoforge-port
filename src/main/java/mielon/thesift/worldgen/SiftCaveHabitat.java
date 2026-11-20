@@ -36,7 +36,10 @@ final class SiftCaveHabitat {
    }
 
    static int surfaceRockBottom(WorldGenLevel level, int x, int z) {
-      int top = rockTop(level, x, z);
+      return surfaceRockBottom(level, x, z, rockTop(level, x, z));
+   }
+
+   static int surfaceRockBottom(WorldGenLevel level, int x, int z, int top) {
       if (!TheSiftDimension.isCaveBiome(biome(level, new BlockPos(x, top, z)))) {
          return top - 5;
       }
@@ -110,16 +113,19 @@ final class SiftCaveHabitat {
 
          for (int dy = -1; dy <= 1; dy++) {
             BlockPos pos = other.above(dy);
-            if (SiftLandmarkTerrain.isGround(level.getBlockState(pos))
-               && !SiftLandmarkTerrain.isGround(level.getBlockState(pos.above()))
-               && level.getBlockState(pos.above()).getFluidState().isEmpty()) {
-               neighbours++;
-               break;
+            if (SiftLandmarkTerrain.isGround(level.getBlockState(pos))) {
+               BlockState above = level.getBlockState(pos.above());
+               if (!SiftLandmarkTerrain.isGround(above) && above.getFluidState().isEmpty()) {
+                  if (++neighbours == 2) {
+                     return true;
+                  }
+                  break;
+               }
             }
          }
       }
 
-      return neighbours >= 2;
+      return false;
    }
 
    static boolean surfaceTreeFloor(WorldGenLevel level, BlockPos floor) {
@@ -144,24 +150,27 @@ final class SiftCaveHabitat {
       }
 
       int supported = 0;
+      MutableBlockPos cursor = new MutableBlockPos();
 
       for (int dx = -2; dx <= 2; dx++) {
          for (int dz = -2; dz <= 2; dz++) {
             if (Math.abs(dx) + Math.abs(dz) <= 2) {
                for (int dy = 1; dy >= -1; dy--) {
-                  BlockPos neighbour = floor.offset(dx, dy, dz);
-                  if (SiftLandmarkTerrain.isGround(level.getBlockState(neighbour))
-                     && SiftLandmarkTerrain.isGround(level.getBlockState(neighbour.below()))
-                     && !SiftLandmarkTerrain.isGround(level.getBlockState(neighbour.above()))
-                     && level.getBlockState(neighbour.above()).getFluidState().isEmpty()) {
-                     supported++;
-                     break;
+                  cursor.set(floor.getX() + dx, floor.getY() + dy, floor.getZ() + dz);
+                  if (SiftLandmarkTerrain.isGround(level.getBlockState(cursor)) && SiftLandmarkTerrain.isGround(level.getBlockState(cursor.move(0, -1, 0)))) {
+                     BlockState above = level.getBlockState(cursor.move(0, 2, 0));
+                     if (!SiftLandmarkTerrain.isGround(above) && above.getFluidState().isEmpty()) {
+                        if (++supported == 10) {
+                           return true;
+                        }
+                        break;
+                     }
                   }
                }
             }
          }
       }
 
-      return supported >= 10;
+      return false;
    }
 }

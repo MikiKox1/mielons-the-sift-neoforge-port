@@ -502,5 +502,6 @@
   "subtitles.the_sift.block.royal_sculk.activate": "Royal Sculk activates",
   "subtitles.the_sift.block.royal_sculk.deactivate": "Royal Sculk deactivates",
   "death.attack.the_sift.pollinator_drool": "%1$s was killed by Pollinator Drool",
-  "item.the_sift.monarch_elytra.flight": "Use Spacebar while gliding to fly higher"
+  "item.the_sift.monarch_elytra.flight": "Use Spacebar while gliding to fly higher",
+  "item.the_sift.monarch_spawn_egg": "Ovo Gerador de Monarch"
 }
