@@ -1,3 +1,9 @@
+## Port 2.0.5 — Minecraft 26.3 (NeoForge)
+
+This source-only release adapts the original creator's 2.0.4 and 2.0.5 updates: more efficient cave/terrain work, improved portal-entry handling, Sculkflower growth, Diagonal Blocks compatibility, Monarch Spawn Egg, Echo Golem arm pivots, pig spawn handling and updated translations. Existing community fixes for shaders, underground portals, passengers and saved worlds are preserved. **Mielon** created The Sift; **MikiKox1** maintains this unofficial AI-assisted NeoForge port. Additional Ukrainian localization credit: **Smagard**. No new game-client, server, GPU or in-game performance test is claimed.
+
+---
+
 ## Port 2.0.3 — Minecraft 26.3 (NeoForge)
 
 The source-only community port adapts Mielon's official Fabric 2.0.3 behavior for Minecraft 26.3: the natural Bedrock advancement, closing Rifts in Creative, Nuzzle dyeing, Nester head movement, native Sifter Cap rendering, Rift tooltip and updated languages. Existing NeoForge portal, shaders and world-generation behavior is preserved. Original author: **Mielon**. Independent port maintainer: **MikiKox1** (AI-assisted). Simplified Chinese localization: **kulisaiji**. See the version-specific changelog and preserved credits below. This source snapshot does not assert new client/server/GPU tests.

@@ -50,61 +50,67 @@ public final class CoveredGrowthCleanupFeature implements Feature {
                cursor.set(x, y, z);
                if (!camp.contains(cursor)) {
                   BlockState state = blocks.get(cursor);
-                  if (!state.isAir() && !SiftTerrainFeatureMemory.isProtectedTerrain(x, y, z)) {
-                     if (coralColumn
-                        && y >= rockTop
-                        && !SiftTerrainFeatureMemory.isCanyonWall(x, y, z)
+                  if (!state.isAir()) {
+                     Block host = coralColumn && y >= rockTop ? CoralSurfaceFeature.hostRock(state) : null;
+                     if ((
+                           host != null
+                              || theSift$isLakePlant(state)
+                              || state.is(ModBlocks.SOULSHALE_GROWTH)
+                              || state.is(ModBlocks.SIFTSLATE_GROWTH)
+                              || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)
+                        )
                         && !SiftTerrainFeatureMemory.isProtectedTerrain(x, y, z)) {
-                        Block host = CoralSurfaceFeature.hostRock(state);
-                        if (host != null) {
+                        if (host != null && !SiftTerrainFeatureMemory.isCanyonWall(x, y, z)) {
                            state = host.defaultBlockState();
                            level.setBlock(cursor, state, 2);
                            changed = true;
                         }
-                     }
 
-                     if (!theSift$isLakePlant(state) || state.canSurvive(level, cursor) && !theSift$hasUnsupportedIchorBelow(level, cursor)) {
-                        if (state.is(ModBlocks.SOULSHALE_GROWTH)) {
-                           BlockState cover = blocks.get(cursor.above());
-                           boolean snowy = SiftslateGrowthBlock.isIchorSnowCover(cover);
-                           if (!SiftCaveHabitat.grim(level, cursor)
-                              || !snowy && (cover.canOcclude() && cover.isCollisionShapeFullBlock(level, cursor.above()) || !cover.getFluidState().isEmpty())) {
-                              level.setBlock(
-                                 cursor,
-                                 (!coralColumn && !SiftCaveHabitat.underground(level, cursor) ? ModBlocks.SIFTSLATE : ModBlocks.SOULSHALE).defaultBlockState(),
-                                 2
-                              );
-                              changed = true;
-                           } else if (state.getValue(SiftslateGrowthBlock.SNOWY) != snowy) {
-                              level.setBlock(cursor, state.setValue(SiftslateGrowthBlock.SNOWY, snowy), 2);
-                              changed = true;
-                           }
-                        } else if (state.is(ModBlocks.SIFTSLATE_GROWTH) || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)) {
-                           above.set(x, y + 1, z);
-                           BlockState coveringState = blocks.get(above);
-                           boolean dry = state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH) || blocks.get(cursor.below()).is(ModBlocks.DRY_HEALTHY_SCULK);
-                           boolean ichorSnowCover = SiftslateGrowthBlock.isIchorSnowCover(coveringState);
-                           if (SiftLandmarkTerrain.allowsGrowth(level, cursor)
-                              && (
-                                 (!coveringState.canOcclude() || !coveringState.isCollisionShapeFullBlock(level, above))
-                                       && coveringState.getFluidState().isEmpty()
-                                    || ichorSnowCover
-                              )) {
-                              if (dry && state.is(ModBlocks.SIFTSLATE_GROWTH) && !level.getBiome(cursor).is(TheSiftDimension.OVERGROWN_CAVES)) {
-                                 level.setBlock(cursor, ModBlocks.DRY_HEALTHY_SCULK_GROWTH.defaultBlockState(), 2);
+                        if (!theSift$isLakePlant(state) || state.canSurvive(level, cursor) && !theSift$hasUnsupportedIchorBelow(level, cursor)) {
+                           if (state.is(ModBlocks.SOULSHALE_GROWTH)) {
+                              BlockState cover = blocks.get(cursor.above());
+                              boolean snowy = SiftslateGrowthBlock.isIchorSnowCover(cover);
+                              if (!SiftCaveHabitat.grim(level, cursor)
+                                 || !snowy
+                                    && (cover.canOcclude() && cover.isCollisionShapeFullBlock(level, cursor.above()) || !cover.getFluidState().isEmpty())) {
+                                 level.setBlock(
+                                    cursor,
+                                    (!coralColumn && !SiftCaveHabitat.underground(level, cursor) ? ModBlocks.SIFTSLATE : ModBlocks.SOULSHALE)
+                                       .defaultBlockState(),
+                                    2
+                                 );
                                  changed = true;
-                              } else if (state.is(ModBlocks.SIFTSLATE_GROWTH) && state.getValue(SiftslateGrowthBlock.SNOWY) != ichorSnowCover) {
-                                 level.setBlock(cursor, state.setValue(SiftslateGrowthBlock.SNOWY, ichorSnowCover), 2);
+                              } else if (state.getValue(SiftslateGrowthBlock.SNOWY) != snowy) {
+                                 level.setBlock(cursor, state.setValue(SiftslateGrowthBlock.SNOWY, snowy), 2);
                                  changed = true;
                               }
-                           } else {
-                              level.setBlock(cursor, (dry ? ModBlocks.DRY_HEALTHY_SCULK : ModBlocks.SIFTSLATE).defaultBlockState(), 2);
-                              changed = true;
+                           } else if (state.is(ModBlocks.SIFTSLATE_GROWTH) || state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH)) {
+                              above.set(x, y + 1, z);
+                              BlockState coveringState = blocks.get(above);
+                              boolean dry = state.is(ModBlocks.DRY_HEALTHY_SCULK_GROWTH) || blocks.get(cursor.below()).is(ModBlocks.DRY_HEALTHY_SCULK);
+                              boolean ichorSnowCover = SiftslateGrowthBlock.isIchorSnowCover(coveringState);
+                              if (SiftLandmarkTerrain.allowsGrowth(level, cursor)
+                                 && (
+                                    (!coveringState.canOcclude() || !coveringState.isCollisionShapeFullBlock(level, above))
+                                          && coveringState.getFluidState().isEmpty()
+                                       || ichorSnowCover
+                                 )) {
+                                 if (dry && state.is(ModBlocks.SIFTSLATE_GROWTH) && !level.getBiome(cursor).is(TheSiftDimension.OVERGROWN_CAVES)) {
+                                    level.setBlock(cursor, ModBlocks.DRY_HEALTHY_SCULK_GROWTH.defaultBlockState(), 2);
+                                    changed = true;
+                                 } else if (state.is(ModBlocks.SIFTSLATE_GROWTH) && state.getValue(SiftslateGrowthBlock.SNOWY) != ichorSnowCover) {
+                                    level.setBlock(cursor, state.setValue(SiftslateGrowthBlock.SNOWY, ichorSnowCover), 2);
+                                    changed = true;
+                                 }
+                              } else {
+                                 level.setBlock(cursor, (dry ? ModBlocks.DRY_HEALTHY_SCULK : ModBlocks.SIFTSLATE).defaultBlockState(), 2);
+                                 changed = true;
+                              }
                            }
+                        } else {
+                           level.setBlock(cursor, Blocks.AIR.defaultBlockState(), 2);
+                           changed = true;
                         }
-                     } else {
-                        level.setBlock(cursor, Blocks.AIR.defaultBlockState(), 2);
-                        changed = true;
                      }
                   }
                }

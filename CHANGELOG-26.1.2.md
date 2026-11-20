@@ -2,6 +2,19 @@
 
 Released versions are listed **newest first**.
 
+## Port 2.0.5 — Minecraft 26.1.2
+
+A gameplay, compatibility and world-generation update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.4 and 2.0.5 improvements.
+
+- **World generation:** Optimized cave geology, vegetation, landmark and biome lookups with reusable buffers, early exits and section filtering, preserving existing terrain data and the port's protected legacy-chunk behavior.
+- **Portals and Rifts:** Improved detecting the actual entrance and choosing a recorded emergency Rift anchor, retaining safe underground portal returns, matching portal frames, vehicle/passenger tickets and existing shader-aware rendering.
+- **Sculkflower growth:** Updated crop growth calculations for Sculkflower on ordinary Sculk and Royal Sculk, while preserving earlier Healthy Sculk behavior.
+- **Monarch and Echo Golem:** Added the Monarch Spawn Egg to the Creative inventory and corrected the Echo Golem's arm pivots.
+- **Creature spawning and compatibility:** Prevented natural/chunk-generation pig spawns inside The Sift and improved Ichorlogged compatibility with the optional Diagonal Blocks mod.
+- **Localization:** Added Ukrainian, Hong Kong Chinese and Traditional Chinese (Taiwan), refreshed Simplified Chinese and existing translations, and preserved the original contributor credits.
+
+[Port 2.0.5 — Minecraft 26.1.2](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.5-mc26.1.2-neoforge)
+
 ## Port 2.0.3 — Minecraft 26.1.2
 
 A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes.

@@ -1,5 +1,7 @@
 package mielon.thesift.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import mielon.thesift.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -10,7 +12,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CropBlock.class)
@@ -26,20 +27,23 @@ public abstract class CropBlockMixin {
       }
    }
 
-   @Redirect(
-      method = "getGrowthSpeed",
+   @WrapOperation(
+      method = "getGrowthSpeed(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
       at = @At(
          value = "INVOKE",
          target = "Lnet/minecraft/world/level/BlockGetter;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;",
          ordinal = 0
       )
    )
-   private static BlockState theSift$useHydratedSoilGrowth(BlockGetter level, BlockPos pos) {
-      BlockState soil = level.getBlockState(pos);
+   private static BlockState theSift$useHydratedSoilGrowth(
+      BlockGetter level, BlockPos pos, Operation<BlockState> original, BlockState crop, BlockGetter cropLevel, BlockPos cropPos
+   ) {
+      BlockState soil = original.call(level, pos);
       return !soil.is(ModBlocks.HEALTHY_SCULK)
             && !soil.is(ModBlocks.HEALTHY_SCULK_CARTILAGE)
             && !soil.is(ModBlocks.HEALTHY_SCULK_PORES)
             && !soil.is(ModBlocks.DRY_HEALTHY_SCULK)
+            && (!crop.is(ModBlocks.SCULKFLOWER_CROP) || !soil.is(Blocks.SCULK) && !soil.is(ModBlocks.ROYAL_SCULK))
          ? soil
          : Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7);
    }

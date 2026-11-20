@@ -2,11 +2,27 @@
 
 Released versions are listed **newest first**.
 
+## Port 2.0.5 — Minecraft 26.3
+
+A gameplay, compatibility and world-generation update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.4 and 2.0.5 improvements.
+
+- **World generation:** Optimized cave geology, vegetation, landmark and biome lookups with reusable buffers, early exits and section filtering, preserving existing terrain data and the port's protected legacy-chunk behavior.
+- **Portals and Rifts:** Improved detecting the actual entrance and choosing a recorded emergency Rift anchor, retaining safe underground portal returns, matching portal frames, vehicle/passenger tickets and existing shader-aware rendering.
+- **Sculkflower growth:** Updated crop growth calculations for Sculkflower on ordinary Sculk and Royal Sculk, while preserving earlier Healthy Sculk behavior.
+- **Monarch and Echo Golem:** Added the Monarch Spawn Egg to the Creative inventory and corrected the Echo Golem's arm pivots.
+- **Creature spawning and compatibility:** Prevented natural/chunk-generation pig spawns inside The Sift and improved Ichorlogged compatibility with the optional Diagonal Blocks mod.
+- **Localization:** Added Ukrainian, Hong Kong Chinese and Traditional Chinese (Taiwan), refreshed Simplified Chinese and existing translations, and preserved the original contributor credits.
+- **Ichor glass:** Updated Ichor Glass and Ichor Glass Pane motion-tag entries for Minecraft 26.3.
+
+[Port 2.0.5 — Minecraft 26.3](https://github.com/MikiKox1/mielons-the-sift-neoforge-port/releases/tag/v2.0.5-mc26.3-neoforge)
+
 ## Port 2.0.3 — Minecraft 26.3
 
 A gameplay and visual update to the unofficial NeoForge port of Mielon's The Sift, incorporating the creator's 2.0.3 fixes.
 
 - **Monarch Echo shaders:** Corrected the giant black polygons and stretched magenta/cyan artifacts with Iris shaderpacks. The Echo glow layer now uses Minecraft's native translucent emissive pass when shaders are active; normal Monarch, shaderless rendering, portals, clouds and other creatures are unchanged.
+- **New advancement:** Earn “Make it for Bedrock please” by looking at naturally generated bedrock in The Sift; an additional persistent record distinguishes blocks placed by players.
+- **Creative Rifts:** Creative players can strike an active Rift to close it, immediately removing the offered exit while preserving main-portal and Rift return routing.
 - **Nuzzle dyeing:** Explicitly handles valid dye interactions, including one-item consumption in Survival and no consumption in Creative.
 - **Sifter Cap:** Updated native helmet geometry through NeoForge's supported armor-model extension, preserving the item ID and the standard armor trim and enchantment-glint pipeline.
 - **Nester and Rift item:** More stable head rotation relative to the body; a descriptive yellow tooltip for the Rift item.

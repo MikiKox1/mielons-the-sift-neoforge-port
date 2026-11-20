@@ -507,5 +507,6 @@
   "gamerule.the_sift.spawn_rifts.description": "Czy szczeliny mogą pojawiać się naturalnie w Sifcie.",
   "advancement.the_sift.make_it_for_bedrock.title": "Zrób wersję na Bedrocka, proszę",
   "advancement.the_sift.make_it_for_bedrock.description": "Dokop się do skały macierzystej w Sifcie. I nie, nie będzie wersji na Bedrocka.",
-  "tooltip.the_sift.sift_rift": "Postawienie tego przedmiotu działa jak portal do Siftu"
+  "tooltip.the_sift.sift_rift": "Postawienie tego przedmiotu działa jak portal do Siftu",
+  "item.the_sift.monarch_spawn_egg": "Jajo przyzywające monarchę"
 }

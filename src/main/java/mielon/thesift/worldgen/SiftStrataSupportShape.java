@@ -75,48 +75,54 @@ public final class SiftStrataSupportShape {
       for (int x = minX; x <= minX + 15; x++) {
          for (int z = minZ; z <= minZ + 15; z++) {
             if (terrain.canSample(x, z)) {
+               boolean ground = false;
+
                for (int y = Math.min(238, terrain.surfaceY(x, z)); y >= 60; y--) {
-                  SiftStrataSupportShape.Voxel start = new SiftStrataSupportShape.Voxel(x, y, z);
-                  if (!inspected.contains(start) && terrain.ground(x, y, z) && terrain.air(x, y + 1, z) && !terrain.ground(x, y - 4, z)) {
-                     ArrayDeque<SiftStrataSupportShape.Voxel> queue = new ArrayDeque<>();
-                     Set<SiftStrataSupportShape.Voxel> seen = new HashSet<>();
-                     List<SiftStrataSupportShape.Voxel> component = new ArrayList<>();
-                     queue.add(start);
-                     boolean detached = true;
+                  boolean groundAbove = ground;
+                  ground = terrain.ground(x, y, z);
+                  if (ground && !groundAbove && terrain.air(x, y + 1, z) && !terrain.ground(x, y - 4, z)) {
+                     SiftStrataSupportShape.Voxel start = new SiftStrataSupportShape.Voxel(x, y, z);
+                     if (!inspected.contains(start)) {
+                        ArrayDeque<SiftStrataSupportShape.Voxel> queue = new ArrayDeque<>();
+                        Set<SiftStrataSupportShape.Voxel> seen = new HashSet<>();
+                        List<SiftStrataSupportShape.Voxel> component = new ArrayList<>();
+                        queue.add(start);
+                        boolean detached = true;
 
-                     while (!queue.isEmpty()) {
-                        SiftStrataSupportShape.Voxel p = queue.removeFirst();
-                        if (seen.add(p)) {
-                           if (terrain.canSample(p.x(), p.z()) && p.y() >= 60 && p.y() <= 238) {
-                              if (!terrain.ground(p.x(), p.y(), p.z())) {
-                                 continue;
-                              }
-
-                              if (p.x() >= minX && p.x() <= minX + 15 && p.z() >= minZ && p.z() <= minZ + 15) {
-                                 component.add(p);
-                                 if (component.size() > 192) {
-                                    detached = false;
-                                    break;
+                        while (!queue.isEmpty()) {
+                           SiftStrataSupportShape.Voxel p = queue.removeFirst();
+                           if (seen.add(p)) {
+                              if (terrain.canSample(p.x(), p.z()) && p.y() >= 60 && p.y() <= 238) {
+                                 if (!terrain.ground(p.x(), p.y(), p.z())) {
+                                    continue;
                                  }
 
-                                 for (int[] d : neighbours) {
-                                    queue.addLast(new SiftStrataSupportShape.Voxel(p.x() + d[0], p.y() + d[1], p.z() + d[2]));
+                                 if (p.x() >= minX && p.x() <= minX + 15 && p.z() >= minZ && p.z() <= minZ + 15) {
+                                    component.add(p);
+                                    if (component.size() > 192) {
+                                       detached = false;
+                                       break;
+                                    }
+
+                                    for (int[] d : neighbours) {
+                                       queue.addLast(new SiftStrataSupportShape.Voxel(p.x() + d[0], p.y() + d[1], p.z() + d[2]));
+                                    }
+                                    continue;
                                  }
-                                 continue;
+
+                                 detached = false;
+                                 break;
                               }
 
                               detached = false;
                               break;
                            }
-
-                           detached = false;
-                           break;
                         }
-                     }
 
-                     inspected.addAll(seen);
-                     if (detached) {
-                        removed.addAll(component);
+                        inspected.addAll(seen);
+                        if (detached) {
+                           removed.addAll(component);
+                        }
                      }
                   }
                }
